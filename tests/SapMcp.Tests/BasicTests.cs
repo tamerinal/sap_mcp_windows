@@ -64,6 +64,15 @@ public sealed class BasicTests
     }
     private sealed class BrokenManager(SettingsStore store):ConnectionManager(store)
     {private int n;protected override Task WriteAsync(string p,string c,CancellationToken ct)=>++n==3?throw new IOException("injected"):base.WriteAsync(p,c,ct);}
+    [Fact] public async Task GuiConversionCannotSilentlyReplaceAnExistingRouteForTheSameTarget()
+    {
+        using var t=new TestDirectory();var store=Store(t);var manager=new ConnectionManager(store);var s=await manager.SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");
+        s=await manager.SaveSystemAsync(s,new(){Name="Existing",Host="sap.example.invalid",Sysnr="00",Router="/H/router-a.invalid/S/3299"});
+        var catalog=await File.ReadAllBytesAsync(ConnectionManager.CatalogPath(s));var gui=Path.Combine(t.Root,"gui.xml");
+        await File.WriteAllTextAsync(gui,"<Landscape><Routers><Router uuid='r' router='/H/router-b.invalid/S/3299'/></Routers><Services><Service type='SAPGUI' uuid='other' name='GUI' server='sap.example.invalid:3200' routerid='r'/></Services></Landscape>");
+        s=await manager.SelectSourceAsync(s,"sapGui",gui);var before=await File.ReadAllBytesAsync(store.FilePath);
+        await Assert.ThrowsAsync<InvalidDataException>(()=>manager.ConvertForBasicAsync(s));Assert.Equal(before,await File.ReadAllBytesAsync(store.FilePath));Assert.Equal(catalog,await File.ReadAllBytesAsync(ConnectionManager.CatalogPath(s)));
+    }
     [Fact] public async Task BasicCommitRollsBackAllSharedFilesOnFailure()
     {
         using var t=new TestDirectory();var store=Store(t);var s=await new ConnectionManager(store).SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");var before=await File.ReadAllBytesAsync(store.FilePath);

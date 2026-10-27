@@ -226,6 +226,8 @@ public class ConnectionManager(SettingsStore store)
                 var entry=new ManagedConnection { Id=s.Id,Name=s.Name,Host=s.Host,Sysnr=s.Sysnr,Sid=s.Sid,Router=s.Router };
                 entry.NormalizeAndValidate();
                 var existing=catalog.Systems.SingleOrDefault(x=>x.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase));
+                if(existing!=null&&(existing.Router!=entry.Router||(existing.Sid.Length>0&&entry.Sid.Length>0&&!existing.Sid.Equals(entry.Sid,StringComparison.OrdinalIgnoreCase))))
+                    throw new InvalidDataException(UiText.Get("Basic.SourceUnsupported"));
                 if(existing==null) {if(catalog.Systems.Any(x=>x.Id==entry.Id))entry.Id=Guid.NewGuid().ToString("N");catalog.Systems.Add(entry);}
             }
             // Preserve profiles for targets that may have disappeared from a changed GUI source.
