@@ -55,6 +55,8 @@ public sealed class WindowTests
                     {Directory.CreateDirectory(output);using var frame=window.CaptureRenderedFrame();frame!.Save(Path.Combine(output,$"basic-{locale}-{step}-{width}-{theme}.png"),Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);}
                 }
             }
+            typeof(MainWindow).GetMethod("SetInferredInstance",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.Invoke(window,[4]);
+            Assert.Equal("04",Named<TextBox>(window,"BasicInstance").Text);host.Text="changed.example.invalid";Assert.Equal("",Named<TextBox>(window,"BasicInstance").Text);
             switcher.SelectedIndex=1;await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);Assert.Equal("advanced unsaved",advanced.Text);
             Assert.Same(advanced,window.GetLogicalDescendants().OfType<TextBox>().First(b=>b.PasswordChar!='\0'));
         }

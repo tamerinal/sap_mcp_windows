@@ -27,6 +27,7 @@ public partial class MainWindow
     private TextBlock? _basicDiscoveryStatus,_basicResult;
     private Button? _basicCertificateButton;
     private bool _basicFilling;
+    private bool _basicInstanceWasDerived;
     private ComboBox? _basicProfilePicker;
     private string[] _basicProfileIds=[];
     private string _basicLoadedFields="";
@@ -127,7 +128,8 @@ public partial class MainWindow
         _basicResult=Text("");_basicResult.Name="BasicResult";form.Children.Add(_basicResult);
         _basicCertificateButton=Action(UiText.Get("Adt.Certificates"),ImportBasicTrustAsync);_basicCertificateButton.IsVisible=false;
         form.Children.Add(Row(Action(UiText.Get("Basic.Back"),()=>{CancelBasicDiscovery();SetBasicStep(0);return Task.CompletedTask;}),Action(UiText.Get("Basic.Help"),ShowAdtUrlHelpAsync),_basicCertificateButton,Action(UiText.Get("Basic.Save"),SaveBasicConnectionAsync,true)));
-        _basicHost.TextChanged+=(_,_)=>QueueBasicDiscovery();_basicUrl.TextChanged+=(_,_)=>QueueBasicDiscovery();
+        _basicHost.TextChanged+=(_,_)=>BasicEndpointChanged();_basicUrl.TextChanged+=(_,_)=>BasicEndpointChanged();
+        _basicInstance.TextChanged+=(_,_)=>{if(!_basicFilling)_basicInstanceWasDerived=false;};
         foreach(var box in new[]{_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicInstance})box.TextChanged+=(_,_)=>{if(!_basicFilling&&_basicResult!=null)_basicResult.Text=UiText.Get("Basic.Changed");};
         RefreshBasicProfiles();_basicLoadedFields=BasicFields();
         root.Children.Add(form);_basicSteps.Add(form);
@@ -182,6 +184,7 @@ public partial class MainWindow
     private void FillBasicProfile(string? id)
     {
         CancelBasicDiscovery();_basicFilling=true;
+        _basicInstanceWasDerived=false;
         var p=_settings.Profiles.SingleOrDefault(p=>p.Id==id);var system=p==null?null:_systems.SingleOrDefault(s=>s.TargetKey.Equals(p.TargetKey,StringComparison.OrdinalIgnoreCase));
         _basicDraft=new(){ProfileId=p?.Id??Guid.NewGuid().ToString("N"),SystemId=system?.Id??Guid.NewGuid().ToString("N"),Certificates=p?.AdtCertificates.ToList()??[]};
         _basicHost!.Text=system?.Host??"";_basicInstance!.Text=system?.Sysnr??"";_basicUser!.Text=p?.User??"";_basicPassword!.Text="";_basicClient!.Text=p?.Client??"100";_basicLanguage!.Text=p?.Language??(UiText.Language=="tr"?"TR":"EN");_basicUrl!.Text=p?.AdtBaseUrl??"";
@@ -197,6 +200,13 @@ public partial class MainWindow
         if(_basicFilling||!_basicPrepared)return;CancelBasicDiscovery();var generation=_discoveryGeneration;_discoveryCancel=new();var token=_discoveryCancel.Token;
         _discoveryTask=DiscoverBasicInBackgroundAsync(generation,token);
     }
+    private void BasicEndpointChanged()
+    {
+        if(_basicFilling)return;
+        if(_basicInstanceWasDerived){_basicInstance!.Text="";_basicInstanceWasDerived=false;}
+        QueueBasicDiscovery();
+    }
+    private void SetInferredInstance(int value){_basicInstance!.Text=value.ToString("00");_basicInstanceWasDerived=true;}
     private async Task DiscoverBasicInBackgroundAsync(long generation,CancellationToken token)
     {
         try
@@ -224,7 +234,7 @@ public partial class MainWindow
         if(draft.Sysnr.Length==0)
         {
             var host=BasicPolicy.ParseHost(draft.Host).Host;var values=(_discovery?.Candidates??[]).Where(c=>c.Verified||c.HttpStatus==401).Select(c=>BasicPolicy.InstanceCandidate(c.Url,host)).Where(x=>x!=null).Distinct().ToArray();
-            if(values.Length==1){_basicInstance!.Text=values[0]!.Value.ToString("00");draft.Sysnr=Read(_basicInstance);}
+            if(values.Length==1){SetInferredInstance(values[0]!.Value);draft.Sysnr=Read(_basicInstance!);}
             else{_basicResult!.Text=UiText.Get("Basic.InstanceRequired");_basicInstance!.Focus();return;}
         }
         var active=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
