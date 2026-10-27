@@ -113,6 +113,9 @@ public sealed class BasicDiscoveryService
 public sealed class BasicPreparationService(PackageService packages)
 {
     public IReadOnlyList<Requirement> LastChecks {get;private set;}=[];
+    public bool RfcReady {get;private set;}
+    internal static void RetainValidatedSdk(AppSettings candidate,AppSettings current,bool ready)
+    {if(!ready)candidate.SdkDirectory=current.SdkDirectory;}
     public async Task<AppSettings> PrepareAsync(AppSettings current,string sdk,bool adtOnly,IProgress<string>? progress,CancellationToken ct)
     {
         var s=BasicPolicy.Copy(current);s.Adt.Selected=true;s.Rfc.Selected=!adtOnly;s.SdkDirectory=adtOnly?current.SdkDirectory:sdk;
@@ -133,6 +136,7 @@ public sealed class BasicPreparationService(PackageService packages)
         var sharedFailure=checks.FirstOrDefault(c=>c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013")&&c.State is not (CheckState.Ready or CheckState.Warning));
         if(sharedFailure!=null)throw new InvalidOperationException(UiText.Get("Basic.RequirementBlocked",sharedFailure.Name));
         var rfcReady=!adtOnly&&checks.Where(c=>c.Id is "sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013").All(c=>c.State==CheckState.Ready);
+        RfcReady=rfcReady;RetainValidatedSdk(s,current,rfcReady);
         var catalog=packages.LoadCatalog();
         foreach(var component in new[]{"adt","rfc"}.Where(c=>c=="adt"||rfcReady))
         {

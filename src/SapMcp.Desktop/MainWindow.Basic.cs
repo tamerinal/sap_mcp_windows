@@ -97,7 +97,7 @@ public partial class MainWindow
             var firstPreparation=!_basicPrepared;
             var preparation=new BasicPreparationService(_packages);
             _settings=await preparation.PrepareAsync(_settings,Read(sdk),adtOnly.IsChecked==true,Progress,Token);
-            await PersistAsync();_basicRfcReady=adtOnly.IsChecked!=true&&_settings.Rfc.Installed&&(await PrerequisiteService.ValidateSdkAsync(_settings,Token)).State==CheckState.Ready;
+            await PersistAsync();_basicRfcReady=preparation.RfcReady&&_settings.Rfc.Installed;
             await VerifyBasicPackagesAsync();_basicPrepared=true;
             if(!await EnsureBasicSourceAsync())return;
             await LoadConnectionsAsync(repairManaged:true);if(firstPreparation)FillBasicProfile(_settings.BasicProfileId??(_settings.Profiles.Count==1?_settings.Profiles[0].Id:null));SetBasicStep(1);

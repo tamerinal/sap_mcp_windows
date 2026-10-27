@@ -19,6 +19,11 @@ internal static class AdtVerification
             prepared=await new BasicPreparationService(packages).PrepareAsync(prepared,"",true,null,CancellationToken.None);
             Ensure(File.GetLastWriteTimeUtc(entry)==before,"Basic reinstalled compatible ADT package");
         });
+        await step("Basic invalid SDK candidate preserves the existing shared SDK and does not claim RFC readiness",async()=>
+        {
+            var preparation=new BasicPreparationService(packages);var prepared=await preparation.PrepareAsync(source,Path.Combine(root,"missing SDK"),false,null,CancellationToken.None);
+            Ensure(!preparation.RfcReady&&prepared.SdkDirectory==source.SdkDirectory,"Invalid Basic SDK replaced shared configuration or claimed readiness");
+        });
         using var caKey = RSA.Create(2048);
         var caRequest = new CertificateRequest("CN=Fictional test CA", caKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         caRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, false, 0, true));

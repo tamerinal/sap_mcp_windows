@@ -129,12 +129,25 @@ public sealed class PackageService(string payloadDirectory)
             await Task.Run(() => Extract(archive, stage, asset.Format, asset.StripPrefix, ct), ct);
             await AtomicFile.WriteAsync(Path.Combine(stage, ".sapmcp-package.json"), JsonSerializer.Serialize(asset, JsonDefaults.Options), ct);
             ct.ThrowIfCancellationRequested();
-            if (Directory.Exists(destination)) Directory.Move(destination, old);
-            try { Directory.Move(stage, destination); }
-            catch { if (Directory.Exists(old)) Directory.Move(old, destination); throw; }
-            if (Directory.Exists(old)) Directory.Delete(old, true);
+            if (Directory.Exists(destination)) await RetryFileOperationAsync(()=>Directory.Move(destination, old),ct);
+            try { await RetryFileOperationAsync(()=>Directory.Move(stage, destination),ct); }
+            catch { if (Directory.Exists(old)) await RetryFileOperationAsync(()=>Directory.Move(old, destination),CancellationToken.None); throw; }
+            if (Directory.Exists(old)) await RetryFileOperationAsync(()=>Directory.Delete(old, true),CancellationToken.None);
         }
-        finally { if (Directory.Exists(stage)) Directory.Delete(stage, true); }
+        finally { if (Directory.Exists(stage)) await RetryFileOperationAsync(()=>Directory.Delete(stage, true),CancellationToken.None); }
+    }
+
+    internal static async Task RetryFileOperationAsync(Action operation,CancellationToken ct,Func<int,CancellationToken,Task>? delay=null)
+    {
+        // Antivirus/indexing can briefly hold extracted directories on Windows. Do not
+        // retry bad paths, disk-full or unrelated failures, or hide permanent denial.
+        for(var attempt=0;;attempt++)
+        {
+            ct.ThrowIfCancellationRequested();
+            try{operation();return;}
+            catch(Exception ex)when(attempt<5&&(ex is IOException or UnauthorizedAccessException)&&(ex.HResult&0xffff) is 5 or 32 or 33)
+            {await (delay??Task.Delay)(100<<attempt,ct);}
+        }
     }
 
     public static void Extract(string archive, string destination, string format = "zip", string stripPrefix = "", CancellationToken ct = default)

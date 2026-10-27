@@ -7,6 +7,12 @@ namespace SapMcp.Tests;
 public sealed class BasicTests
 {
     private static SettingsStore Store(TestDirectory t)=>new(Path.Combine(t.Root,"config","settings.json"));
+    [Fact] public void UnverifiedSdkCandidateCannotReplaceExistingSharedSdk()
+    {
+        using var t=new TestDirectory();var current=AppSettings.CreateDefault(t.Root);current.SdkDirectory=Path.Combine(t.Root,"validated-sdk");var candidate=BasicPolicy.Copy(current);candidate.SdkDirectory=Path.Combine(t.Root,"invalid-sdk");
+        BasicPreparationService.RetainValidatedSdk(candidate,current,false);Assert.Equal(current.SdkDirectory,candidate.SdkDirectory);
+        candidate.SdkDirectory=Path.Combine(t.Root,"new-validated-sdk");BasicPreparationService.RetainValidatedSdk(candidate,current,true);Assert.NotEqual(current.SdkDirectory,candidate.SdkDirectory);
+    }
     [Fact] public async Task FreshConfigurationUsesBasicLegacyUsesAdvancedAndModePersists()
     {
         using var t=new TestDirectory();var store=Store(t);Assert.Equal("basic",(await store.LoadAsync()).UiMode);
