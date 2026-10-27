@@ -44,7 +44,8 @@ await Step("Managed JSON generates landscape without SAP GUI and preserves exter
     settings = await manager.SaveSystemAsync(settings, new() { Name = "Offline managed test", Host = "127.0.0.1", Sysnr = "00", Sid = "TST" });
     Ensure(settings.LandscapeFile == ConnectionManager.GeneratedPath(settings), "Managed projection not selected");
     Ensure(LandscapeService.Load(settings.LandscapeFile).Single().TargetKey == "127.0.0.1:00", "Managed target mismatch");
-    Ensure(externalBefore.SequenceEqual(await File.ReadAllBytesAsync(settings.ExternalLandscapeFile!)), "External XML changed");
+    var externalAfter = await File.ReadAllBytesAsync(settings.ExternalLandscapeFile!);
+    Ensure(externalBefore.SequenceEqual(externalAfter), "External XML changed");
 });
 var packages = new PackageService(offlinePayload); var prerequisites = new PrerequisiteService(packages);
 var deploy = new DeploymentService(packages, prerequisites);
