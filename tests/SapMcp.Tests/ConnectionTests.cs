@@ -124,6 +124,22 @@ public sealed class ConnectionTests
         Assert.Equal(xml, await File.ReadAllTextAsync(settings.LandscapeFile));
     }
 
+    [Fact] public async Task SourceHostCasingKeepsTheSameActiveAccount()
+    {
+        using var temp = new TestDirectory(); var store = Store(temp); var manager = new ConnectionManager(store);
+        var settings = AppSettings.CreateDefault(temp.Root); settings.LandscapeFile = Path.Combine(temp.Root, "gui.xml");
+        await File.WriteAllTextAsync(settings.LandscapeFile, "<Landscape><Services><Service type='SAPGUI' server='SAP.EXAMPLE:3200'/></Services></Landscape>");
+        var profile = new ConnectionProfile { Name = "Existing", User = "DEMO", TargetKey = "SAP.EXAMPLE:00", SecretRef = "kept.dpapi" };
+        settings.Profiles.Add(profile); settings.ActiveProfiles[profile.TargetKey] = profile.Id;
+        settings = await manager.SelectSourceAsync(settings, "managed"); settings = await manager.SaveSystemAsync(settings, System());
+        using (var mapping = JsonDocument.Parse(await File.ReadAllTextAsync(settings.CredentialsFile)))
+            Assert.Equal("DEMO", mapping.RootElement.GetProperty("overridesByTarget").GetProperty("sap.example:00").GetProperty("user").GetString());
+        settings = await manager.SelectSourceAsync(settings, "sapGui");
+        using (var mapping = JsonDocument.Parse(await File.ReadAllTextAsync(settings.CredentialsFile)))
+            Assert.Equal("DEMO", mapping.RootElement.GetProperty("overridesByTarget").GetProperty("SAP.EXAMPLE:00").GetProperty("user").GetString());
+        Assert.Single(settings.Profiles); Assert.Single(settings.ActiveProfiles);
+    }
+
     [Fact] public async Task FolderSelectionBrokenSourcesAndPathCollisionAreHandled()
     {
         using var temp = new TestDirectory(); var store = Store(temp); var manager = new ConnectionManager(store);

@@ -21,6 +21,8 @@ public partial class MainWindow
         {
             if (repairManaged && _settings.ConnectionSourceMode == "managed")
                 _settings = await new ConnectionManager(_store).SelectSourceAsync(_settings, "managed", ct: Token);
+            else if (repairManaged && ConnectionManager.Mode(_settings) == "sapGui" && _settings.Profiles.Count > 0 && ConnectionManager.ExternalPath(_settings).Length > 0)
+                _settings = await new ConnectionManager(_store).SelectSourceAsync(_settings, "sapGui", ct: Token);
             _systems = await ConnectionManager.Source(_settings).LoadAsync(_settings, Token);
         }
         catch (OperationCanceledException) { throw; }

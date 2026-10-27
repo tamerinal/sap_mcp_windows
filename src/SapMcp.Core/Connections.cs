@@ -146,11 +146,14 @@ public class ConnectionManager(SettingsStore store)
             next.ConnectionSourceMode = mode; next.ManagedConnectionsFile = CatalogPath(current);
             if (mode == "sapGui")
             {
-                LandscapeService.Load(next.ExternalLandscapeFile);
+                var systems = LandscapeService.Load(next.ExternalLandscapeFile);
                 next.LandscapeFile = next.ExternalLandscapeFile;
                 next.Validate();
                 EnsureDistinct(next, [store.FilePath, next.CredentialsFile, CatalogPath(next), GeneratedPath(next)]);
-                await CommitAsync([(store.FilePath, JsonSerializer.Serialize(next, JsonDefaults.Options))], ct);
+                var changes = new List<(string, string)>();
+                if (next.Profiles.Count > 0) changes.Add((next.CredentialsFile, ProfileService.SerializeMapping(next, systems)));
+                changes.Add((store.FilePath, JsonSerializer.Serialize(next, JsonDefaults.Options)));
+                await CommitAsync(changes.ToArray(), ct);
             }
             else if (mode == "managed")
             {
@@ -224,7 +227,7 @@ public class ConnectionManager(SettingsStore store)
         var xml = ManagedJsonConnectionSource.ExportXml(catalog);
         // Read our own projection with the same parser used by the desktop.
         if (LandscapeService.Parse(XDocument.Parse(xml)).Count != catalog.Systems.Count) throw new InvalidDataException(UiText.Get("Connections.InvalidCatalog"));
-        var mapping = ProfileService.SerializeMapping(settings);
+        var mapping = ProfileService.SerializeMapping(settings, catalog.Systems.Select(s => s.ToSystem()).ToArray());
         await CommitAsync([(settings.ManagedConnectionsFile, JsonSerializer.Serialize(catalog, JsonDefaults.Options)),
             (settings.CredentialsFile, mapping), (settings.LandscapeFile, xml), (store.FilePath, JsonSerializer.Serialize(settings, JsonDefaults.Options))], ct);
     }

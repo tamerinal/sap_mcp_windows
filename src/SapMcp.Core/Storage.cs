@@ -175,9 +175,12 @@ public sealed class ProfileService(ISecretStore secrets)
         await AtomicFile.WriteAsync(settings.CredentialsFile, SerializeMapping(settings), ct, privateData: true);
     }
 
-    public static string SerializeMapping(AppSettings settings)
+    public static string SerializeMapping(AppSettings settings, IReadOnlyList<SapSystem>? systems = null)
     {
         settings.Validate();
+        if (systems == null && File.Exists(settings.LandscapeFile))
+            try { systems = LandscapeService.Load(settings.LandscapeFile); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or XmlException) { }
         var entries = new JsonObject();
         foreach (var (target, id) in settings.ActiveProfiles)
         {
@@ -190,7 +193,10 @@ public sealed class ProfileService(ISecretStore secrets)
             if (p.AdtBaseUrl.Length > 0) { node["adtBaseUrl"] = p.AdtBaseUrl; node.Remove("adtBaseUrls"); }
             if (p.BwModelingBaseUrl.Length > 0) { node["bwModelingBaseUrl"] = p.BwModelingBaseUrl; node.Remove("bwModelingBaseUrls"); }
             node["allowInsecureTls"] = p.AllowInsecureTls;
-            entries[target] = node;
+            // DNS case differences between a GUI landscape and the managed catalog
+            // must not select a different account in the upstream case-sensitive JSON map.
+            foreach (var key in new[] { target }.Concat((systems ?? []).Where(s => s.TargetKey.Equals(target, StringComparison.OrdinalIgnoreCase)).Select(s => s.TargetKey)).Distinct(StringComparer.Ordinal))
+                entries[key] = node.DeepClone();
         }
         return new JsonObject { ["overridesByTarget"] = entries }.ToJsonString(JsonDefaults.Options);
     }
