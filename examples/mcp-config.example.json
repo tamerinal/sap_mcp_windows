@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sap_adt_mcp": {
+      "command": "C:\\Path\\To\\SapMcpHost.exe",
+      "args": ["--component", "adt", "--config", "C:\\Path\\To\\settings.json"]
+    }
+  }
+}

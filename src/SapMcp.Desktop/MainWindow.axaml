@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SapMcp.Desktop.MainWindow"
+        Width="1240" Height="880" MinWidth="940" MinHeight="680" WindowStartupLocation="CenterScreen">
+  <Window.Styles>
+    <Style Selector="TextBlock.h1"><Setter Property="FontSize" Value="28"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.h2"><Setter Property="FontSize" Value="18"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Opacity" Value="0.65"/></Style>
+    <Style Selector="Button.primary"><Setter Property="Background" Value="#147D70"/><Setter Property="Foreground" Value="White"/><Setter Property="Padding" Value="20,12"/><Setter Property="CornerRadius" Value="8"/></Style>
+    <Style Selector="Button.nav"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#C6D6DC"/><Setter Property="HorizontalContentAlignment" Value="Left"/><Setter Property="Padding" Value="16,14"/><Setter Property="CornerRadius" Value="8"/></Style>
+    <Style Selector="Button.nav:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#233C47"/></Style>
+    <Style Selector="Button.nav.active"><Setter Property="Background" Value="#234942"/><Setter Property="Foreground" Value="#A4E9D0"/></Style>
+    <Style Selector="TextBox"><Setter Property="MinHeight" Value="38"/><Setter Property="CornerRadius" Value="6"/></Style>
+    <Style Selector="ComboBox"><Setter Property="MinHeight" Value="38"/><Setter Property="HorizontalAlignment" Value="Stretch"/></Style>
+    <Style Selector="Button"><Setter Property="CornerRadius" Value="6"/><Setter Property="Padding" Value="14,9"/></Style>
+  </Window.Styles>
+  <Grid ColumnDefinitions="240,*" RowDefinitions="*,Auto">
+    <Border Grid.RowSpan="2" Background="#112A35">
+      <Grid RowDefinitions="Auto,*,Auto" Margin="20,30,20,22">
+        <StackPanel Spacing="10" Margin="12,0,0,35">
+          <TextBlock Text="SAP / MCP" Foreground="#A4E9D0" FontSize="25" FontWeight="Bold"/>
+          <TextBlock x:Name="BrandCaption" Foreground="#94ACB6" FontSize="10" LetterSpacing="2"/>
+          <Border Background="#25424D" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left" Margin="0,8,0,0"><TextBlock Text="WINDOWS · 0.1.0-preview.1" Foreground="#C6D6DC" FontSize="10"/></Border>
+        </StackPanel>
+        <StackPanel x:Name="Navigation" Grid.Row="1" Spacing="6"/>
+        <StackPanel Grid.Row="2" Margin="12,0,12,0" Spacing="8">
+          <TextBlock x:Name="PrivacyCaption" Foreground="#9CC5B8" FontSize="10" LetterSpacing="1"/>
+          <TextBlock x:Name="PrivacyDescription" Foreground="#94ACB6" FontSize="11" TextWrapping="Wrap" LineHeight="18"/>
+          <Button x:Name="HelpButton" Background="Transparent" Foreground="#A4E9D0" Padding="0,10"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="36,30,36,20">
+      <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+        <StackPanel Spacing="7"><TextBlock x:Name="Eyebrow" Classes="muted" FontSize="10" LetterSpacing="2"/><TextBlock x:Name="PageTitle" Classes="h1"/><TextBlock x:Name="PageSubtitle" Classes="muted" TextWrapping="Wrap"/></StackPanel>
+        <StackPanel Grid.Column="1" Spacing="8" Margin="12,0,0,0">
+          <ComboBox x:Name="LanguagePicker" Width="110" AutomationProperties.Name="English / Türkçe"/>
+          <ComboBox x:Name="ThemePicker" Width="110"/>
+        </StackPanel>
+      </Grid>
+      <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled"><StackPanel x:Name="PageBody" Spacing="18" Margin="0,0,5,16"/></ScrollViewer>
+    </Grid>
+    <Border Grid.Column="1" Grid.Row="1" BorderBrush="#25808080" BorderThickness="0,1,0,0" Padding="24,13">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <ProgressBar x:Name="BusyIndicator" IsVisible="False" IsIndeterminate="True" Width="80" Height="4"/>
+        <TextBlock x:Name="StatusText" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12"/>
+        <Button x:Name="CancelAction" Grid.Column="2" IsVisible="False"/>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

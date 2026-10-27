@@ -1,0 +1,39 @@
+{
+  "vc-runtime": {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/990c720a-46ce-4dc7-87b9-c2eb615d34b9/CC0FF0EB1DC3F5188AE6300FAEF32BF5BEEBA4BDD6E8E445A9184072096B713B/VC_redist.x64.exe",
+    "fileName": "vc-runtime-x64.exe",
+    "version": "14.44.35211.0",
+    "stripPrefix": "",
+    "source": "Microsoft signed Visual C++ runtime",
+    "format": "exe",
+    "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+  },
+  "vc2013": {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/10912041/cee5d6bca2ddbcd039da727bf4acb48a/vcredist_x64.exe",
+    "fileName": "vc2013-x64.exe",
+    "version": "12.0.40664.0",
+    "stripPrefix": "",
+    "source": "Microsoft signed Visual C++ runtime",
+    "format": "exe",
+    "sha256": "a4bba7701e355ae29c403431f871a537897c363e215cafe706615e270984f17c"
+  },
+  "python": {
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "fileName": "cpython-3.11.18+20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "version": "3.11.18",
+    "stripPrefix": "python",
+    "source": "astral-sh/python-build-standalone 20261026",
+    "format": "tar.gz",
+    "sha256": "67215a7bf1643e33d01b17ee3f1e91a8b0b39163746855ee02594bf0608f68b4"
+  },
+  "schemaVersion": 1,
+  "node": {
+    "url": "https://nodejs.org/dist/v24.22.1/node-v24.22.1-win-x64.zip",
+    "fileName": "node-v24.22.1-win-x64.zip",
+    "version": "24.22.1",
+    "stripPrefix": "node-v24.22.1-win-x64",
+    "source": "Node.js official distribution and SHASUMS256.txt",
+    "format": "zip",
+    "sha256": "d2046d28c2c3dcd211ac5145c0bf30e2047ef9dfb306693c8c6e2eccd8b95fa5"
+  }
+}

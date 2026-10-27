@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SapMcp.Core/SapMcp.Core.csproj" />
+    <Project Path="src/SapMcp.Desktop/SapMcp.Desktop.csproj" />
+    <Project Path="src/SapMcp.Host/SapMcp.Host.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SapMcp.Integration/SapMcp.Integration.csproj" />
+    <Project Path="tests/SapMcp.Tests/SapMcp.Tests.csproj" />
+    <Project Path="tests/SapMcp.UiTests/SapMcp.UiTests.csproj" />
+  </Folder>
+</Solution>

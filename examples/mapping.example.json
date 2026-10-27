@@ -1,0 +1,10 @@
+{
+  "overridesByTarget": {
+    "sap.example:00": {
+      "user": "DEMO_USER",
+      "client": "100",
+      "lang": "EN",
+      "secretRef": "C:\\Path\\To\\profile.password.dpapi"
+    }
+  }
+}

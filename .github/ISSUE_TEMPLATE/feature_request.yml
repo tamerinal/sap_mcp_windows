@@ -1,0 +1,10 @@
+name: Feature request / Geliştirme isteği
+description: Describe the user need without customer data.
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: User need and proposed behavior / İhtiyaç ve önerilen davranış
+      description: Use fictional systems and users; do not provide SAP credentials.
+    validations:
+      required: true

@@ -1,0 +1,22 @@
+SAP MCP Manager 0.1.0-preview.1 — Windows önizleme
+
+Bu önizleme yayıncı kod imza sertifikası olmadan hazırlanmıştır.
+SAP NetWeaver RFC SDK dosyaları ve müşteri şifreleri DAHİL DEĞİLDİR.
+Kullanıcı SDK'yi SAP'den ayrı edinmeli ve lisanslamalıdır.
+SAP, SAP GUI, NetWeaver ve ABAP SAP SE markalarıdır; uygulama SAP ürünü değildir.
+
+Yazara ait yayımlanan kod MIT lisanslıdır. Diğer bileşenlerin koşulları korunur:
+- .NET: MIT ve docs/licenses/DotNet-ThirdPartyNotices.txt.
+- Avalonia: MIT; Inter: SIL Open Font License 1.1.
+- Node.js: MIT ve runtime LICENSE içindeki üçüncü taraf koşulları.
+- CPython / python-build-standalone: PSF ve arşivdeki diğer koşullar.
+- PyRFC: Apache-2.0; lisans metni paket metadata'sında korunur.
+- Microsoft Visual C++: Microsoft koşulları; kurulum UAC isteyebilir.
+- MCP npm bağımlılıkları: node_modules içindeki ayrı lisanslar.
+- Bu ortamda kullanılan Inno Setup 6.7.3 non-commercial use bildirir.
+  Ticari derleme/dağıtımdan önce uygun Inno lisansı edinin.
+
+Derlenmiş MCP kodu EXE'den çıkarılabilir; kaynak depoları özel kalır.
+Temiz Windows 10/11 ve canlı SAP kabul testleri henüz tamamlanmamıştır.
+Kaldırma kullanıcı verisini varsayılan olarak korur.
+Offline kurulum sabit katalogda belirtilen bütün runtime arşivlerini içerir.

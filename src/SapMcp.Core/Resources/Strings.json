@@ -1,0 +1,1118 @@
+{
+  "Text001": {
+    "en": "Invalid Codex TOML settings; the existing file was preserved.",
+    "tr": "Codex TOML ayarı geçersiz; mevcut dosya korunuyor."
+  },
+  "Text002": {
+    "en": "Generated Codex configuration could not be validated.",
+    "tr": "Üretilen Codex yapılandırması doğrulanamadı."
+  },
+  "Text003": {
+    "en": "Invalid Claude configuration file.",
+    "tr": "Claude ayar dosyası geçersiz."
+  },
+  "Text004": {
+    "en": "Claude mcpServers must be an object.",
+    "tr": "Claude mcpServers alanı nesne olmalı."
+  },
+  "Text005": {
+    "en": "Conflicting entries: ",
+    "tr": "Çakışan kayıtlar var: "
+  },
+  "Text006": {
+    "en": ". Select replacement or export the configuration.",
+    "tr": ". Değiştirme seçeneğini işaretleyin veya ayarı dışa aktarın."
+  },
+  "Text007": {
+    "en": "Client settings changed after preview. Preview again.",
+    "tr": "İstemci ayarı önizlemeden sonra değişti. Yeniden önizleyin."
+  },
+  "Text008": {
+    "en": "Invalid Codex settings; no entries were removed.",
+    "tr": "Codex ayarı geçersiz; kaldırma yapılmadı."
+  },
+  "Text009": {
+    "en": "Select at least one MCP component.",
+    "tr": "En az bir MCP bileşeni seçin."
+  },
+  "Text010": {
+    "en": "Complete the prerequisites first: ",
+    "tr": "Önce gereksinimleri tamamlayın: "
+  },
+  "Text011": {
+    "en": "{0} MCP is not installed or is disabled.",
+    "tr": "{0} MCP kurulu değil veya devre dışı."
+  },
+  "Text012": {
+    "en": "RFC SDK/PyRFC prerequisites are not ready. Check the SDK page in the manager.",
+    "tr": "RFC SDK/PyRFC gereksinimleri hazır değil. Yönetim uygulamasındaki SDK sayfasını kontrol edin."
+  },
+  "Text013": {
+    "en": "MCP or Node.js files are missing; repair the installation.",
+    "tr": "MCP veya Node.js dosyası bulunamadı; onarım kurulumu yapın."
+  },
+  "Text014": {
+    "en": "MCP could not be started.",
+    "tr": "MCP başlatılamadı."
+  },
+  "Text015": {
+    "en": "MCP returned an error. Check component status and connection settings.",
+    "tr": "MCP isteği hata döndürdü. Bileşen durumunu ve bağlantı ayarlarını kontrol edin."
+  },
+  "Text016": {
+    "en": "MCP response exceeded the size limit.",
+    "tr": "MCP yanıtı boyut sınırını aştı."
+  },
+  "Text017": {
+    "en": "MCP connection closed. Check the prerequisites.",
+    "tr": "MCP bağlantısı kapandı. Gereksinimleri kontrol edin."
+  },
+  "Text018": {
+    "en": "Component must be rfc or adt.",
+    "tr": "Bileşen rfc veya adt olmalı."
+  },
+  "Text019": {
+    "en": "Unsupported configuration version.",
+    "tr": "Desteklenmeyen yapılandırma sürümü."
+  },
+  "Text020": {
+    "en": "File and folder paths must be absolute.",
+    "tr": "Dosya ve klasör yolları mutlak olmalı."
+  },
+  "Text021": {
+    "en": "Landscape path must be absolute.",
+    "tr": "Landscape yolu mutlak olmalı."
+  },
+  "Text022": {
+    "en": "SDK path must be absolute.",
+    "tr": "SDK yolu mutlak olmalı."
+  },
+  "Text023": {
+    "en": "Invalid log retention, file size or file count.",
+    "tr": "Log saklama süresi, dosya boyutu veya dosya sayısı geçersiz."
+  },
+  "Text024": {
+    "en": "Choose a dedicated subfolder for data and secrets instead of a drive root.",
+    "tr": "Veriler ve şifreler sürücü kökünde saklanamaz; özel bir alt klasör seçin."
+  },
+  "Text025": {
+    "en": "Profile IDs must be unique.",
+    "tr": "Profil kimlikleri benzersiz olmalı."
+  },
+  "Text026": {
+    "en": "The active profile does not match the system.",
+    "tr": "Aktif profil ile sistem eşleşmiyor."
+  },
+  "Text027": {
+    "en": "Profile name, system and SAP user are required.",
+    "tr": "Profil adı, sistem ve SAP kullanıcısı zorunlu."
+  },
+  "Text028": {
+    "en": "Client must contain three digits.",
+    "tr": "Client üç rakam olmalı."
+  },
+  "Text029": {
+    "en": "Language code must contain one or two letters.",
+    "tr": "Dil kodu bir veya iki harf olmalı."
+  },
+  "Text030": {
+    "en": "Connection URL must use HTTP(S) and must not contain credentials.",
+    "tr": "Bağlantı adresi kullanıcı/şifre içermeyen HTTP(S) adresi olmalı."
+  },
+  "Text031": {
+    "en": "Profile extra fields cannot contain plaintext secrets.",
+    "tr": "Profil ek alanlarında açık şifre saklanamaz."
+  },
+  "Text032": {
+    "en": "Package {0} was not found in the catalog.",
+    "tr": "Paket kataloğunda {0} bulunamadı."
+  },
+  "Text033": {
+    "en": "The process could not be started.",
+    "tr": "İşlem başlatılamadı."
+  },
+  "Text034": {
+    "en": "Process output exceeded the size limit.",
+    "tr": "İşlem çıktısı boyut sınırını aştı."
+  },
+  "Text035": {
+    "en": "Package catalog missing. Check the payload folder in the installation.",
+    "tr": "Paket kataloğu bulunamadı. Dağıtım klasöründeki payload içeriğini kontrol edin."
+  },
+  "Text036": {
+    "en": "Package catalog is empty.",
+    "tr": "Paket kataloğu boş."
+  },
+  "Text037": {
+    "en": "Unsupported package catalog version.",
+    "tr": "Paket kataloğu sürümü desteklenmiyor."
+  },
+  "Text038": {
+    "en": "Invalid package name or SHA-256 value.",
+    "tr": "Paket adı veya SHA-256 değeri geçersiz."
+  },
+  "Text039": {
+    "en": "Download URL must use HTTPS.",
+    "tr": "İndirme adresi HTTPS olmalı."
+  },
+  "Text040": {
+    "en": "Package {0} is absent from the offline payload. Use the full installer.",
+    "tr": "{0} paketi çevrimdışı içerikte yok. Tam kurulum paketini kullanın."
+  },
+  "Text041": {
+    "en": "Downloading: {0} {1}",
+    "tr": "İndiriliyor: {0} {1}"
+  },
+  "Text042": {
+    "en": "Unsafe download redirect.",
+    "tr": "Güvenli olmayan indirme yönlendirmesi."
+  },
+  "Text043": {
+    "en": "Package exceeded the download limit.",
+    "tr": "Paket indirme sınırını aştı."
+  },
+  "Text044": {
+    "en": "Package SHA-256 verification failed: {0}",
+    "tr": "Paket SHA-256 doğrulaması başarısız: {0}"
+  },
+  "Text045": {
+    "en": "Archive extraction limit exceeded.",
+    "tr": "Arşiv açma sınırı aşıldı."
+  },
+  "Text046": {
+    "en": "Unsafe archive path.",
+    "tr": "Güvensiz arşiv yolu."
+  },
+  "Text047": {
+    "en": "Archive cannot extract outside the destination folder.",
+    "tr": "Arşiv hedef klasörün dışına çıkamaz."
+  },
+  "Text048": {
+    "en": "Archive contains a link.",
+    "tr": "Arşiv bağlantı içeriyor."
+  },
+  "Text049": {
+    "en": "Unsupported file type in archive.",
+    "tr": "Arşivde desteklenmeyen dosya türü."
+  },
+  "Text050": {
+    "en": "Unsupported package format.",
+    "tr": "Desteklenmeyen paket biçimi."
+  },
+  "Text051": {
+    "en": "Waiting for SDK. Select the SDK folder obtained from SAP.",
+    "tr": "SDK bekleniyor. SAP’den edindiğiniz SDK klasörünü seçin."
+  },
+  "Text052": {
+    "en": "{0} was not found in the SDK lib folder.",
+    "tr": "SDK lib klasöründe {0} bulunamadı."
+  },
+  "Text053": {
+    "en": "SDK must be the 64-bit Windows x64 version.",
+    "tr": "SDK 64 bit Windows x64 sürümü olmalı."
+  },
+  "Text054": {
+    "en": "SDK file is not a valid Windows DLL.",
+    "tr": "SDK dosyası geçerli bir Windows DLL dosyası değil."
+  },
+  "Text055": {
+    "en": "Cannot read SDK files. Check folder permissions.",
+    "tr": "SDK dosyaları okunamıyor. Klasör izinlerini kontrol edin."
+  },
+  "Text056": {
+    "en": "DLLs found. Install Python/PyRFC for the actual load test.",
+    "tr": "DLL’ler bulundu. Gerçek yükleme testi için Python/PyRFC kurulmalı."
+  },
+  "Text057": {
+    "en": "SDK loaded successfully through PyRFC. No SAP network connection was made.",
+    "tr": "PyRFC üzerinden SDK başarıyla yüklendi. SAP ağına bağlanılmadı."
+  },
+  "Text058": {
+    "en": "Cannot load SDK/PyRFC. Check SDK architecture, PyRFC and Visual C++ runtimes.",
+    "tr": "SDK/PyRFC yüklenemedi. SDK mimarisini, PyRFC ve Visual C++ çalışma zamanlarını kontrol edin."
+  },
+  "Text059": {
+    "en": "SDK verification timed out.",
+    "tr": "SDK doğrulama zaman aşımı."
+  },
+  "Text060": {
+    "en": "SDK/Python or RFC log folder unavailable. Check paths and permissions.",
+    "tr": "SDK/Python veya RFC log klasörü kullanılamıyor. Dosya yollarını ve izinleri kontrol edin."
+  },
+  "Text061": {
+    "en": "{0} MB free",
+    "tr": "{0} MB boş"
+  },
+  "Text062": {
+    "en": "At least 1 GB free space is required.",
+    "tr": "En az 1 GB boş alan gerekir."
+  },
+  "Text063": {
+    "en": "Cannot write to the selected data/log folder.",
+    "tr": "Seçilen veri/log klasörüne yazılamıyor."
+  },
+  "Text064": {
+    "en": "Microsoft.PowerShell.Security and its secret commands must be accessible.",
+    "tr": "Microsoft.PowerShell.Security modülü ve şifre komutları erişilebilir olmalı."
+  },
+  "Text065": {
+    "en": "MCP package catalog",
+    "tr": "MCP paket kataloğu"
+  },
+  "Text066": {
+    "en": "Versions are pinned with SHA-256 hashes.",
+    "tr": "Sürümler SHA-256 değerleriyle sabitlenmiş."
+  },
+  "Text067": {
+    "en": "Prebuilt RFC binding matching Python 3.11 x64.",
+    "tr": "Python 3.11 x64 ile eşleşen hazır RFC bağlayıcısı."
+  },
+  "Text068": {
+    "en": "Required for the SDK native DLL dependencies.",
+    "tr": "SDK’nin yerel DLL bağımlılıkları için."
+  },
+  "Text069": {
+    "en": "The managed runtime is not installed.",
+    "tr": "Uygulamanın yönettiği çalışma zamanı kurulu değil."
+  },
+  "Text070": {
+    "en": "Version verified.",
+    "tr": "Sürüm doğrulandı."
+  },
+  "Text071": {
+    "en": "Incompatible version; install the managed runtime.",
+    "tr": "Sürüm uyumlu değil; yönetilen sürümü kurun."
+  },
+  "Text072": {
+    "en": "Runtime could not be started.",
+    "tr": "Çalışma zamanı başlatılamadı."
+  },
+  "Text073": {
+    "en": "Install Python first, or select Python and PyRFC together.",
+    "tr": "Önce Python kurulmalı; veya Python ile PyRFC’yi birlikte seçin."
+  },
+  "Text074": {
+    "en": "Visual C++ installation could not be started.",
+    "tr": "Visual C++ kurulumu başlatılamadı."
+  },
+  "Text075": {
+    "en": "Visual C++ installation failed: {0}",
+    "tr": "Visual C++ kurulumu başarısız: {0}"
+  },
+  "Text076": {
+    "en": "Visual C++ installed; Windows restart required.",
+    "tr": "Visual C++ kuruldu; Windows yeniden başlatılması gerekiyor."
+  },
+  "Text077": {
+    "en": "Visual C++ installed.",
+    "tr": "Visual C++ kuruldu."
+  },
+  "Text078": {
+    "en": "Configuration is empty.",
+    "tr": "Yapılandırma boş."
+  },
+  "Text079": {
+    "en": "The secret store in this version uses Windows DPAPI.",
+    "tr": "Bu sürümün şifre kasası Windows DPAPI kullanır."
+  },
+  "Text080": {
+    "en": "Password cannot be empty.",
+    "tr": "Şifre boş olamaz."
+  },
+  "Text081": {
+    "en": "Secret file is larger than expected.",
+    "tr": "Şifre dosyası beklenenden büyük."
+  },
+  "Text082": {
+    "en": "This Windows user cannot decrypt the secret. Enter the SAP password again.",
+    "tr": "Şifre bu Windows kullanıcısıyla çözülemiyor. SAP şifresini yeniden girin."
+  },
+  "Text083": {
+    "en": "Enter the SAP password when saving for the first time.",
+    "tr": "İlk kayıtta SAP şifresini girin."
+  },
+  "Text084": {
+    "en": "Network secret files are not supported.",
+    "tr": "Ağ üzerindeki şifre dosyaları desteklenmiyor."
+  },
+  "Text085": {
+    "en": "The active profile secret file is missing.",
+    "tr": "Aktif profilin şifre dosyası yok."
+  },
+  "Text086": {
+    "en": "Invalid mapping JSON.",
+    "tr": "Mapping JSON geçersiz."
+  },
+  "Text087": {
+    "en": "Imported · ",
+    "tr": "İçe aktarılan · "
+  },
+  "Text088": {
+    "en": "Prepare your workspace",
+    "tr": "Çalışma alanınızı hazırlayın"
+  },
+  "Text089": {
+    "en": "Complete the prerequisites",
+    "tr": "Gereksinimleri tamamlayın"
+  },
+  "Text090": {
+    "en": "Connect your SAP RFC SDK",
+    "tr": "SAP RFC SDK’nızı bağlayın"
+  },
+  "Text091": {
+    "en": "Your SAP connections",
+    "tr": "SAP bağlantılarınız"
+  },
+  "Text092": {
+    "en": "Connect MCP clients",
+    "tr": "MCP istemcilerini bağlayın"
+  },
+  "Text093": {
+    "en": "Settings and activity logs",
+    "tr": "Ayarlar ve işlem günlükleri"
+  },
+  "Text094": {
+    "en": "Install and manage SAP RFC and ADT tools in one place.",
+    "tr": "SAP RFC ve ADT araçlarını tek bir yerden kurun ve yönetin."
+  },
+  "Text095": {
+    "en": "Checks cover the prerequisites for your selected components.",
+    "tr": "Yalnız seçtiğiniz bileşenler için gereken uygulamalar kontrol edilir."
+  },
+  "Text096": {
+    "en": "Select your x64 SDK folder from SAP to verify library loading.",
+    "tr": "SAP’den edindiğiniz x64 SDK klasörünü seçin; uygulama yüklemeyi doğrulasın."
+  },
+  "Text097": {
+    "en": "Find systems, create account profiles and select the shared active account.",
+    "tr": "Sistemleri bulun, hesap profilleri oluşturun ve ortak aktif hesabı seçin."
+  },
+  "Text098": {
+    "en": "Add connections while preserving your existing settings.",
+    "tr": "Bağlantıları mevcut ayarlarınızı koruyarak ekleyin."
+  },
+  "Text099": {
+    "en": "Manage paths, log levels and retention rules.",
+    "tr": "Dosya yollarını, log düzeylerini ve saklama kurallarını yönetin."
+  },
+  "Text100": {
+    "en": "01   Overview",
+    "tr": "01   Genel durum"
+  },
+  "Text101": {
+    "en": "02   Prerequisites",
+    "tr": "02   Ön koşullar"
+  },
+  "Text102": {
+    "en": "03   SAP RFC SDK",
+    "tr": "03   SAP RFC SDK"
+  },
+  "Text103": {
+    "en": "04   SAP connections",
+    "tr": "04   SAP bağlantıları"
+  },
+  "Text104": {
+    "en": "05   MCP clients",
+    "tr": "05   MCP istemcileri"
+  },
+  "Text105": {
+    "en": "06   Settings and logs",
+    "tr": "06   Ayarlar ve loglar"
+  },
+  "Text106": {
+    "en": "System",
+    "tr": "Sistem"
+  },
+  "Text107": {
+    "en": "Light",
+    "tr": "Açık"
+  },
+  "Text108": {
+    "en": "Dark",
+    "tr": "Koyu"
+  },
+  "Text109": {
+    "en": "SAP MCP · User guide",
+    "tr": "SAP MCP · Kullanım kılavuzu"
+  },
+  "Text110": {
+    "en": "Cancelling. You can close the window when the operation finishes.",
+    "tr": "İşlem iptal ediliyor. Tamamlandığında pencereyi kapatabilirsiniz."
+  },
+  "Text111": {
+    "en": "Ready · Select your components first.",
+    "tr": "Hazır · Önce bileşenlerinizi seçin."
+  },
+  "Text112": {
+    "en": "Operation cancelled. Completed packages are preserved; you can retry.",
+    "tr": "İşlem iptal edildi. Tamamlanmış paketler korunur; tekrar deneyebilirsiniz."
+  },
+  "Text113": {
+    "en": "Operation failed: ",
+    "tr": "İşlem tamamlanamadı: "
+  },
+  "Text114": {
+    "en": "Cannot load configuration. Fix the file or open another --config path.",
+    "tr": "Yapılandırma yüklenemedi. Dosyayı düzeltin veya farklı bir --config yolu ile açın."
+  },
+  "Text115": {
+    "en": "FIRST SETUP  /  1 → 6     Select components, complete prerequisites and connect your clients.",
+    "tr": "İLK KURULUM  /  1 → 6     Bileşenleri seçin, gereksinimleri tamamlayın ve istemcilerinizi bağlayın."
+  },
+  "Text116": {
+    "en": "Call BAPIs and function modules through the NetWeaver RFC SDK.",
+    "tr": "BAPI ve fonksiyon modüllerini NetWeaver RFC SDK üzerinden çağırın."
+  },
+  "Text117": {
+    "en": "Access ABAP development tools through ADT. Basic use does not require the SDK.",
+    "tr": "ABAP geliştirme araçlarına ADT üzerinden erişin. Temel kullanımda SDK gerekmez."
+  },
+  "Text118": {
+    "en": "Install this component",
+    "tr": "Bu bileşeni kur"
+  },
+  "Text119": {
+    "en": "INSTALLED · ",
+    "tr": "KURULU · "
+  },
+  "Text120": {
+    "en": "NOT INSTALLED",
+    "tr": "HENÜZ KURULMADI"
+  },
+  "Text121": {
+    "en": "Remove component",
+    "tr": "Bileşeni kaldır"
+  },
+  "Text122": {
+    "en": ": remove component?",
+    "tr": " kaldırılsın mı?"
+  },
+  "Text123": {
+    "en": "Only MCP package files will be removed. Accounts and secrets are preserved. Stop this MCP in your client.",
+    "tr": "Yalnız MCP paket dosyaları kaldırılır. Hesaplarınız ve şifreleriniz korunur. İstemcide bu MCP’yi durdurun."
+  },
+  "Text124": {
+    "en": " removed.",
+    "tr": " kaldırıldı."
+  },
+  "Text125": {
+    "en": "Check prerequisites →",
+    "tr": "Ön koşulları denetle →"
+  },
+  "Text126": {
+    "en": "Select at least one component.",
+    "tr": "En az bir bileşen seçin."
+  },
+  "Text127": {
+    "en": "Verify local MCP",
+    "tr": "Yerel MCP doğrulaması"
+  },
+  "Text128": {
+    "en": "You are in control",
+    "tr": "Her şey sizin kontrolünüzde"
+  },
+  "Text129": {
+    "en": "The SDK is not included. Connect your SDK files during setup or later.",
+    "tr": "SDK kurulum paketine dahil değildir. Dosyalarınızı kurulum sırasında veya daha sonra bağlayabilirsiniz."
+  },
+  "Text130": {
+    "en": "Codex and Claude Desktop share active account profiles. Select SAP systems with target_key.",
+    "tr": "Codex ve Claude Desktop aynı aktif hesap profillerini kullanır. Birden fazla SAP sistemi target_key ile seçilebilir."
+  },
+  "Text131": {
+    "en": "Checking prerequisites…",
+    "tr": "Gereksinimler kontrol ediliyor…"
+  },
+  "Text132": {
+    "en": "Checks complete · ",
+    "tr": "Kontrol tamamlandı · "
+  },
+  "Text133": {
+    "en": " ready.",
+    "tr": " hazır."
+  },
+  "Text134": {
+    "en": "Check again",
+    "tr": "Tekrar denetle"
+  },
+  "Text135": {
+    "en": "Select Check again to see the prerequisites.",
+    "tr": "Gereksinim listesini görmek için Tekrar denetle düğmesine basın."
+  },
+  "Text136": {
+    "en": "✓ Ready",
+    "tr": "✓ Hazır"
+  },
+  "Text137": {
+    "en": "◷ Waiting",
+    "tr": "◷ Bekleniyor"
+  },
+  "Text138": {
+    "en": "! Information",
+    "tr": "! Bilgi"
+  },
+  "Text139": {
+    "en": "! Action required",
+    "tr": "! İşlem gerekiyor"
+  },
+  "Text140": {
+    "en": "Install / repair selected MCP components",
+    "tr": "Seçili MCP bileşenlerini kur / onar"
+  },
+  "Text141": {
+    "en": "Installed: ",
+    "tr": "Kuruldu: "
+  },
+  "Text142": {
+    "en": ". Complete SDK and connection settings.",
+    "tr": ". SDK ve bağlantı ayarlarını tamamlayın."
+  },
+  "Text143": {
+    "en": "Install required applications",
+    "tr": "Gerekli uygulamaları kurun"
+  },
+  "Text144": {
+    "en": "Missing prerequisites are checked. SDK files are not downloaded here.",
+    "tr": "Eksikler işaretlidir. SDK dosyaları bu listeden indirilmez."
+  },
+  "Text145": {
+    "en": "Installation finished and checks were repeated. Reopen this window to refresh the list.",
+    "tr": "Kurulum tamamlandı; durumlar yeniden kontrol edildi. Listeyi yenilemek için kapatıp tekrar açabilirsiniz."
+  },
+  "Text146": {
+    "en": "Cancelled. You can retry.",
+    "tr": "İptal edildi. Tekrar deneyebilirsiniz."
+  },
+  "Text147": {
+    "en": "✓ Installed",
+    "tr": "✓ Kurulu"
+  },
+  "Text148": {
+    "en": "Retry",
+    "tr": "Yeniden dene"
+  },
+  "Text149": {
+    "en": "Installed",
+    "tr": "Kurulu"
+  },
+  "Text150": {
+    "en": "No installable missing applications, or no package catalog. Check prerequisite results.",
+    "tr": "Kurulabilir eksik uygulama yok veya paket kataloğu bulunamadı. Ön koşul sonuçlarını kontrol edin."
+  },
+  "Text151": {
+    "en": "Select a prerequisite to install.",
+    "tr": "Kurulacak bir gereksinim seçin."
+  },
+  "Text152": {
+    "en": "Use your own SAP SDK files",
+    "tr": "Kendi SAP SDK dosyalarınızı kullanın"
+  },
+  "Text153": {
+    "en": "Open the official SAP SDK page ↗",
+    "tr": "SAP’nin resmî SDK sayfasını aç ↗"
+  },
+  "Text154": {
+    "en": "SDK folder · example: C:\\SAP\\nwrfcsdk",
+    "tr": "SDK klasörü · örnek: C:\\SAP\\nwrfcsdk"
+  },
+  "Text155": {
+    "en": "Choose folder",
+    "tr": "Klasör seç"
+  },
+  "Text156": {
+    "en": "Select the SDK folder",
+    "tr": "SDK klasörünü seçin"
+  },
+  "Text157": {
+    "en": "Verify and save SDK",
+    "tr": "SDK’yı doğrula ve kaydet"
+  },
+  "Text158": {
+    "en": "Expected files: lib\\sapnwrfc.dll and lib\\libsapucum.dll. Install Python and PyRFC for an actual load test.",
+    "tr": "Beklenen dosyalar: lib\\sapnwrfc.dll ve lib\\libsapucum.dll. Gerçek yükleme testi için Python ve PyRFC de kurulu olmalı."
+  },
+  "Text159": {
+    "en": "Waiting for SDK · RFC is disabled. You can continue preparing ADT connections.",
+    "tr": "SDK bekleniyor · RFC etkinleştirilmez. ADT bağlantılarını hazırlamaya devam edebilirsiniz."
+  },
+  "Text160": {
+    "en": "SDK path saved. Readiness is checked again whenever MCP starts.",
+    "tr": "SDK yolu kaydedildi. Etkinlik durumu her MCP başlangıcında yeniden doğrulanır."
+  },
+  "Text161": {
+    "en": "Continue to SAP connections →",
+    "tr": "SAP bağlantılarına devam et →"
+  },
+  "Text162": {
+    "en": "SAP GUI landscape file",
+    "tr": "SAP GUI landscape dosyası"
+  },
+  "Text163": {
+    "en": "Choose XML",
+    "tr": "XML seç"
+  },
+  "Text164": {
+    "en": "Select SAPUILandscape.xml",
+    "tr": "SAPUILandscape.xml seçin"
+  },
+  "Text165": {
+    "en": "Load systems",
+    "tr": "Sistemleri yükle"
+  },
+  "Text166": {
+    "en": "Loaded {0} SAP GUI connections. Source XML was preserved.",
+    "tr": "{0} SAP GUI bağlantısı yüklendi. Kaynak XML değiştirilmedi."
+  },
+  "Text167": {
+    "en": "Import mapping",
+    "tr": "Mapping içe aktar"
+  },
+  "Text168": {
+    "en": "Select sap_credentials.json",
+    "tr": "sap_credentials.json seçin"
+  },
+  "Text169": {
+    "en": "Load the landscape systems first.",
+    "tr": "Önce landscape sistemlerini yükleyin."
+  },
+  "Text170": {
+    "en": "Imported {0} profiles; source file was preserved.",
+    "tr": "{0} profil içe aktarıldı; kaynak dosya korundu."
+  },
+  "Text171": {
+    "en": "Select SAPUILandscape.xml. This version reads direct SAPGUI host:port connections; message-server groups and SNC/SSO are not supported.",
+    "tr": "Bir SAPUILandscape.xml dosyası seçin. İlk sürüm doğrudan SAPGUI host:port bağlantılarını okur; message-server grupları ve SNC/SSO kapsam dışıdır."
+  },
+  "Text172": {
+    "en": "SAP system",
+    "tr": "SAP sistemi"
+  },
+  "Text173": {
+    "en": "Saved profiles",
+    "tr": "Kayıtlı profiller"
+  },
+  "Text174": {
+    "en": "Profile name",
+    "tr": "Profil adı"
+  },
+  "Text175": {
+    "en": "SAP user",
+    "tr": "SAP kullanıcısı"
+  },
+  "Text176": {
+    "en": "Language",
+    "tr": "Dil"
+  },
+  "Text177": {
+    "en": "SAP password · leave blank to keep the current password",
+    "tr": "SAP şifresi · mevcut şifreyi korumak için boş bırakın"
+  },
+  "Text178": {
+    "en": "ADT URL · optional",
+    "tr": "ADT adresi · isteğe bağlı"
+  },
+  "Text179": {
+    "en": "BW Modeling URL · optional",
+    "tr": "BW Modeling adresi · isteğe bağlı"
+  },
+  "Text180": {
+    "en": "Disable TLS certificate verification for this profile",
+    "tr": "Bu profil için TLS sertifika doğrulamasını devre dışı bırak"
+  },
+  "Text181": {
+    "en": "Make this profile active for all clients",
+    "tr": "Bu profili bütün istemciler için aktif yap"
+  },
+  "Text182": {
+    "en": "Shared active profile: ",
+    "tr": "Ortak aktif profil: "
+  },
+  "Text183": {
+    "en": "none yet",
+    "tr": "henüz yok"
+  },
+  "Text184": {
+    "en": "New profile",
+    "tr": "Yeni profil"
+  },
+  "Text185": {
+    "en": "Save profile",
+    "tr": "Profili kaydet"
+  },
+  "Text186": {
+    "en": "Profile saved with DPAPI. The next MCP call uses the active profile.",
+    "tr": "Profil DPAPI ile kaydedildi. Aktif profil sonraki MCP çağrısında kullanılır."
+  },
+  "Text187": {
+    "en": "Select a saved profile first.",
+    "tr": "Önce kayıtlı bir profil seçin."
+  },
+  "Text188": {
+    "en": "Make active",
+    "tr": "Aktif yap"
+  },
+  "Text189": {
+    "en": "Shared active profile updated.",
+    "tr": "Ortak aktif profil güncellendi."
+  },
+  "Text190": {
+    "en": "Test RFC connection",
+    "tr": "RFC bağlantısını test et"
+  },
+  "Text191": {
+    "en": "Test ADT connection",
+    "tr": "ADT bağlantısını test et"
+  },
+  "Text192": {
+    "en": "Delete profile",
+    "tr": "Profili sil"
+  },
+  "Text193": {
+    "en": "Remove profile?",
+    "tr": "Profil kaldırılsın mı?"
+  },
+  "Text194": {
+    "en": " profile mapping will be removed.",
+    "tr": " profilinin mapping kaydı kaldırılacak."
+  },
+  "Text195": {
+    "en": "Profile removed; the unused secret file was retained.",
+    "tr": "Profil kaldırıldı; kullanılmayan şifre dosyası otomatik silinmedi."
+  },
+  "Text196": {
+    "en": "Select a SAP system.",
+    "tr": "Bir SAP sistemi seçin."
+  },
+  "Text197": {
+    "en": " connection test running…",
+    "tr": " bağlantısı deneniyor…"
+  },
+  "Text198": {
+    "en": "Connection failed. Check user, password, URL, network and SAP authorizations.",
+    "tr": "Bağlantı başarısız. Kullanıcı, şifre, adres, ağ ve SAP yetkilerini kontrol edin."
+  },
+  "Text199": {
+    "en": "Connection successful: ",
+    "tr": "Bağlantı başarılı: "
+  },
+  "Text200": {
+    "en": " local MCP startup verification running…",
+    "tr": " yerel MCP başlangıcı doğrulanıyor…"
+  },
+  "Text201": {
+    "en": " tools",
+    "tr": " araç"
+  },
+  "Text202": {
+    "en": "Install at least one MCP component first.",
+    "tr": "Önce en az bir MCP bileşenini kurun."
+  },
+  "Text203": {
+    "en": "Local verification successful · ",
+    "tr": "Yerel doğrulama başarılı · "
+  },
+  "Text204": {
+    "en": ". No SAP connection was made.",
+    "tr": ". SAP sistemine bağlanılmadı."
+  },
+  "Text205": {
+    "en": "Claude Desktop configuration",
+    "tr": "Claude Desktop yapılandırması"
+  },
+  "Text206": {
+    "en": "Replace conflicting SAP MCP entries after preview",
+    "tr": "Çakışan SAP MCP kayıtlarını önizledikten sonra değiştir"
+  },
+  "Text207": {
+    "en": "At least one ready MCP component is required. RFC also needs SDK verification.",
+    "tr": "En az bir hazır MCP bileşeni gerekli. RFC için SDK doğrulaması da tamamlanmalı."
+  },
+  "Text208": {
+    "en": "Preview changes",
+    "tr": "Değişiklikleri önizle"
+  },
+  "Text209": {
+    "en": "Select a client.",
+    "tr": "Bir istemci seçin."
+  },
+  "Text210": {
+    "en": "\nEntries to add: ",
+    "tr": "\nEklenecek kayıtlar: "
+  },
+  "Text211": {
+    "en": "\nConflicts: ",
+    "tr": "\nÇakışmalar: "
+  },
+  "Text212": {
+    "en": "none",
+    "tr": "yok"
+  },
+  "Text213": {
+    "en": "Preview ready. Existing settings will be backed up and merged.",
+    "tr": "Önizleme hazır. Mevcut ayarlar yedeklenerek birleştirilecek."
+  },
+  "Text214": {
+    "en": "Apply previewed settings",
+    "tr": "Önizlenen ayarları uygula"
+  },
+  "Text215": {
+    "en": "Preview the changes first.",
+    "tr": "Önce değişiklikleri önizleyin."
+  },
+  "Text216": {
+    "en": "Conflicting entries exist. Select the replacement option.",
+    "tr": "Çakışan kayıtlar var. Değiştirme seçeneğini işaretleyin."
+  },
+  "Text217": {
+    "en": "Client settings saved. Restart the MCP servers in Codex/Claude Desktop.",
+    "tr": "İstemci ayarları kaydedildi. Codex/Claude Desktop içinde MCP’leri yeniden başlatın."
+  },
+  "Text218": {
+    "en": "Export generic MCP JSON settings",
+    "tr": "Genel MCP JSON ayarını dışa aktar"
+  },
+  "Text219": {
+    "en": "MCP launch configuration exported without passwords.",
+    "tr": "Şifre içermeyen MCP başlatma ayarı dışa aktarıldı."
+  },
+  "Text220": {
+    "en": "The manager can stay closed. Clients use the local stdio launcher. RFC waiting for SDK is not registered.",
+    "tr": "Yönetim uygulamasının açık kalması gerekmez. Her istemci MCP’yi yerel stdio başlatıcısı üzerinden çalıştırır. SDK bekleyen RFC kaydı eklenmez."
+  },
+  "Text221": {
+    "en": "Verify local MCP startup",
+    "tr": "Yerel MCP başlangıcını doğrula"
+  },
+  "Text222": {
+    "en": "Active mapping file",
+    "tr": "Aktif mapping dosyası"
+  },
+  "Text223": {
+    "en": "DPAPI secret folder",
+    "tr": "DPAPI şifre klasörü"
+  },
+  "Text224": {
+    "en": "Managed Node.js",
+    "tr": "Yönetilen Node.js"
+  },
+  "Text225": {
+    "en": "Managed Python",
+    "tr": "Yönetilen Python"
+  },
+  "Text226": {
+    "en": "File and runtime paths",
+    "tr": "Dosya ve çalışma zamanı yolları"
+  },
+  "Text227": {
+    "en": "Log folder",
+    "tr": "Log klasörü"
+  },
+  "Text228": {
+    "en": "Log level",
+    "tr": "Log düzeyi"
+  },
+  "Text229": {
+    "en": "Retention · days",
+    "tr": "Saklama · gün"
+  },
+  "Text230": {
+    "en": "File · MB",
+    "tr": "Dosya · MB"
+  },
+  "Text231": {
+    "en": "Rotated files",
+    "tr": "Döndürülen dosya"
+  },
+  "Text232": {
+    "en": "Operation timeout · seconds",
+    "tr": "İşlem zaman aşımı · saniye"
+  },
+  "Text233": {
+    "en": "RFC function allowlist · comma separated; leave blank for the current MCP policy",
+    "tr": "RFC fonksiyon izin listesi · virgülle ayrılmış, boşsa mevcut MCP politikası"
+  },
+  "Text234": {
+    "en": "Open log folder",
+    "tr": "Log klasörünü aç"
+  },
+  "Text235": {
+    "en": "Save settings",
+    "tr": "Ayarları kaydet"
+  },
+  "Text236": {
+    "en": "Timeout must be between 1 and 3600 seconds.",
+    "tr": "Zaman aşımı 1–3600 saniye olmalı."
+  },
+  "Text237": {
+    "en": "Settings saved. Restart MCP servers in your clients for path and log changes.",
+    "tr": "Ayarlar kaydedildi. Yol ve log değişiklikleri için istemcilerde MCP’yi yeniden başlatın."
+  },
+  "Text238": {
+    "en": "Recent activity",
+    "tr": "Son işlemler"
+  },
+  "Text239": {
+    "en": "Refresh logs",
+    "tr": "Günlükleri yenile"
+  },
+  "Text240": {
+    "en": "No activity logs yet.",
+    "tr": "Henüz işlem günlüğü yok."
+  },
+  "Text241": {
+    "en": "Files",
+    "tr": "Dosyalar"
+  },
+  "Text242": {
+    "en": "Confirm",
+    "tr": "Onayla"
+  },
+  "Text243": {
+    "en": "Go back",
+    "tr": "Vazgeç"
+  },
+  "Text244": {
+    "en": "MCP process could not be started.",
+    "tr": "MCP işlemi başlatılamadı."
+  },
+  "Text245": {
+    "en": "SAP_MCP_LOG_WRITE_FAILED: Cannot write to the log folder.",
+    "tr": "SAP_MCP_LOG_WRITE_FAILED: Log klasörüne yazılamadı."
+  },
+  "Text246": {
+    "en": "MCP request exceeded the size limit.",
+    "tr": "MCP isteği boyut sınırını aştı."
+  },
+  "Text247": {
+    "en": "RFC_UNAVAILABLE: This operation requires RFC verification. No SAP changes were made. Enable RFC and its SDK first.",
+    "tr": "RFC_UNAVAILABLE: Bu işlem RFC doğrulaması gerektirir. SAP üzerinde değişiklik yapılmadı. Önce RFC bileşenini ve SDK’yı etkinleştirin."
+  },
+  "Text248": {
+    "en": "MCP produced stderr output; sensitive content was not recorded.",
+    "tr": "MCP stderr çıktısı üretti; hassas içerik kaydedilmedi."
+  },
+  "Text249": {
+    "en": "--component rfc|adt is required.",
+    "tr": "--component rfc|adt gerekli."
+  },
+  "Text250": {
+    "en": "Windows and architecture",
+    "tr": "Windows ve mimari"
+  },
+  "Text251": {
+    "en": "Windows 10 22H2 or Windows 11 x64 is required.",
+    "tr": "Windows 10 22H2 veya Windows 11 x64 gereklidir."
+  },
+  "Text252": {
+    "en": "Disk and write permissions",
+    "tr": "Disk ve yazma izni"
+  },
+  "Text253": {
+    "en": "SAP MCP · Setup and Connection Manager",
+    "tr": "SAP MCP · Kurulum ve Bağlantı Yöneticisi"
+  },
+  "Text254": {
+    "en": "CONNECTION MANAGER",
+    "tr": "BAĞLANTI YÖNETİCİSİ"
+  },
+  "Text255": {
+    "en": "LOCAL AND SECURE",
+    "tr": "YEREL VE GÜVENLİ"
+  },
+  "Text256": {
+    "en": "Windows protects your passwords with your account. You control your SDK files.",
+    "tr": "Şifreleriniz Windows hesabınızla korunur. SDK dosyalarınız sizin kontrolünüzdedir."
+  },
+  "Text257": {
+    "en": "User guide ↗",
+    "tr": "Kullanım kılavuzu ↗"
+  },
+  "Text258": {
+    "en": "SETUP AND MANAGEMENT",
+    "tr": "KURULUM VE YÖNETİM"
+  },
+  "Text259": {
+    "en": "Preparing…",
+    "tr": "Hazırlanıyor…"
+  },
+  "Text260": {
+    "en": "Cancel",
+    "tr": "İptal"
+  },
+  "Text261": {
+    "en": "Install Required Applications",
+    "tr": "Gerekli Uygulamaları Kur"
+  },
+  "Text262": {
+    "en": "Install Selected",
+    "tr": "Seçilenleri Kur"
+  },
+  "Text263": {
+    "en": "Install",
+    "tr": "Kur"
+  },
+  "Text264": {
+    "en": "1. Sign in to SAP Software Download Center with your authorized SAP account.\n2. Download and extract SAP NetWeaver RFC SDK for Windows x64.\n3. Select the nwrfcsdk folder containing the lib folder.",
+    "tr": "1. SAP Software Download Center’a yetkili SAP hesabınızla giriş yapın.\n2. SAP NetWeaver RFC SDK’nin Windows x64 paketini indirin ve açın.\n3. İçinde lib klasörü bulunan nwrfcsdk klasörünü seçin."
+  },
+  "Text265": {
+    "en": "Open the user guide in the installation docs folder.\n\nComponents → Prerequisites → SDK → Connections → MCP clients → Verification.",
+    "tr": "Kılavuz kurulum klasöründeki docs/KULLANIM.txt dosyasında bulunur.\n\nBileşen seçimi → Ön koşullar → SDK → Bağlantılar → MCP istemcileri → Doğrulama."
+  },
+  "InvalidUiLanguage": {
+    "en": "uiLanguage must be en or tr.",
+    "tr": "uiLanguage en veya tr olmalı."
+  },
+  "OperationFailed": {
+    "en": "Operation failed: {0}",
+    "tr": "İşlem tamamlanamadı: {0}"
+  },
+  "InstalledVersion": {
+    "en": "INSTALLED · {0}",
+    "tr": "KURULU · {0}"
+  },
+  "RemoveComponent": {
+    "en": "Remove {0}?",
+    "tr": "{0} kaldırılsın mı?"
+  },
+  "ComponentRemoved": {
+    "en": "{0} removed.",
+    "tr": "{0} kaldırıldı."
+  },
+  "ChecksComplete": {
+    "en": "Checks complete · {0}/{1} ready.",
+    "tr": "Kontrol tamamlandı · {0}/{1} hazır."
+  },
+  "ComponentsInstalled": {
+    "en": "Installed: {0}. Complete SDK and connection settings.",
+    "tr": "Kuruldu: {0}. SDK ve bağlantı ayarlarını tamamlayın."
+  },
+  "ActiveProfile": {
+    "en": "Shared active profile: {0}",
+    "tr": "Ortak aktif profil: {0}"
+  },
+  "ActiveProfileNone": {
+    "en": "Shared active profile: none yet",
+    "tr": "Ortak aktif profil: henüz yok"
+  },
+  "RemoveProfile": {
+    "en": "The mapping for profile {0} will be removed.",
+    "tr": "{0} profilinin mapping kaydı kaldırılacak."
+  },
+  "ConnectionTesting": {
+    "en": "{0} connection test running…",
+    "tr": "{0} bağlantısı deneniyor…"
+  },
+  "ConnectionSuccess": {
+    "en": "Connection successful: {0} / {1}",
+    "tr": "Bağlantı başarılı: {0} / {1}"
+  },
+  "VerifyingMcp": {
+    "en": "{0} local MCP startup verification running…",
+    "tr": "{0} yerel MCP başlangıcı doğrulanıyor…"
+  },
+  "LocalVerified": {
+    "en": "Local verification successful · tools: {0}. No SAP connection was made.",
+    "tr": "Yerel doğrulama başarılı · araçlar: {0}. SAP sistemine bağlanılmadı."
+  }
+}

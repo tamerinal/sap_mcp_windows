@@ -1,0 +1,11 @@
+{
+  "sources": {
+    "Avalonia-LICENSE.txt": "https://raw.githubusercontent.com/AvaloniaUI/Avalonia/12.1.4/licence.md",
+    "Inter-OFL.txt": "https://raw.githubusercontent.com/rsms/inter/master/LICENSE.txt",
+    "Tomlyn-LICENSE.txt": "https://raw.githubusercontent.com/xoofx/Tomlyn/0.19.0/license.txt",
+    "MicroCom-LICENSE.txt": "https://raw.githubusercontent.com/kekekeks/MicroCom/master/LICENSE",
+    "DotNet-LICENSE.txt": "Bundled .NET SDK 10.0.403 LICENSE.txt",
+    "DotNet-ThirdPartyNotices.txt": "Bundled .NET SDK 10.0.403 ThirdPartyNotices.txt (superset of runtime notices)"
+  },
+  "nuget": "Other files copied unchanged from pinned NuGet runtime dependency archives; see src/SapMcp.Desktop/packages.lock.json."
+}

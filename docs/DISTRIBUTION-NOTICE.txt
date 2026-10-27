@@ -1,0 +1,19 @@
+SAP MCP Manager 0.1.0-preview.1 — Windows preview
+
+This package is a development build, without a publisher code-signing certificate.
+SAP NetWeaver RFC SDK binaries and SAP customer credentials are NOT included.
+The user must obtain and license the SAP SDK independently from SAP.
+SAP, SAP GUI, NetWeaver and ABAP are trademarks of SAP SE. This application is not an SAP product.
+
+Third-party components retain their respective licenses:
+- .NET runtime: MIT; see docs/licenses/DotNet-ThirdPartyNotices.txt.
+- Avalonia: MIT; Inter font: SIL Open Font License 1.1.
+- Node.js: MIT and included third-party licenses (runtime LICENSE file).
+- CPython / python-build-standalone: Python Software Foundation and included third-party licenses.
+- PyRFC: Apache-2.0; copied license text is included with the package metadata.
+- Microsoft Visual C++ Redistributable: Microsoft license terms apply; installation may request UAC elevation.
+- MCP npm dependencies: individual LICENSE files are included in node_modules.
+- The Inno Setup 6.7.3 compiler used for this development build reports non-commercial use. Obtain the appropriate Inno Setup commercial license before commercial distribution/build use.
+
+No SAP credentials are included in support exports. Uninstall preserves user data by default.
+An offline installer requires all runtime cache files named in the pinned catalog.

@@ -1,0 +1,30 @@
+name: Bug report / Hata bildirimi
+description: Report a reproducible problem without sharing sensitive SAP data.
+body:
+  - type: markdown
+    attributes:
+      value: 'Do not upload passwords, DPAPI files, real landscape/mapping/client settings, tokens or raw SAP payloads. Şifre, gerçek bağlantı/istemci dosyası ve ham SAP verisi paylaşmayın.'
+  - type: input
+    id: version
+    attributes:
+      label: App version and installer / Sürüm ve kurulum
+      placeholder: v0.1.0-preview.1, Online or Offline
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows build, language, theme, component / Windows derlemesi, dil, tema, bileşen
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps, expected and actual behavior / Adımlar, beklenen ve gerçekleşen
+    validations:
+      required: true
+  - type: textarea
+    id: diagnosis
+    attributes:
+      label: Diagnostic ID and redacted error text / Teşhis kimliği ve maskeli hata
+      description: Review text yourself; do not attach configuration or secret files.
