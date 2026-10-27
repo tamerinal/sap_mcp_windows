@@ -175,7 +175,7 @@ await Step("Two selected MCP components start independently", async () =>
     await using var session = await McpSession.StartAsync(settings, store.FilePath, "adt");
     var result = await session.RequestAsync("tools/list"); Ensure(result.GetProperty("tools").GetArrayLength() > 10, "ADT tools missing");
 });
-await AdtVerification.RunAsync(settings, Step);
+await AdtVerification.RunAsync(settings, Step, packages);
 await Step("Off logging creates no operation/session files", async () =>
 {
     settings.Adt.LogLevel = LogLevel.Off; settings.Adt.LogDirectory = Path.Combine(data, "logs-off"); await store.SaveAsync(settings);

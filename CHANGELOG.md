@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-preview.5 — 2026-10-28
+
+Basic/Advanced modes; SDK-first automatic preparation; bounded credential-free HTTPS discovery; independent ADT/RFC verification and partial success; shared record preservation; bilingual help and regression tests. RFC payload unchanged.
+
 [Türkçe](CHANGELOG.tr.md)
 
 ## v0.1.0-preview.4 — 2026-10-28

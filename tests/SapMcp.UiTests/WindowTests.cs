@@ -23,6 +23,46 @@ public static class TestAppBuilder
 public sealed class WindowTests
 {
     [AvaloniaFact]
+    public async Task BasicDefaultsAndBothModeFormsSurviveLocaleAndModeSwitches()
+    {
+        using var temp=new UiTemporary();var config=Path.Combine(temp.Root,"config","settings.json");var store=new SettingsStore(config);var seed=await store.LoadAsync();
+        var manager=new ConnectionManager(store);seed=await manager.SelectSourceAsync(seed,"managed");await manager.SaveSystemAsync(seed,new(){Name="Fictional",Host="fictional.example.invalid",Sysnr="00"});
+        var window=new MainWindow(config);window.Show();
+        try
+        {
+            await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.Equal(0,window.FindControl<ComboBox>("ModePicker")!.SelectedIndex);Assert.False(window.FindControl<StackPanel>("Navigation")!.IsVisible);
+            var sdk=Named<TextBox>(window,"BasicSdkDirectory");sdk.Text="Fictional SDK path";
+            var host=Named<TextBox>(window,"BasicHost");host.Text="fictional.example.invalid";
+            var password=Named<TextBox>(window,"BasicPassword");password.Text="  unsaved şifre  ";
+            var switcher=window.FindControl<ComboBox>("ModePicker")!;
+            switcher.SelectedIndex=1;await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.True(window.FindControl<StackPanel>("Navigation")!.IsVisible);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[3]);
+            var advanced=window.GetLogicalDescendants().OfType<TextBox>().First(b=>b.PasswordChar!='\0');advanced.Text="advanced unsaved";
+            switcher.SelectedIndex=0;await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.Same(sdk,Named<TextBox>(window,"BasicSdkDirectory"));Assert.Equal("  unsaved şifre  ",password.Text);
+            foreach(var locale in new[]{"en","tr"})foreach(var theme in new[]{ThemeVariant.Light,ThemeVariant.Dark})foreach(var width in new[]{940d,1240d})
+            {
+                window.Width=width;Application.Current!.RequestedThemeVariant=theme;window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex=locale=="tr"?1:0;
+                await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                for(var step=0;step<3;step++)
+                {
+                    typeof(MainWindow).GetMethod("SetBasicStep",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.Invoke(window,[step]);
+                    await Task.Delay(25);Dispatcher.UIThread.RunJobs();
+                    Assert.Equal("fictional.example.invalid",host.Text);Assert.Equal("Fictional SDK path",sdk.Text);Assert.Equal("  unsaved şifre  ",password.Text);
+                    if(Environment.GetEnvironmentVariable("SAP_MCP_UI_SNAPSHOTS") is {Length:>0} output)
+                    {Directory.CreateDirectory(output);using var frame=window.CaptureRenderedFrame();frame!.Save(Path.Combine(output,$"basic-{locale}-{step}-{width}-{theme}.png"),Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);}
+                }
+            }
+            switcher.SelectedIndex=1;await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);Assert.Equal("advanced unsaved",advanced.Text);
+            Assert.Same(advanced,window.GetLogicalDescendants().OfType<TextBox>().First(b=>b.PasswordChar!='\0'));
+        }
+        finally{window.Close();}
+    }
+    private sealed class UiTemporary:IDisposable
+    {public string Root{get;}=Path.Combine(Path.GetTempPath(),"Basic UI "+Guid.NewGuid().ToString("N"));public void Dispose(){if(Directory.Exists(Root))Directory.Delete(Root,true);}}
+    [AvaloniaFact]
     public async Task AdtHelpAndProfileControlsPreserveUnsavedValuesInBothLanguages()
     {
         var root = Path.Combine(Path.GetTempPath(), "SapMcp ADT UI " + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);

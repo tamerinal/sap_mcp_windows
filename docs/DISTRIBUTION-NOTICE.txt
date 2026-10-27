@@ -1,4 +1,4 @@
-SAP MCP Manager 0.1.0-preview.4 — Windows preview
+SAP MCP Manager 0.1.0-preview.5 — Windows preview
 
 This package is a development build, without a publisher code-signing certificate.
 SAP NetWeaver RFC SDK binaries and SAP customer credentials are NOT included.

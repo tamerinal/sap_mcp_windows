@@ -55,3 +55,8 @@ SDK içermeyen başlangıç PATH’i, mükerrer/büyük harf/tırnaklı SDK gird
 ## Preview.4 ADT/TLS
 
 Yerelde üretilen kök/ara/leaf/self-signed/süresi dolmuş/adı farklı sertifikalar; HTTP, HTTPS, özel port, IPv6, proxy, güven yalıtımı, redirect, kimlik deneme sayısı, içerik ve maskelenmiş raporu sınar. Entegrasyon yerel sunucuyla seçili-profil Manager snapshot’ını aktif-profil MCP araçlarıyla karşılaştırır; özgün mapping’i korur ve Türkçe/boşluklu DPAPI şifresini kontrol eder. Canlı SAP, müşteri sertifikası ve OS deposu değişikliği ön koşul değildir.
+
+
+## Preview.5 Basic
+
+Basic/Advanced geçişi ve form koruma, HTTPS aday sınıflandırması, paralellik/bütçe/iptal, geçici profil testleri, bağımsız kısmi başarı, ilk hatalı girişte durma, atomik kayıt/geri alma ve kaynak dönüşümü yerel/mock testlerle sınanır. Temiz Windows ve canlı SAP kabulü bekler.

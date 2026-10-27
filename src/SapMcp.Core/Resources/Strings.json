@@ -1530,5 +1530,225 @@
   "Adt.Status.unverified": {
     "en": "Unverified",
     "tr": "Doğrulanmadı"
+  },
+  "Basic.Mode": {
+    "en": "Basic setup",
+    "tr": "Basic kurulum"
+  },
+  "Basic.Advanced": {
+    "en": "Advanced setup",
+    "tr": "Advanced kurulum"
+  },
+  "Basic.Title": {
+    "en": "Basic setup",
+    "tr": "Basic kurulum"
+  },
+  "Basic.Step1": {
+    "en": "1 / SDK and automatic preparation",
+    "tr": "1 / SDK ve otomatik hazırlık"
+  },
+  "Basic.Step2": {
+    "en": "2 / One SAP connection",
+    "tr": "2 / Tek SAP bağlantısı"
+  },
+  "Basic.Step3": {
+    "en": "3 / Codex and Claude integration",
+    "tr": "3 / Codex ve Claude entegrasyonu"
+  },
+  "Basic.SdkIntro": {
+    "en": "Select your SAP NetWeaver RFC SDK folder. One action prepares the runtimes and MCP servers.",
+    "tr": "SAP NetWeaver RFC SDK klasörünüzü seçin. Tek işlem çalışma zamanlarını ve MCP sunucularını hazırlar."
+  },
+  "Basic.SdkLabel": {
+    "en": "SAP NetWeaver RFC SDK folder",
+    "tr": "SAP NetWeaver RFC SDK klasörü"
+  },
+  "Basic.Browse": {
+    "en": "Browse…",
+    "tr": "Gözat…"
+  },
+  "Basic.AdtOnly": {
+    "en": "Continue with ADT only, without an SDK",
+    "tr": "SDK olmadan yalnız ADT ile devam et"
+  },
+  "Basic.Prepare": {
+    "en": "Prepare installation",
+    "tr": "Kurulumu hazırla"
+  },
+  "Basic.PrepareNotice": {
+    "en": "Paths and logging use application defaults. Windows may request administrator approval for Visual C++ and require a restart. SAP SDK is not bundled.",
+    "tr": "Yollar ve loglar uygulama varsayılanlarını kullanır. Visual C++ için Windows yönetici onayı ve yeniden başlatma gerekebilir. SAP SDK pakete dahil değildir."
+  },
+  "Basic.PrepareFirst": {
+    "en": "Prepare the installation first; the current ADT package must support Basic discovery.",
+    "tr": "Önce kurulumu hazırlayın; güncel ADT paketi Basic keşfini desteklemelidir."
+  },
+  "Basic.SdkRequired": {
+    "en": "Select an SDK folder or choose ADT only.",
+    "tr": "SDK klasörü seçin veya yalnız ADT seçeneğini işaretleyin."
+  },
+  "Basic.RequirementBlocked": {
+    "en": "Requirement unavailable: {0}.",
+    "tr": "Gereksinim sağlanamadı: {0}."
+  },
+  "Basic.Prepared": {
+    "en": "MCP packages prepared. Enter one SAP connection.",
+    "tr": "MCP paketleri hazırlandı. Tek SAP bağlantısını girin."
+  },
+  "Basic.PreparedAdt": {
+    "en": "ADT is prepared. RFC remains unavailable until its SDK and dependencies are ready.",
+    "tr": "ADT hazırlandı. RFC, SDK ve bağımlılıkları sağlanana kadar kullanılamaz."
+  },
+  "Basic.NewProfile": {
+    "en": "New connection / account",
+    "tr": "Yeni bağlantı / hesap"
+  },
+  "Basic.SelectProfile": {
+    "en": "Connection / account to manage",
+    "tr": "Yönetilecek bağlantı / hesap"
+  },
+  "Basic.Host": {
+    "en": "Application server (DNS/IP; optional :HTTPS-port)",
+    "tr": "Uygulama sunucusu (DNS/IP; isteğe bağlı :HTTPS-port)"
+  },
+  "Basic.User": {
+    "en": "SAP user",
+    "tr": "SAP kullanıcısı"
+  },
+  "Basic.Password": {
+    "en": "SAP password (leave blank to keep saved password)",
+    "tr": "SAP şifresi (kayıtlı şifreyi korumak için boş bırakın)"
+  },
+  "Basic.Client": {
+    "en": "SAP client",
+    "tr": "SAP client"
+  },
+  "Basic.Language": {
+    "en": "SAP language",
+    "tr": "SAP dili"
+  },
+  "Basic.Instance": {
+    "en": "System / instance number (two digits)",
+    "tr": "Sistem / instance numarası (iki hane)"
+  },
+  "Basic.Manual": {
+    "en": "Enter an ADT address / port",
+    "tr": "ADT adresi / portu gir"
+  },
+  "Basic.ManualUrl": {
+    "en": "HTTPS base URL or HTTPS port (optional)",
+    "tr": "HTTPS kök URL veya HTTPS portu (isteğe bağlı)"
+  },
+  "Basic.DiscoveryIdle": {
+    "en": "Enter the application server to search for ADT without credentials.",
+    "tr": "Kimlik bilgisi göndermeden ADT aramak için sunucuyu girin."
+  },
+  "Basic.Discovering": {
+    "en": "Searching for ADT securely… No SAP credentials are sent.",
+    "tr": "ADT güvenli olarak aranıyor… SAP kimlik bilgileri gönderilmiyor."
+  },
+  "Basic.Discovered": {
+    "en": "ADT discovery confirmed. Save to verify the account and RFC separately.",
+    "tr": "ADT discovery doğrulandı. Hesap ve RFC’yi ayrı doğrulamak için kaydedin."
+  },
+  "Basic.AuthCandidate": {
+    "en": "A secure candidate requires sign-in; ADT is not verified yet.",
+    "tr": "Güvenli bir aday giriş istiyor; ADT henüz doğrulanmadı."
+  },
+  "Basic.NotFound": {
+    "en": "ADT access was not found at the tested addresses.",
+    "tr": "Denenen adreslerde ADT erişimi bulunamadı."
+  },
+  "Basic.DiscoveryIssue": {
+    "en": "Discovery encountered a network, certificate, permission or service problem. Check the address help or certificate settings.",
+    "tr": "Keşifte ağ, sertifika, yetki veya servis sorunu oluştu. Adres yardımını veya sertifika ayarlarını inceleyin."
+  },
+  "Basic.DiscoveryInvalid": {
+    "en": "Discovery did not return a valid result for the current server.",
+    "tr": "Keşif, güncel sunucu için geçerli bir sonuç döndürmedi."
+  },
+  "Basic.InvalidHost": {
+    "en": "Enter a DNS name or IP address, optionally with an HTTPS port. IPv6 with a port requires brackets.",
+    "tr": "DNS adı veya IP adresini, gerekirse HTTPS portuyla girin. Portlu IPv6 adresini köşeli paranteze alın."
+  },
+  "Basic.HttpsOnly": {
+    "en": "Basic accepts HTTPS only. Use Advanced for an explicitly configured HTTP connection.",
+    "tr": "Basic yalnız HTTPS kabul eder. Açık HTTP yapılandırması için Advanced kullanın."
+  },
+  "Basic.Back": {
+    "en": "Back",
+    "tr": "Geri"
+  },
+  "Basic.Save": {
+    "en": "Save and verify",
+    "tr": "Kaydet ve doğrula"
+  },
+  "Basic.Help": {
+    "en": "How do I find the ADT port or address?",
+    "tr": "ADT portu veya adresi nasıl bulunur?"
+  },
+  "Basic.Changed": {
+    "en": "Connection values changed. Save to verify again.",
+    "tr": "Bağlantı değerleri değişti. Yeniden doğrulamak için kaydedin."
+  },
+  "Basic.InstanceRequired": {
+    "en": "Enter the two-digit instance number. A web port alone does not confirm the RFC instance.",
+    "tr": "İki haneli instance numarasını girin. Web portu tek başına RFC instance’ını doğrulamaz."
+  },
+  "Basic.PasswordRequired": {
+    "en": "Enter a password or select an account with a saved password.",
+    "tr": "Şifre girin veya kayıtlı şifresi olan bir hesap seçin."
+  },
+  "Basic.ActivateNotice": {
+    "en": "Saving will make this account the shared active account for this system. Other profiles are retained.",
+    "tr": "Kaydetme bu hesabı sistemin ortak aktif hesabı yapacak. Diğer profiller korunur."
+  },
+  "Basic.AdtResult": {
+    "en": "ADT:",
+    "tr": "ADT:"
+  },
+  "Basic.RfcResult": {
+    "en": "RFC:",
+    "tr": "RFC:"
+  },
+  "Basic.Passed": {
+    "en": "Verified",
+    "tr": "Doğrulandı"
+  },
+  "Basic.Failed": {
+    "en": "Not verified",
+    "tr": "Doğrulanmadı"
+  },
+  "Basic.BothFailed": {
+    "en": "Neither connection was verified. No profile or active account was changed. Correct the settings and retry.",
+    "tr": "İki bağlantı da doğrulanamadı. Profil veya aktif hesap değiştirilmedi. Ayarları düzeltip yeniden deneyin."
+  },
+  "Basic.SavedBoth": {
+    "en": "Profile saved. ADT and RFC connections verified.",
+    "tr": "Profil kaydedildi. ADT ve RFC bağlantıları doğrulandı."
+  },
+  "Basic.SavedPartial": {
+    "en": "Profile saved with a warning. Continue with the verified MCP only; setup is partially complete.",
+    "tr": "Profil uyarıyla kaydedildi. Yalnız doğrulanan MCP ile devam edin; kurulum kısmen tamamlandı."
+  },
+  "Basic.ClientsNotice": {
+    "en": "Only verified MCP components are offered. Review and apply the Codex/Claude configuration, then restart their MCP processes. Other registrations are retained. RFC ping does not prove authorization for every function.",
+    "tr": "Yalnız doğrulanan MCP bileşenleri sunulur. Codex/Claude ayarını önizleyip uygulayın, sonra MCP süreçlerini yeniden başlatın. Diğer kayıtlar korunur. RFC ping her fonksiyona yetkiyi kanıtlamaz."
+  },
+  "Basic.Retest": {
+    "en": "Connection settings changed or verification is missing. Return and verify the saved profile again.",
+    "tr": "Bağlantı ayarları değişti veya doğrulama eksik. Geri dönüp profili yeniden doğrulayın."
+  },
+  "Basic.ConvertTitle": {
+    "en": "Use application-managed connections?",
+    "tr": "Uygulamanın bağlantılarını kullan?"
+  },
+  "Basic.ConvertBody": {
+    "en": "Basic requires the managed connection catalog. The listed supported GUI connections will be preserved in the catalog. The source XML and profiles are retained. Unsupported entries stop conversion. Confirm to switch the shared source; cancel to keep Advanced.",
+    "tr": "Basic yönetilen bağlantı kataloğu gerektirir. Listelenen desteklenen GUI bağlantıları kataloğa korunarak alınır. Kaynak XML ve profiller saklanır. Desteklenmeyen kayıt dönüşümü durdurur. Ortak kaynağı değiştirmek için onaylayın; Advanced’i korumak için iptal edin."
+  },
+  "Basic.SourceUnsupported": {
+    "en": "Some source connections cannot be preserved safely. Keep the current source and manage them in Advanced.",
+    "tr": "Bazı kaynak bağlantıları güvenli olarak korunamıyor. Mevcut kaynağı koruyup Advanced ile yönetin."
   }
 }

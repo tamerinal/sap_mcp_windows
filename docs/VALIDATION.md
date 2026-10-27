@@ -48,3 +48,8 @@ Checks cover missing inherited SDK PATH, duplicate/cased/quoted SDK entries, Tur
 ## Preview.4 ADT/TLS
 
 Local generated root/intermediate/leaf/self-signed/expired/mismatched certificates exercise HTTP, HTTPS, custom ports, IPv6, proxies, trust isolation, redirects, authentication retry counts, content validation and masked diagnosis. Integration starts a local server and compares selected-profile Manager snapshots with active-profile MCP tools, preserving original mappings and checking Unicode/whitespace DPAPI secrets. No real SAP, customer certificate or OS store mutation is a prerequisite.
+
+
+## Preview.5 Basic
+
+Basic/Advanced migration and form preservation, HTTPS candidate classification, concurrency/budget/cancellation, isolated temporary profile tests, independent partial success, first bad-login stop, atomic shared commit/rollback and source conversion are tested with local/mock fixtures. Clean Windows and live SAP remain pending.

@@ -50,10 +50,12 @@ public partial class MainWindow : Window
             await RunAsync(async () => { ApplyLanguage(language); _settings.UiLanguage = language; await PersistAsync(); });
         };
         ApplyLanguage(UiText.Language);
+        InitializeModePicker();
         this.FindControl<Button>("CancelAction")!.Click += (_, _) => _operation?.Cancel();
         this.FindControl<Button>("HelpButton")!.Click += async (_, _) =>
         {
-            var file = Path.Combine(AppContext.BaseDirectory, "docs", UiText.Language == "tr" ? "USER-GUIDE.tr.md" : "USER-GUIDE.md");
+            var guideName=_settings.UiMode=="basic"?"BASIC-SETUP":"USER-GUIDE";
+            var file = Path.Combine(AppContext.BaseDirectory, "docs", guideName+(UiText.Language=="tr"?".tr":"")+".md");
             var guide = File.Exists(file) ? await File.ReadAllTextAsync(file) : UiText.Get("Text265");
             var dialog = new Window { Title = UiText.Get("Text109"), Width = 760, Height = 650, WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Content = new TextBox { Text = guide, IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, Margin = new(20) } };
@@ -84,7 +86,7 @@ public partial class MainWindow : Window
             if (arguments.Contains("--adt=1")) _settings.Adt.Selected = true;
             if (_settings.ConnectionSourceMode == null && string.IsNullOrEmpty(_settings.LandscapeFile)) _settings.ExternalLandscapeFile ??= LandscapeService.Discover().FirstOrDefault();
             await LoadConnectionsAsync(repairManaged: true);
-            _loaded = true; ShowPage(0); SetStatus(UiText.Get("Text111"));
+            _loaded = true; DisplayInitialMode(); SetStatus(UiText.Get(_settings.UiMode=="basic"?"Basic.SdkIntro":"Text111"));
         });
     }
 
@@ -118,6 +120,7 @@ public partial class MainWindow : Window
         theme.SelectedIndex = selectedTheme;
         _refreshConnectionLanguage?.Invoke();
         this.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = language == "tr" ? 1 : 0;
+        RefreshModeLanguage();
     }
     private void SetStatus(string message) => this.FindControl<TextBlock>("StatusText")!.Text = UiText.Redisplay(message);
     private async Task RunAsync(Func<Task> action)
@@ -128,6 +131,7 @@ public partial class MainWindow : Window
         this.FindControl<Button>("CancelAction")!.IsVisible = true;
         Body.IsEnabled = false;
         this.FindControl<ComboBox>("LanguagePicker")!.IsEnabled = false;
+        this.FindControl<ComboBox>("ModePicker")!.IsEnabled = false;
         try { await action(); }
         catch (OperationCanceledException) { SetStatus(UiText.Get("Text112")); }
         catch (Exception ex)
@@ -136,7 +140,7 @@ public partial class MainWindow : Window
             try { await AuditAsync("operation.failed", new { message = ex.GetType().Name }, LogLevel.Error); } catch { }
             if (!_loaded) { Body.Children.Clear(); Body.Children.Add(Notice(UiText.Get("Text114"), true)); }
         }
-        finally { _operation.Dispose(); _operation = null; Body.IsEnabled = true; this.FindControl<ComboBox>("LanguagePicker")!.IsEnabled = true; this.FindControl<ProgressBar>("BusyIndicator")!.IsVisible = false; this.FindControl<Button>("CancelAction")!.IsVisible = false; }
+        finally { _operation.Dispose(); _operation = null; Body.IsEnabled = true; this.FindControl<ComboBox>("LanguagePicker")!.IsEnabled = true; this.FindControl<ComboBox>("ModePicker")!.IsEnabled = true; this.FindControl<ProgressBar>("BusyIndicator")!.IsVisible = false; this.FindControl<Button>("CancelAction")!.IsVisible = false; }
     }
 
     private Task AuditAsync(string name, object? detail = null, LogLevel level = LogLevel.Info) => new RollingLog(Path.Combine(_settings.DataDirectory, "logs", "manager")).WriteAsync(level, name, detail);

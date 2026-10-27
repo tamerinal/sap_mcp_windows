@@ -45,7 +45,7 @@ Paketlerde derlenmiş kod, üretim bağımlılıkları, kilitler ve kaynak bilgi
 2. Directory.Build.props, kurulum/dosya adları, host teşhisi, katalog ve sürüm notlarını eşitleyin. uiLanguage içermeyen eski ayarları doğrulayın.
 3. Paket hazırlama, derleme, çekirdek/arayüz/entegrasyon/kurulum testleri ve Test-Publication çalıştırın. Yayın kontrolü kaynak ve dağıtımı kişisel yol, şifre ve SDK için tarar. Görselleri ve raporları da inceleyin.
 4. Maskelenmiş doğrulama özeti ve İngilizce/Türkçe sürüm notlarını yayın dosyalarına ekleyin. İki EXE ve belge arşivi için SHA256SUMS.txt üretin. Lisans ve kaynak kayıtlarını inceleyin. Temiz VM/canlı SAP yapılmadıysa tamamlandı yazmayın.
-5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.4` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
+5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.5` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
 6. Dosyaları oturumsuz HTTPS üzerinden indirip hash karşılaştırın. README/kılavuz bağlantılarını oturum kapalı kontrol edin. Başarısız kontrol düzeltilmeden yayınlamayın.
 
 Bu önizlemede otomatik güncelleme sunucusu veya imza sertifikası yoktur. Mevcut kullanıcı kurulumu kayıtlıysa smoke test çalışmaz. Workspace artifacts içine kurup kaldırır ve kullanıcı verisini korur; üretim kabulü için temiz VM kullanın.
@@ -61,3 +61,8 @@ Ortak SDK ortamı Core içinde oluşturulur; başlatma ve doğrulama aynı ortam
 ## Preview.4 ADT policy
 
 ConnectionProfile isteğe bağlı adtCertificates, adtAutoDiscovery (false), adtTimeoutSeconds (15) kazanır. Şema 1, DPAPI ve ortak aktif profiller korunur. Mapping adtTlsCertificates [{file,sha256}] ve adtTimeoutMs aktarır; eski ek alanlar tutulur. Host --profile tanılama için aktif ayarı değiştirmeyen geçici özel mapping seçer; mutlak secretRef DPAPI konumunu korur. ADT başlatmada build-info.json connectionPolicyVersion=1 gerekir. Tüm ağ davranışı Node’dadır; diagnose_connection/inspect_tls_certificate/discover_adt_endpoints araçları eklenir. Tanılama şema 1 yalnız sabit aşama/durum/kod ve sayısal süre/status içerir. Açık PEM/DER ekleme açık onay ister; OS deposu değişmez. Prepare-AdtPayload.ps1 -AdtSource $adtSource yalnız ADT’yi günceller; RFC/PyRFC/runtime hashlerini korur. Özel ADT CI, Windows’ta yerel kurgusal sertifikalarla npm test çalıştırır; public Manager CI özel kaynak istemez.
+
+
+## Preview.5 Basic
+
+Basic arayüzü mevcut Advanced ekranlarından ayrıdır. Core ortak katalog/profil işlemlerini, otomatik ön koşul hazırlığını, geçici DPAPI test yapılandırmasını ve bağımsız ADT/RFC sonuçlarını yönetir. ADT paketindeki dist/basic-connection.js, standart girdiden sınırlı JSON alır ve gerçek Node TLS/proxy/XML politikasını kullanarak kimlik bilgisiz keşif yapar. Merkezi ayarlar BasicDiscoveryOptions içindedir; ikinci bir .NET HTTP katmanı yoktur. Doğrulama parmak izi eski entegrasyon seçimlerini geçersizleştirir. RFC kaynak/paketi korunur.

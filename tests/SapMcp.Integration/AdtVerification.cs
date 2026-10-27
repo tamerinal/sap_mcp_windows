@@ -7,9 +7,18 @@ using SapMcp.Core;
 
 internal static class AdtVerification
 {
-    public static async Task RunAsync(AppSettings source, Func<string, Func<Task>, Task> step)
+    public static async Task RunAsync(AppSettings source, Func<string, Func<Task>, Task> step, PackageService packages)
     {
         var root = Path.Combine(source.DataDirectory, "ADT bağlantı sınaması"); Directory.CreateDirectory(root);
+        await step("Basic one action installs missing Node and ADT offline, skips Python without SDK and reuses compatible packages",async()=>
+        {
+            var fresh=AppSettings.CreateDefault(Path.Combine(root,"automatic preparation"));fresh.HostExecutable=source.HostExecutable;
+            var prepared=await new BasicPreparationService(packages).PrepareAsync(fresh,"",true,null,CancellationToken.None);
+            Ensure(prepared.Adt.Installed&&File.Exists(prepared.NodeExecutable)&&!File.Exists(prepared.PythonExecutable)&&!prepared.Rfc.Installed,"Basic prerequisite selection incorrect");
+            var entry=Path.Combine(prepared.PackageDirectory,"adt","dist","basic-connection.js");var before=File.GetLastWriteTimeUtc(entry);
+            prepared=await new BasicPreparationService(packages).PrepareAsync(prepared,"",true,null,CancellationToken.None);
+            Ensure(File.GetLastWriteTimeUtc(entry)==before,"Basic reinstalled compatible ADT package");
+        });
         using var caKey = RSA.Create(2048);
         var caRequest = new CertificateRequest("CN=Fictional test CA", caKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         caRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, false, 0, true));
@@ -95,6 +104,29 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
                 var result = await Diagnose(null);
                 Ensure(!result.GetProperty("success").GetBoolean() && result.GetProperty("stages")[0].GetProperty("code").GetString() == "ADT_URL_REQUIRED", "Legacy blank URL was guessed");
                 Ensure(before == await File.ReadAllTextAsync(Path.Combine(root, "count.json")), "Blank URL sent credentials");
+            });
+            BasicDiscovery? basicDiscovery=null;
+            var draft=new BasicDraft{ProfileId=selected.Id,SystemId=LandscapeService.Load(s.LandscapeFile).Single().Id,Host="127.0.0.1",Sysnr="00",User="TEST",Password="  fixture şifre  ",ManualUrl=endpoints.RootElement.GetProperty("https").GetString()!,Certificates=selected.AdtCertificates.ToList()};
+            await step("Basic real Node discovery finds a TLS-verified candidate without credentials",async()=>
+            {
+                var before=await File.ReadAllTextAsync(Path.Combine(root,"count.json"));basicDiscovery=await new BasicDiscoveryService().DiscoverAsync(s,draft);
+                Ensure(basicDiscovery.Candidates.Count==1&&basicDiscovery.Candidates[0].HttpStatus==401&&!basicDiscovery.Found,"401 incorrectly verified discovery");
+                Ensure(before==await File.ReadAllTextAsync(Path.Combine(root,"count.json")),"Basic discovery authenticated");
+            });
+            await step("Basic real Host saves only verified ADT when RFC dependencies are unavailable",async()=>
+            {
+                var result=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(s,store,draft,basicDiscovery!,false);
+                Ensure(result.Settings!=null&&result.Adt.Success&&!result.Rfc.Success,"Basic partial result incorrect");s=result.Settings!;
+                Ensure(BasicPolicy.Eligible(s,s.Profiles.Single(p=>p.Id==selected.Id)).SequenceEqual(new[]{"adt"}),"Unverified RFC offered to clients");
+                Ensure(s.Profiles.Count==2,"Basic removed another existing profile");
+            });
+            await step("Basic real Host rejects wrong credentials once and preserves prior active mapping",async()=>
+            {
+                var before=await File.ReadAllTextAsync(s.CredentialsFile);using var oldCount=JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root,"count.json")));var count=oldCount.RootElement.GetProperty("auth").GetInt32();draft.Password="wrong fixture password";
+                var result=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(s,store,draft,basicDiscovery!,true);
+                Ensure(result.Settings==null&&result.Adt.Code=="AUTHENTICATION_FAILED"&&result.Rfc.Code=="AUTHENTICATION_RETRY_STOPPED","Basic did not stop credential retries");
+                using var newCount=JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root,"count.json")));Ensure(newCount.RootElement.GetProperty("auth").GetInt32()==count+1,"Basic repeated bad login");
+                Ensure(before==await File.ReadAllTextAsync(s.CredentialsFile),"Failed Basic save changed mapping");
             });
         }
         finally

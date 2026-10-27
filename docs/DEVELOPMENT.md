@@ -45,7 +45,7 @@ Packages contain compiled code, production dependencies, lockfiles and provenanc
 2. Align Directory.Build.props, installer/versioned asset names, host diagnostics, payload catalog and release notes. Test compatibility with settings lacking uiLanguage.
 3. Prepare, build, run core/UI/integration/installer checks, then Test-Publication. The publication gate scans source and distribution content for machine paths, secrets and SDK. Review screenshots and reports for personal information too.
 4. Copy a sanitized validation summary and English/Turkish release notes into assets. Generate SHA256SUMS.txt for the two EXEs and documentation archive. Review licenses and provenance. Do not label clean VM/live SAP tests complete unless performed.
-5. Push code and wait for Public Windows CI. Create tag `v0.1.0-preview.4` at the tested commit, publish a **prerelease**, upload both EXEs, guide archive, SHA files, notes and validation summary. README links must target the tag, not latest (prereleases are not stable latest).
+5. Push code and wait for Public Windows CI. Create tag `v0.1.0-preview.5` at the tested commit, publish a **prerelease**, upload both EXEs, guide archive, SHA files, notes and validation summary. README links must target the tag, not latest (prereleases are not stable latest).
 6. Download assets over unauthenticated HTTPS and compare hashes. Check README/guide links while signed out. A failure in any gate blocks publication until corrected.
 
 No automatic update server or signing certificate is supplied in this preview. Installer smoke tests refuse to run if an existing user installation is registered. They install/uninstall in workspace artifacts and preserve user data; use a clean VM for production acceptance.
@@ -61,3 +61,8 @@ Shared SDK environment is constructed in Core and reused by launch/validation. S
 ## Preview.4 ADT policy
 
 ConnectionProfile gains optional adtCertificates, adtAutoDiscovery (false), adtTimeoutSeconds (15). Schema 1, DPAPI and shared active profiles remain. Mapping exports per-profile adtTlsCertificates [{file,sha256}] and adtTimeoutMs; legacy extras are retained. Host --profile selects a temporary private mapping for diagnostics without altering active settings; absolute secret references preserve DPAPI lookup. ADT build-info.json connectionPolicyVersion=1 is required before launch. Node owns all network behavior and new diagnose_connection/inspect_tls_certificate/discover_adt_endpoints tools. Diagnostic schema 1 contains only fixed stage/status/code and numeric timing/status. Importing public PEM/DER requires explicit confirmation; no OS store mutation. Prepare-AdtPayload.ps1 -AdtSource $adtSource updates only ADT and preserves RFC/PyRFC/runtime asset hashes. Private ADT CI runs npm test with local synthetic certificates on Windows; public Manager CI needs no private sources.
+
+
+## Preview.5 Basic
+
+Basic UI is separate from existing Advanced pages. Core coordinates shared catalog/profile transactions, automatic prerequisite preparation, isolated DPAPI-backed test snapshots and independent ADT/RFC results. The ADT package adds dist/basic-connection.js, a bounded stdin/JSON unauthenticated discovery entrypoint sharing the real Node TLS/proxy/XML policy. BasicDiscoveryOptions is the central policy; no second .NET HTTP stack. Validation fingerprints invalidate stale integration choices. RFC source/payload stays unchanged.

@@ -206,6 +206,58 @@ public class ConnectionManager(SettingsStore store)
         finally { Gate.Release(); }
     }
 
+    public async Task<AppSettings> ConvertForBasicAsync(AppSettings current, CancellationToken ct = default)
+    {
+        await Gate.WaitAsync(ct);
+        try
+        {
+            var next=Copy(current); var catalog=await new ManagedJsonConnectionSource().ReadCatalogAsync(current,ct,createIfMissing:true);
+            var external=LandscapeService.Load(ExternalPath(current));
+            // The GUI reader intentionally skips unsupported entries. A Basic conversion
+            // must instead stop before any source switch could hide those entries.
+            using var reader=System.Xml.XmlReader.Create(ExternalPath(current),new System.Xml.XmlReaderSettings{DtdProcessing=System.Xml.DtdProcessing.Prohibit,XmlResolver=null,MaxCharactersInDocument=20*1024*1024});
+            var sourceXml=XDocument.Load(reader);
+            if(sourceXml.Descendants().Any(e=>e.Name.LocalName.Contains("Include",StringComparison.OrdinalIgnoreCase))||sourceXml.Descendants().Attributes().Any(a=>a.Name.LocalName.StartsWith("snc",StringComparison.OrdinalIgnoreCase)&&a.Value is not ("" or "0" or "false")))throw new InvalidDataException(UiText.Get("Basic.SourceUnsupported"));
+            if(sourceXml.Descendants().Count(e=>e.Name.LocalName=="Service"&&(string?)e.Attribute("type")=="SAPGUI")!=external.Count)
+                throw new InvalidDataException(UiText.Get("Basic.SourceUnsupported"));
+            foreach(var s in external)
+            {
+                if(s.Sysnr==null) throw new InvalidDataException(UiText.Get("Basic.SourceUnsupported"));
+                var entry=new ManagedConnection { Id=s.Id,Name=s.Name,Host=s.Host,Sysnr=s.Sysnr,Sid=s.Sid,Router=s.Router };
+                entry.NormalizeAndValidate();
+                var existing=catalog.Systems.SingleOrDefault(x=>x.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase));
+                if(existing==null) {if(catalog.Systems.Any(x=>x.Id==entry.Id))entry.Id=Guid.NewGuid().ToString("N");catalog.Systems.Add(entry);}
+            }
+            // Preserve profiles for targets that may have disappeared from a changed GUI source.
+            if(next.Profiles.Any(p=>!catalog.Systems.Any(s=>s.TargetKey.Equals(p.TargetKey,StringComparison.OrdinalIgnoreCase))))throw new InvalidDataException(UiText.Get("Basic.SourceUnsupported"));
+            next.ExternalLandscapeFile=ExternalPath(current);await CommitManagedAsync(next,catalog,ct);return next;
+        }
+        finally {Gate.Release();}
+    }
+
+    public async Task<AppSettings> SaveBasicAsync(AppSettings current, ManagedConnection entry, ConnectionProfile profile, CancellationToken ct=default)
+    {
+        await Gate.WaitAsync(ct);
+        try
+        {
+            RequireManaged(current);var next=Copy(current);var catalog=await new ManagedJsonConnectionSource().ReadCatalogAsync(current,ct,createIfMissing:true);
+            entry=JsonSerializer.Deserialize<ManagedConnection>(JsonSerializer.Serialize(entry,JsonDefaults.Options),JsonDefaults.Options)!;entry.NormalizeAndValidate();
+            var old=catalog.Systems.SingleOrDefault(s=>s.Id==entry.Id);
+            if(old!=null&&!old.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase))
+            {
+                if(catalog.Systems.Any(s=>s.Id!=old.Id&&s.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase))||next.Profiles.Any(p=>p.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase)))throw new InvalidDataException(UiText.Get("Connections.TargetConflict"));
+                foreach(var p in next.Profiles.Where(p=>p.TargetKey.Equals(old.TargetKey,StringComparison.OrdinalIgnoreCase)))p.TargetKey=entry.TargetKey;
+                if(next.ActiveProfiles.Remove(old.TargetKey,out var active))next.ActiveProfiles[entry.TargetKey]=active;
+            }
+            catalog.Systems.RemoveAll(s=>s.Id==entry.Id);catalog.Systems.Add(entry);
+            next.Profiles.RemoveAll(p=>p.Id==profile.Id);next.Profiles.Add(profile);next.ActiveProfiles[entry.TargetKey]=profile.Id;next.BasicProfileId=profile.Id;
+            if(profile.BasicValidation?.Adt.Success==true)next.Adt.Selected=true;
+            if(profile.BasicValidation?.Rfc.Success==true)next.Rfc.Selected=true;
+            await CommitManagedAsync(next,catalog,ct);return next;
+        }
+        finally {Gate.Release();}
+    }
+
     private static void RequireManaged(AppSettings settings)
     {
         if (Mode(settings) != "managed") throw new InvalidOperationException(UiText.Get("Connections.ReadOnly"));

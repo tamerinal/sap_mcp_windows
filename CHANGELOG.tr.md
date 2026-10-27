@@ -1,5 +1,9 @@
 # Sürüm geçmişi
 
+## 0.1.0-preview.5 — 2026-10-28
+
+Basic/Advanced modları; SDK’dan başlayan otomatik hazırlık; şifresiz sınırlı HTTPS keşfi; bağımsız ADT/RFC doğrulama ve kısmi başarı; ortak kayıtların korunması; EN/TR yardım ve regresyon testleri. RFC paketi değişmedi.
+
 [English](CHANGELOG.md)
 
 ## v0.1.0-preview.4 — 2026-10-28

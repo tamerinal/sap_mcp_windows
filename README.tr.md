@@ -6,27 +6,25 @@ SAP RFC ve SAP ADT MCP sunucularını kurun, SAP bağlantı profillerini ve Wind
 
 ![SAP MCP Yöneticisi genel durum](docs/images/overview-tr.png)
 
-**Önizleme: v0.1.0-preview.4.** Windows 10 22H2 ve Windows 11 **x64**. İngilizce/Türkçe ve açık/koyu tema. macOS planlanmaktadır. Kurulumlar imzasızdır; temiz Windows 10/11 ve canlı SAP kabul testleri henüz tamamlanmamıştır. [Sürüm notlarını](docs/RELEASE-NOTES.tr.md) okuyun.
+**Önizleme: v0.1.0-preview.5.** Windows 10 22H2 ve Windows 11 **x64**. İngilizce/Türkçe ve açık/koyu tema. macOS planlanmaktadır. Kurulumlar imzasızdır; temiz Windows 10/11 ve canlı SAP kabul testleri henüz tamamlanmamıştır. [Sürüm notlarını](docs/RELEASE-NOTES.tr.md) okuyun.
 
 ## İndirme
 
 | Kurulum | Ne zaman seçilmeli? |
 |---|---|
-| [İnternetli EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.4/SAP-MCP-Manager-0.1.0-preview.4-Windows-x64-Online.exe) | Eksik çalışma zamanlarını indirmek için internet varsa. MCP paketleri ve kendi çalışma zamanını içeren yönetici dahildir. |
-| [Çevrimdışı EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.4/SAP-MCP-Manager-0.1.0-preview.4-Windows-x64-Offline.exe) | Hedef bilgisayar çalışma zamanlarını indiremiyorsa. Aynı MCP paketlerine çalışma zamanı kurulumları eklenir. |
+| [İnternetli EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.5/SAP-MCP-Manager-0.1.0-preview.5-Windows-x64-Online.exe) | Eksik çalışma zamanlarını indirmek için internet varsa. MCP paketleri ve kendi çalışma zamanını içeren yönetici dahildir. |
+| [Çevrimdışı EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.5/SAP-MCP-Manager-0.1.0-preview.5-Windows-x64-Offline.exe) | Hedef bilgisayar çalışma zamanlarını indiremiyorsa. Aynı MCP paketlerine çalışma zamanı kurulumları eklenir. |
 
-[Önizleme dosyaları ve hashler](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.4). `Get-FileHash -Algorithm SHA256` sonucunu `SHA256SUMS.txt` ile karşılaştırın. SAP erişimi için kurum ağı gerekir. **SAP NetWeaver RFC SDK iki EXE’ye de dahil değildir.**
+[Önizleme dosyaları ve hashler](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.5). `Get-FileHash -Algorithm SHA256` sonucunu `SHA256SUMS.txt` ile karşılaştırın. SAP erişimi için kurum ağı gerekir. **SAP NetWeaver RFC SDK iki EXE’ye de dahil değildir.**
 
 ## İlk kurulum
 
-1. EXE’yi normal Windows kullanıcınızla çalıştırın. Başlat’tan **SAP MCP Manager** açın. RFC ve ADT başlangıçta işaretlidir; birini veya ikisini bırakın. Boş seçim engellenir.
-2. **Ön koşullar → Tekrar denetle → Gerekli Uygulamaları Kur** seçin. Eksikleri tek tek veya **Seçilenleri Kur** ile kurup **Seçili MCP bileşenlerini kur / onar** düğmesini kullanın.
-3. RFC için yetkili SAP hesabınızla Windows x64 [SAP RFC SDK](https://support.sap.com/en/product/connectors/nwrfcsdk.html) edinin. Açıp `lib/sapnwrfc.dll` ve `lib/libsapucum.dll` içeren `nwrfcsdk` klasörünü seçin. Sonradan bağlayabilirsiniz; temel ADT SDK gerektirmez.
-4. **SAP bağlantıları** ekranında SAP GUI olmadan sistem oluşturmak için **Uygulamanın bağlantıları**, mevcut XML için **SAP GUI bağlantıları (salt okunur)** seçin. Kaynağı uygulayıp sistem seçin; geçerli SAP şifresiyle kullanıcı/client profili kaydedin. DPAPI şifreyi mevcut Windows kullanıcısıyla korur. Sistem başına ortak aktif profil seçin.
-5. **MCP istemcileri** ekranında Codex ve/veya Claude Desktop seçin, önizleyin, çakışmaları çözün ve uygulayın. Mevcut dosyalar yedeklenir; diğer MCP kayıtları korunur. İstemcide MCP’leri yeniden başlatın.
-6. SAP’ye giriş yapmadan başlangıç/araç kontrolü için **Yerel MCP doğrulaması** kullanın. SAP’ye bağlanmaya hazır olduğunuzda **RFC/ADT bağlantısını test et** seçin.
+1. Online/Offline EXE’yi normal Windows hesabınızla kurup Manager’ı açın. Yeni kurulum **Basic**, mevcut yapılandırma **Advanced** ile açılır; üst bölümden değiştirebilirsiniz.
+2. Basic’te SDK klasörünü seçin veya **SDK olmadan yalnız ADT** işaretleyin. **Kurulumu hazırla** eksik bağımlılıkları ve MCP paketlerini otomatik hazırlar.
+3. Tek SAP sunucusu, kullanıcı, şifre, client, dil ve instance bilgilerini girin. HTTPS ADT keşfi şifresiz başlar. Gerekirse manuel URL/port ve adres bulma yardımını kullanın; **Kaydet ve doğrula** ADT/RFC’yi ayrı test eder.
+4. Biri çalışıyorsa uyarıyla yalnız çalışan MCP ile devam edilir; ikisi başarısızsa önceki profil korunur. Codex/Claude ayarlarını önizleyip uygulayın, MCP süreçlerini yeniden başlatın.
 
-İstemciler MCP’yi çalıştırırken yönetici kapalı kalabilir. Üstteki **English / Türkçe** seçimi açık form alanlarını korur; SAP profil dilini değiştirmez.
+[Basic kılavuzu](docs/BASIC-SETUP.tr.md) tüm akışı açıklar. **Advanced** mevcut bileşen seçimi, ön koşulları tek tek kurma, SDK, çoklu bağlantı/profil, istemci ve log ekranlarını korur; ayrıntılar [kullanım kılavuzundadır](docs/USER-GUIDE.tr.md). Manager istemciler çalışırken kapalı kalabilir. Dil/mod değiştirmek açık form alanlarını korur ve SAP profil dilini değiştirmez.
 
 ## Sizin sağlayacaklarınız
 
@@ -53,3 +51,6 @@ RFC/ADT kaynak depoları özel kalır. **Derlenmiş MCP JavaScript kodu ve bağ�
 Preview.3, SDK lib PATH içinde yokken oluşan SDK/ICU başlangıç hatasını düzeltir. Güncelleme sonrası kayıtlı SDK klasörünü doğrulayın ve istemcilerde MCP süreçlerini yeniden başlatın. [SDK başlangıç sorunlarını giderme](docs/TROUBLESHOOTING.tr.md) · [Kayıt #3](https://github.com/tamerinal/sap_mcp_windows/issues/3). Canlı TED/TEX kabulü beklemektedir.
 
 Preview.4; açık ADT adresi, profile özel sertifika güveni, aşamalı tanılama ve adres bulma yardımı ekler. **Manager’ı güncelleyin, ADT bileşenini kurun/onarın ve istemcide MCP’leri yeniden başlatın.** Eski boş URL’ler kimlik doğrulamadan önce doğrulanmış adres gerektirir. [ADT/TLS kılavuzu](docs/ADT-CONNECTIONS.tr.md) · [Kayıt #4](https://github.com/tamerinal/sap_mcp_windows/issues/4).
+
+
+[Basic kurulum ve otomatik ADT keşfi](docs/BASIC-SETUP.tr.md).

@@ -21,6 +21,8 @@ public sealed class AppSettings
 {
     public int SchemaVersion { get; set; } = 1;
     public string? UiLanguage { get; set; }
+    public string? UiMode { get; set; }
+    public string? BasicProfileId { get; set; }
     public string AppliedSetupId { get; set; } = "";
     public string DataDirectory { get; set; } = "";
     public string LandscapeFile { get; set; } = "";
@@ -73,6 +75,7 @@ public sealed class AppSettings
 
     public void Validate()
     {
+        if (UiMode is not (null or "basic" or "advanced")) throw new InvalidDataException("INVALID_UI_MODE");
         if (ConnectionSourceMode is not (null or "sapGui" or "managed")) throw new InvalidDataException(UiText.Get("Connections.InvalidMode"));
         foreach (var path in new[] { ExternalLandscapeFile, ManagedConnectionsFile })
             if (!string.IsNullOrEmpty(path) && !Path.IsPathFullyQualified(path)) throw new InvalidDataException(UiText.Get("Text020"));
@@ -128,6 +131,7 @@ public sealed class ConnectionProfile
     public bool AdtAutoDiscovery { get; set; }
     public int AdtTimeoutSeconds { get; set; } = 15;
     public List<TrustedCertificate> AdtCertificates { get; set; } = [];
+    public BasicValidation? BasicValidation { get; set; }
     public Dictionary<string, JsonElement> Extra { get; set; } = [];
 
     public void Validate()

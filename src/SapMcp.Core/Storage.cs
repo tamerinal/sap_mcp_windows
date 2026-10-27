@@ -48,9 +48,10 @@ public sealed class SettingsStore(string path)
     public string FilePath { get; } = Path.GetFullPath(path);
     public async Task<AppSettings> LoadAsync(CancellationToken ct = default)
     {
-        if (!File.Exists(FilePath)) return AppSettings.CreateDefault(Path.GetDirectoryName(Path.GetDirectoryName(FilePath)));
+        if (!File.Exists(FilePath)) { var fresh=AppSettings.CreateDefault(Path.GetDirectoryName(Path.GetDirectoryName(FilePath))); fresh.UiMode="basic"; return fresh; }
         var settings = JsonSerializer.Deserialize<AppSettings>(await File.ReadAllTextAsync(FilePath, ct), JsonDefaults.Options)
             ?? throw new InvalidDataException(UiText.Get("Text078"));
+        settings.UiMode ??= "advanced";
         settings.Validate();
         return settings;
     }
