@@ -172,6 +172,12 @@ public sealed class ProfileService(ISecretStore secrets)
 
     public static async Task MaterializeAsync(AppSettings settings, CancellationToken ct = default)
     {
+        await AtomicFile.WriteAsync(settings.CredentialsFile, SerializeMapping(settings), ct, privateData: true);
+    }
+
+    public static string SerializeMapping(AppSettings settings)
+    {
+        settings.Validate();
         var entries = new JsonObject();
         foreach (var (target, id) in settings.ActiveProfiles)
         {
@@ -186,7 +192,7 @@ public sealed class ProfileService(ISecretStore secrets)
             node["allowInsecureTls"] = p.AllowInsecureTls;
             entries[target] = node;
         }
-        await AtomicFile.WriteAsync(settings.CredentialsFile, new JsonObject { ["overridesByTarget"] = entries }.ToJsonString(JsonDefaults.Options), ct, privateData: true);
+        return new JsonObject { ["overridesByTarget"] = entries }.ToJsonString(JsonDefaults.Options);
     }
 
     public async Task<int> ImportAsync(AppSettings settings, string source, IReadOnlyList<SapSystem> systems, CancellationToken ct = default)

@@ -6,23 +6,23 @@ Install SAP RFC and SAP ADT MCP servers, manage SAP connection profiles and Wind
 
 ![SAP MCP Manager overview](docs/images/overview-en.png)
 
-**Preview: v0.1.0-preview.1.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
+**Preview: v0.1.0-preview.2.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
 
 ## Download
 
 | Installer | Choose this when |
 |---|---|
-| [Online EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.1/SAP-MCP-Manager-0.1.0-preview.1-Windows-x64-Online.exe) | Internet is available to download missing runtimes. MCP packages and the self-contained manager are included. |
-| [Offline EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.1/SAP-MCP-Manager-0.1.0-preview.1-Windows-x64-Offline.exe) | The target cannot download runtimes. Includes the same MCP packages plus runtime installers. |
+| [Online EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.2/SAP-MCP-Manager-0.1.0-preview.2-Windows-x64-Online.exe) | Internet is available to download missing runtimes. MCP packages and the self-contained manager are included. |
+| [Offline EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.2/SAP-MCP-Manager-0.1.0-preview.2-Windows-x64-Offline.exe) | The target cannot download runtimes. Includes the same MCP packages plus runtime installers. |
 
-[Preview assets and checksums](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.1). Compare `Get-FileHash -Algorithm SHA256` with `SHA256SUMS.txt`. SAP access still requires your corporate network. **SAP NetWeaver RFC SDK is not included in either EXE.**
+[Preview assets and checksums](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.2). Compare `Get-FileHash -Algorithm SHA256` with `SHA256SUMS.txt`. SAP access still requires your corporate network. **SAP NetWeaver RFC SDK is not included in either EXE.**
 
 ## First setup
 
 1. Run the EXE as your normal Windows user. Open **SAP MCP Manager** from Start. RFC and ADT start checked; keep one or both. Empty selection is rejected.
 2. Under **Prerequisites**, select **Check again → Install Required Applications**. Install missing prerequisites individually or with **Install Selected**, then **Install / repair selected MCP components**.
 3. For RFC, obtain the Windows x64 [SAP RFC SDK](https://support.sap.com/en/product/connectors/nwrfcsdk.html) with your authorized SAP account. Extract it and select the `nwrfcsdk` folder containing `lib/sapnwrfc.dll` and `lib/libsapucum.dll`. Attach it later if needed; basic ADT works without SDK.
-4. Under **SAP connections**, load `SAPUILandscape.xml`, select a system and save a user/client profile with a valid SAP password. DPAPI protects secrets for the current Windows user. Select one shared active profile per system.
+4. Under **SAP connections**, choose **Application-managed connections** to create systems without SAP GUI, or choose a read-only SAP GUI landscape XML. Apply the source, select a system and save a user/client profile with a valid SAP password. DPAPI protects secrets for the current Windows user. Select one shared active profile per system.
 5. Under **MCP clients**, select Codex and/or Claude Desktop, preview changes, resolve conflicts and apply. Existing files are backed up; other MCP records are preserved. Restart MCP servers in your client.
 6. Run **Verify local MCP** for startup/tools without a SAP login. Use **Test RFC/ADT connection** when ready to contact SAP.
 
@@ -32,8 +32,10 @@ The manager can stay closed while clients run MCP. The header's **English / Tür
 
 - SAP account, client and authorizations for the intended operations.
 - Reachable SAP servers / ADT endpoints, VPN, DNS, firewall access and appropriate TLS certificates.
-- A SAP GUI landscape with direct SAPGUI host/port connections. Message-server groups, SNC/SSO and include expansion are outside this preview.
+- Server host/system-number details, or an existing SAP GUI landscape with direct SAPGUI host/port connections. Message-server groups, SNC/SSO and include expansion are outside this preview.
 - Your own licensed RFC SDK for RFC operations. The manager does not grant SAP access or change SAP-side passwords.
+
+See [Connection sources: with or without SAP GUI](docs/CONNECTIONS.md) for add/edit/delete, source selection and file formats.
 
 ## Bugs and feature requests
 

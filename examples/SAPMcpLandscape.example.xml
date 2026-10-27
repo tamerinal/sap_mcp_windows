@@ -1,0 +1,6 @@
+<Landscape>
+  <Routers />
+  <Services>
+    <Service uuid="7c827a4e83f04ac2ad73962eb418f51a" type="SAPGUI" name="Demo Development" systemid="DEV" server="sap.example:3200" />
+  </Services>
+</Landscape>

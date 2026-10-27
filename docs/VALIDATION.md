@@ -36,3 +36,7 @@ Verify-Release.ps1 uses isolated data under artifacts/verification and locally h
 | Signing and enterprise policy | Appropriate certificate and approved installer policy for production. |
 
 Clean Windows VM and live SAP rows remain **pending** until evidence is collected. macOS, SNC/SSO, message-server groups, real SAP password changes and automatic updates are outside v1 preview.
+
+## Connection-source acceptance
+
+Managed JSON empty/create/edit/delete/reopen, XML projection consumed by both existing MCPs, target/profile migration, retained DPAPI files, duplicate/conflicting targets, read-only GUI source, folder candidates, broken source without manager failure, rollback and cancelled source-change dialogs are covered. Headless UI coverage includes both source modes, bilingual managed screens/editor and existing locale/theme/width coverage. Clean GUI-free Windows and live SAP remain pending.

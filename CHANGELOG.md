@@ -2,11 +2,15 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
-## Unreleased
+## v0.1.0-preview.2 — 2026-10-27
+
+- Added read-only SAP GUI and editable managed JSON connection sources, automatic MCP XML projection, confirmed target/profile migration and deletion with retained DPAPI files.
+- Added recoverable catalog/mapping/XML/settings saves, source error recovery, GUI detection hints and bilingual connection help/examples.
+
 
 - Documented English/Turkish bug and feature intake, triage, ownership, validation and release tracking.
 - Expanded issue forms with default type/triage labels, repository tracking labels and an idempotent label setup script.
-- Added reporting links to README/contribution guidance and a pinned GitHub reporting hub. Existing preview binaries are unchanged.
+- Added reporting links to README/contribution guidance and a pinned GitHub reporting hub.
 
 ## v0.1.0-preview.1 — 2026-10-27
 

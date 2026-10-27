@@ -1,19 +1,20 @@
-# v0.1.0-preview.1 — Windows x64 önizleme
+# v0.1.0-preview.2 — Windows x64 önizleme
 
 [English](RELEASE-NOTES.md)
 
-SAP MCP Yöneticisi’nin ilk public önizlemesi: seçmeli RFC/ADT, yönetilen ön koşullar, kullanıcı SDK’sı, DPAPI profilleri, Codex/Claude entegrasyonu, İngilizce/Türkçe arayüz ve yardım. Çalışma zamanı indirmek için Online, dahil paketler için Offline seçin. İkisinde de SAP SDK yoktur. Kurulum için GitHub hesabı veya kaynak derleme gerekmez.
+Bu önizleme SAP GUI’den bağımsız bağlantı yönetimi ekler. Uygulama modunda özel JSON kataloğuna sistem ekleyin/düzenleyin/silin; mevcut RFC/ADT MCP’leri için uyumlu XML otomatik üretilir. Alternatif olarak SAP GUI klasörü/XML’ini salt okunur seçip sistemleri SAP Logon’dan yönetin. Algılama öneridir; saklanan açık seçim önceliklidir. Profiller ve DPAPI hedef bazında ortak kalır.
 
-## Doğrulama ve sınırlamalar
+- Onaylanan sunucu/sistem numarası değişimi bağlı profilleri ve aktif mapping’i taşır; çakışma engellenir.
+- Onaylı silme yerel sistemi, profilleri ve mapping’i kaldırır; DPAPI dosyaları korunur. SAP GUI kaynak XML’i değiştirilmez.
+- Eski şema-1 ayarları mevcut landscape ile sürer. Kaynak hatası diğer sayfaları engellemez. Başarısız kayıtta geri alma denenir; kaydedilmemiş profil değişikliklerinde kaynak değişimi öncesi onay istenir.
+- İngilizce/Türkçe arayüz/yardım, bağlantı örnekleri, GitHub bildirim formları ve durum/alan/öncelik takibi dahildir. Özellik kaydı: [#2](https://github.com/tamerinal/sap_mcp_windows/issues/2).
 
-Çekirdek/arayüz testleri, yerel MCP entegrasyonları ve dört kurulum senaryosu yetkili geliştirici Windows ortamında çalıştırılır. Yayımlanan VALIDATION-SUMMARY.md gerçek sonuçları açıklar. Headless arayüz kapsamı altı ekran × iki dil × iki tema × iki genişlik ve açık alan/şifre korumasıdır. Bu, yerel masaüstü erişilebilirlik/manuel inceleme veya temiz makine kabulünün **yerine geçmez**.
+Çalışma zamanı indirmek için Online, dahil çalışma zamanları için Offline seçin. SAP GUI gerekmez; RFC için kullanıcı SDK’sı hâlâ gerekir. Temel ADT Python/SDK gerektirmez; RFC’ye bağımlı ADT işlemleri korunur. MCP araç adları, target_key veya şifre biçimleri değişmedi. Özel MCP depolarına dokunulmadı; önceki doğrulanmış sabit MCP/runtime paketleri yeniden kullanıldı.
 
-- Uygulama ve EXE’ler **imzasızdır**; Windows/kurum politikası uyarabilir veya engelleyebilir. Yayımlanan SHA-256 değerlerini doğrulayın.
-- **Temiz Windows 10 22H2 ve Windows 11 VM testleri tamamlanmamıştır. Canlı SAP testleri tamamlanmamıştır.** Üretim onaylı sürüm olarak değerlendirmeyin.
-- Bu ortamdaki Inno Setup 6.7.3 derleyicisi **non-commercial use only** bildirir. Ticari derleme/dağıtım uygun Inno lisansı gerektirir. Derleyici pakette yoktur; kodun MIT lisansı diğer koşulların yerine geçmez.
-- RFC SDK kullanıcıdan gelir. PyRFC arşivlenmiş upstream’den onaylı yerel 3.4 derlemesidir; tam tekrarlanabilir upstream wheel teslimi ayrı taleptir. SDK dosyaları dışarıda tutulur.
-- Üst MCP depoları özel kalır; EXE içindeki derlenmiş JS/bağımlılıklar çıkarılabilir. Değiştirilmiş kaynak snapshot’ları paket kaydında belirtilir; dağıtım uyarlamaları kişisel varsayılan ve debug yollarını nötrleştirir.
-- Üst MCP yerel logları tam politika desteklemez; host maskeli oturum/araç metadata kaydeder ve ham payload tracing kapatır. RFC hazır değilse ADT fonksiyon güncelleme/etkinleştirme ihtiyatlı engellenir.
-- Bu sürümde macOS, SNC/SSO, message-server grubu, SAP’de parola değiştirme veya otomatik güncelleme yoktur.
+Gerçek commit, CI ve test sonuçları VALIDATION-SUMMARY.tr.md içindedir. Otomatik kontroller iki kaynak modunu, iki MCP’de üretilen XML’i, profilleri, hata/geri almayı, iki dilde arayüzü ve dört kurulum senaryosunu kapsar.
 
-Ayarlar/şifreler onarım/güncellemede korunur. Kaldırma veriyi varsayılan olarak saklar; yalnız etkileşimli açık onayla varsayılan sahip olunan veri silinir. Gerçek hesap hazırlamadan kılavuzu okuyun.
+**İmzasız önizlemedir. Temiz Windows 10/11 (GUI’siz makine dahil), yerel erişilebilirlik ve canlı SAP kabulü bekler.** Mevcut geliştirici Windows bilgisayarında SAP GUI kuruludur; uygulama modu testleri onu çağırmaz ancak temiz makine testi değildir. Bu ortamda Inno Setup 6.7.3 non-commercial use only bildirir; ticari derleme/dağıtım uygun lisans gerektirir. Yazara ait kodun MIT lisansı diğer koşulları değiştirmez. SDK dosyaları ve müşteri şifreleri dışarıda tutulur. Derlenmiş MCP JS kurulumdan çıkarılabilir. Onaylı PyRFC kaynak kaydı ve yerel log sınırlamaları belgelerdeki gibidir.
+
+Message-server grupları, SNC/SSO, include genişletmesi, SAP’de parola değiştirme, macOS ve otomatik güncelleme kapsam dışıdır. Önceki preview.1 dosyaları/etiketi korunur. Gerçek hesap hazırlamadan kurulan kullanım/bağlantı kılavuzlarını okuyun.
+
+Uygulama modu şifresiz SAProuter dizelerini destekler. `/W/` ve eski `/P/` şifre bölümleri JSON/XML içine yazılmadan reddedilir; güvenli router şifresi desteği sonraki MCP geliştirmesini gerektirir. [SAP rota sözdizimine](https://help.sap.com/saphelp_em92/helpdata/en/48/6c62b71d5a350ce10000000a42189d/content.htm) bakın.

@@ -181,6 +181,7 @@ foreach ($taskArchive in Get-ChildItem -LiteralPath $taskPackages -Filter '*.zip
         }
     } finally { $taskZip.Dispose() }
 }
-@{schemaVersion=1;version='0.1.0-preview.1';assets=$taskAssets} | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $taskPayload 'catalog.json') -Encoding utf8NoBOM
+$taskVersion = ([xml](Get-Content -Raw -LiteralPath (Join-Path $taskRoot 'Directory.Build.props'))).Project.PropertyGroup.Version
+@{schemaVersion=1;version=$taskVersion;assets=$taskAssets} | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $taskPayload 'catalog.json') -Encoding utf8NoBOM
 $taskDependencyNotices | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $taskPayload 'dependency-notices.json') -Encoding utf8NoBOM
 Write-Host 'Payload prepared. No SAP SDK binaries or user credential files were included.'

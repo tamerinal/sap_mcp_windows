@@ -22,6 +22,116 @@ public static class TestAppBuilder
 
 public sealed class WindowTests
 {
+    private static T Named<T>(Window owner, string name) where T : Control => owner.GetLogicalDescendants().OfType<T>().Single(c => c.Name == name);
+    private static void Click(Button button) => button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+    private static async Task Until(Func<bool> done)
+    {
+        for (var i = 0; i < 200 && !done(); i++) { await Task.Delay(20); Dispatcher.UIThread.RunJobs(); }
+        Assert.True(done());
+    }
+    private static Button Caption(Window owner, string text) => owner.GetLogicalDescendants().OfType<Button>().Single(b => Equals(b.Content, text));
+
+    [AvaloniaFact]
+    public async Task ManagedSourceSupportsCrudProfilesConfirmationAndLanguage()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "SapMcp managed UI " + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);
+        var store = new SettingsStore(Path.Combine(root, "config", "settings.json"));
+        var settings = AppSettings.CreateDefault(root); settings.UiLanguage = "en"; settings.ConnectionSourceMode = "managed";
+        await store.SaveAsync(settings); var window = new MainWindow(store.FilePath); window.Show();
+        try
+        {
+            await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[3]);
+            Assert.True(Named<Button>(window, "AddConnection").IsEnabled);
+            Click(Named<Button>(window, "AddConnection")); await Until(() => window.OwnedWindows.Any());
+            var dialog = window.OwnedWindows.Single();
+            Named<TextBox>(dialog, "ConnectionName").Text = "Demo & Development";
+            Named<TextBox>(dialog, "ConnectionHost").Text = "sap.example";
+            Named<TextBox>(dialog, "ConnectionNumber").Text = "04";
+            Click(Named<Button>(dialog, "SaveConnection")); await Until(() => !window.OwnedWindows.Any());
+            Assert.Equal("sap.example:04", LandscapeService.Load((await store.LoadAsync()).LandscapeFile).Single().TargetKey);
+            TextBox Field(string label) => window.GetLogicalDescendants().OfType<TextBox>().Single(b => Avalonia.Automation.AutomationProperties.GetName(b) == label);
+            Field("Profile name").Text = "Demo account"; Field("SAP user").Text = "DEMO";
+            var password = window.GetLogicalDescendants().OfType<TextBox>().Single(b => b.PasswordChar != '\0'); password.Text = "  Şifre!42  ";
+            Click(Caption(window, "Save profile")); await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            settings = await store.LoadAsync(); Assert.Single(settings.Profiles);
+            var secret = ProfileService.ResolveSecret(settings.CredentialsFile, settings.Profiles[0].SecretRef);
+
+            // Cancel source switching with a dirty profile; neither form nor source is lost.
+            Field("Profile name").Text = "Unsaved";
+            Named<ComboBox>(window, "ConnectionSourcePicker").SelectedIndex = 0;
+            Click(Named<Button>(window, "ApplyConnectionSource")); await Until(() => window.OwnedWindows.Any());
+            Click(Caption(window.OwnedWindows.Single(), "Go back"));
+            await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.Equal("managed", (await store.LoadAsync()).ConnectionSourceMode); Assert.Equal("Unsaved", Field("Profile name").Text);
+            Named<ComboBox>(window, "ConnectionSourcePicker").SelectedIndex = 1;
+            Field("Profile name").Text = "Demo account"; Click(Caption(window, "Save profile"));
+            await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+
+            // Render the managed page and editor in both locales/themes/widths.
+            var output = Environment.GetEnvironmentVariable("SAP_MCP_UI_SNAPSHOTS");
+            foreach (var locale in new[] { "en", "tr" })
+            {
+                window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = locale == "tr" ? 1 : 0;
+                await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                foreach (var theme in new[] { ThemeVariant.Light, ThemeVariant.Dark })
+                foreach (var width in new[] { 1240, 940 })
+                {
+                    Application.Current!.RequestedThemeVariant = theme; window.Width = width;
+                    await Task.Delay(25); Dispatcher.UIThread.RunJobs();
+                    if (!string.IsNullOrEmpty(output))
+                    {
+                        Directory.CreateDirectory(output); using var frame = window.CaptureRenderedFrame();
+                        frame!.Save(Path.Combine(output, $"{locale}-managed-{width}-{theme}.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+                    }
+                }
+                Click(Named<Button>(window, "EditConnection")); await Until(() => window.OwnedWindows.Any());
+                dialog = window.OwnedWindows.Single(); Assert.Equal("sap.example", Named<TextBox>(dialog, "ConnectionHost").Text);
+                if (!string.IsNullOrEmpty(output))
+                {
+                    await Task.Delay(30); Dispatcher.UIThread.RunJobs(); using var frame = dialog.CaptureRenderedFrame();
+                    frame!.Save(Path.Combine(output, $"{locale}-connection-editor.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+                }
+                dialog.Close(); await Task.Delay(20); Dispatcher.UIThread.RunJobs();
+            }
+            window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 0;
+            await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click(Named<Button>(window, "EditConnection")); await Until(() => window.OwnedWindows.Any()); dialog = window.OwnedWindows.Single();
+            Named<TextBox>(dialog, "ConnectionHost").Text = "new.example";
+            Click(Named<Button>(dialog, "SaveConnection")); await Until(() => dialog.OwnedWindows.Any());
+            Click(Caption(dialog.OwnedWindows.Single(), "Confirm")); await Until(() => !window.OwnedWindows.Any());
+            Assert.Equal("new.example:04", (await store.LoadAsync()).Profiles.Single().TargetKey);
+            Click(Named<Button>(window, "DeleteConnection")); await Until(() => window.OwnedWindows.Any());
+            Click(Caption(window.OwnedWindows.Single(), "Go back")); await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.Single((await new ManagedJsonConnectionSource().ReadCatalogAsync(await store.LoadAsync())).Systems);
+            Click(Named<Button>(window, "DeleteConnection")); await Until(() => window.OwnedWindows.Any());
+            Click(Caption(window.OwnedWindows.Single(), "Confirm")); await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            settings = await store.LoadAsync(); Assert.Empty(settings.Profiles); Assert.Empty(LandscapeService.Load(settings.LandscapeFile)); Assert.True(File.Exists(secret));
+        }
+        finally { foreach (var owned in window.OwnedWindows.ToArray()) owned.Close(); window.Close(); Directory.Delete(root, true); }
+    }
+
+    [AvaloniaFact]
+    public async Task BrokenGuiSourceDoesNotBlockManagerAndCannotBeEdited()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "SapMcp bad source " + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);
+        var settings = AppSettings.CreateDefault(root); settings.UiLanguage = "en"; settings.ConnectionSourceMode = "sapGui";
+        settings.LandscapeFile = settings.ExternalLandscapeFile = Path.Combine(root, "broken.xml"); await File.WriteAllTextAsync(settings.LandscapeFile, "<broken");
+        var store = new SettingsStore(Path.Combine(root, "config", "settings.json")); await store.SaveAsync(settings);
+        var window = new MainWindow(store.FilePath); window.Show();
+        try
+        {
+            await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[3]);
+            Assert.False(Named<Button>(window, "AddConnection").IsEnabled);
+            Assert.False(Named<Button>(window, "EditConnection").IsEnabled); Assert.False(Named<Button>(window, "DeleteConnection").IsEnabled);
+            Assert.Contains(window.GetLogicalDescendants().OfType<TextBlock>(), t => t.Text?.StartsWith("Connection source unavailable:") == true);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[5]); Assert.NotEmpty(window.FindControl<StackPanel>("PageBody")!.Children);
+            Assert.Equal("<broken", await File.ReadAllTextAsync(settings.LandscapeFile));
+        }
+        finally { window.Close(); Directory.Delete(root, true); }
+    }
+
     [AvaloniaFact]
     public async Task AllSixPagesRenderAtSupportedWidthsAndThemes()
     {
@@ -51,6 +161,12 @@ public sealed class WindowTests
                         ((Button)nav.Children[page]).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                         await Task.Delay(30); Dispatcher.UIThread.RunJobs();
                         Assert.NotEmpty(window.FindControl<StackPanel>("PageBody")!.Children);
+                        if (page == 3)
+                        {
+                            Assert.False(Named<Button>(window, "AddConnection").IsEnabled);
+                            Assert.False(Named<Button>(window, "EditConnection").IsEnabled);
+                            Assert.False(Named<Button>(window, "DeleteConnection").IsEnabled);
+                        }
                         Assert.True(window.FindControl<StackPanel>("PageBody")!.Bounds.Width > 550);
                         if (!string.IsNullOrEmpty(output))
                         {

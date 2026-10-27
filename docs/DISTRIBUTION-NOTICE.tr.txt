@@ -1,4 +1,4 @@
-SAP MCP Manager 0.1.0-preview.1 — Windows önizleme
+SAP MCP Manager 0.1.0-preview.2 — Windows önizleme
 
 Bu önizleme yayıncı kod imza sertifikası olmadan hazırlanmıştır.
 SAP NetWeaver RFC SDK dosyaları ve müşteri şifreleri DAHİL DEĞİLDİR.

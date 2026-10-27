@@ -2,11 +2,15 @@
 
 [English](CHANGELOG.md)
 
-## Yayımlanmamış değişiklikler
+## v0.1.0-preview.2 — 2026-10-27
+
+- Salt okunur SAP GUI ve düzenlenebilir JSON bağlantı kaynakları, otomatik MCP XML üretimi, onaylı hedef/profil taşıma ve DPAPI dosyalarını koruyan silme eklendi.
+- Geri alınabilir katalog/mapping/XML/ayar kaydı, kaynak hatası düzeltme, GUI algılama önerisi ve iki dilde bağlantı yardımı/örnekleri eklendi.
+
 
 - İngilizce/Türkçe hata ve geliştirme kabulü, inceleme, sorumluluk, doğrulama ve sürüm takibi belgelendi.
 - Formlar varsayılan tür/inceleme etiketleriyle genişletildi; takip etiketleri ve tekrar çalıştırılabilir kurulum betiği eklendi.
-- README/katkı belgelerine bildirim bağlantıları ve GitHub’a sabit takip rehberi eklendi. Mevcut önizleme dosyaları değiştirilmedi.
+- README/katkı belgelerine bildirim bağlantıları ve GitHub’a sabit takip rehberi eklendi.
 
 ## v0.1.0-preview.1 — 2026-10-27
 

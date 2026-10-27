@@ -82,8 +82,8 @@ public partial class MainWindow : Window
             if (arguments.Contains("--rfc=1")) _settings.Rfc.Selected = true;
             if (arguments.Contains("--adt=0")) _settings.Adt.Selected = false;
             if (arguments.Contains("--adt=1")) _settings.Adt.Selected = true;
-            if (string.IsNullOrEmpty(_settings.LandscapeFile)) _settings.LandscapeFile = LandscapeService.Discover().FirstOrDefault() ?? "";
-            if (File.Exists(_settings.LandscapeFile)) _systems = LandscapeService.Load(_settings.LandscapeFile);
+            if (_settings.ConnectionSourceMode == null && string.IsNullOrEmpty(_settings.LandscapeFile)) _settings.ExternalLandscapeFile ??= LandscapeService.Discover().FirstOrDefault();
+            await LoadConnectionsAsync(repairManaged: true);
             _loaded = true; ShowPage(0); SetStatus(UiText.Get("Text111"));
         });
     }
@@ -116,6 +116,7 @@ public partial class MainWindow : Window
         var selectedTheme = theme.SelectedIndex;
         theme.ItemsSource = new[] { UiText.Get("Text106"), UiText.Get("Text107"), UiText.Get("Text108") };
         theme.SelectedIndex = selectedTheme;
+        _refreshConnectionLanguage?.Invoke();
         this.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = language == "tr" ? 1 : 0;
     }
     private void SetStatus(string message) => this.FindControl<TextBlock>("StatusText")!.Text = UiText.Redisplay(message);
@@ -159,6 +160,7 @@ public partial class MainWindow : Window
 
     private void ShowPage(int index)
     {
+        _refreshConnectionLanguage = null;
         _page = index; this.FindControl<TextBlock>("PageTitle")!.Text = UiText.Redisplay(_titles[index]); this.FindControl<TextBlock>("PageSubtitle")!.Text = UiText.Redisplay(_subtitles[index]);
         var nav = this.FindControl<StackPanel>("Navigation")!;
         for (var i = 0; i < nav.Children.Count; i++) { nav.Children[i].Classes.Set("active", i == index); }
@@ -272,14 +274,23 @@ public partial class MainWindow : Window
 
     private void Connections()
     {
-        var landscape = new StackPanel { Spacing = 10 }; var file = Field(landscape, UiText.Get("Text162"), _settings.LandscapeFile);
-        landscape.Children.Add(Row(Action(UiText.Get("Text163"), async () => { var chosen = await PickFileAsync(UiText.Get("Text164"), "*.xml"); if (chosen != null) file.Text = chosen; }),
-            Action(UiText.Get("Text165"), async () => { var candidate = Read(file); var systems = LandscapeService.Load(candidate); _settings.LandscapeFile = candidate; _systems = systems; await PersistAsync(); await AuditAsync("landscape.loaded", new { systems = systems.Count }); ShowPage(3); SetStatus(UiText.Get("Text166" , systems.Count)); }, true),
-            Action(UiText.Get("Text167"), async () => { var source = await PickFileAsync(UiText.Get("Text168"), "*.json"); if (source == null) return; if (_systems.Count == 0) throw new InvalidOperationException(UiText.Get("Text169")); var count = await new ProfileService(_secrets).ImportAsync(_settings, source, _systems, Token); await PersistAsync(); await AuditAsync("profiles.imported", new { count }); ShowPage(3); SetStatus(UiText.Get("Text170" , count)); })));
-        Body.Children.Add(Card(landscape));
-        if (_systems.Count == 0) { Body.Children.Add(Notice(UiText.Get("Text171"))); return; }
+        _connectionsDirty = false;
+        Body.Children.Add(ConnectionSourceCard());
+        if (_connectionError != null) Body.Children.Add(Notice(_connectionError, true));
+        var systemPicker = new ComboBox { Name = "ConnectionSystems", ItemsSource = _systems };
+        systemPicker.SelectedItem = _systems.FirstOrDefault(s => s.Id == _preferredSystemId) ?? _systems.FirstOrDefault();
+        Body.Children.Add(Text(UiText.Get("Text172"), "muted")); Body.Children.Add(systemPicker);
+        Body.Children.Add(SystemToolbar(systemPicker));
+        Body.Children.Add(Action(UiText.Get("Text167"), async () =>
+        {
+            if (!await DiscardConnectionChangesAsync()) return;
+            var source = await PickFileAsync(UiText.Get("Text168"), "*.json"); if (source == null) return;
+            if (_systems.Count == 0) throw new InvalidOperationException(UiText.Get("Text169"));
+            var count = await new ProfileService(_secrets).ImportAsync(_settings, source, _systems, Token);
+            await PersistAsync(); await AuditAsync("profiles.imported", new { count }); ShowPage(3); SetStatus(UiText.Get("Text170", count));
+        }));
+        if (_systems.Count == 0) { Body.Children.Add(Notice(UiText.Get("Connections.Empty"))); return; }
         var edit = new StackPanel { Spacing = 10 };
-        var systemPicker = new ComboBox { ItemsSource = _systems, SelectedIndex = 0 }; edit.Children.Add(Text(UiText.Get("Text172"), "muted")); edit.Children.Add(systemPicker);
         var profilePicker = new ComboBox(); edit.Children.Add(Text(UiText.Get("Text173"), "muted")); edit.Children.Add(profilePicker);
         var activeLabel = Text("", "muted"); edit.Children.Add(activeLabel);
         var name = Field(edit, UiText.Get("Text174"), ""); var user = Field(edit, UiText.Get("Text175"), "");
@@ -290,11 +301,11 @@ public partial class MainWindow : Window
         var insecure = new CheckBox { Content = UiText.Get("Text180") }; edit.Children.Add(insecure);
         var activate = new CheckBox { Content = UiText.Get("Text181"), IsChecked = true }; edit.Children.Add(activate);
         ConnectionProfile? current = null;
-        void Fill(ConnectionProfile? p) { current = p; name.Text = p?.Name ?? ""; user.Text = p?.User ?? ""; client.Text = p?.Client ?? "100"; language.Text = p?.Language ?? "TR"; password.Text = ""; adt.Text = p?.AdtBaseUrl ?? ""; bw.Text = p?.BwModelingBaseUrl ?? ""; insecure.IsChecked = p?.AllowInsecureTls ?? false; }
+        void Fill(ConnectionProfile? p) { _fillingProfiles = true; current = p; name.Text = p?.Name ?? ""; user.Text = p?.User ?? ""; client.Text = p?.Client ?? "100"; language.Text = p?.Language ?? "TR"; password.Text = ""; adt.Text = p?.AdtBaseUrl ?? ""; bw.Text = p?.BwModelingBaseUrl ?? ""; insecure.IsChecked = p?.AllowInsecureTls ?? false; _fillingProfiles = false; _connectionsDirty = false; }
         void RefreshProfiles()
         {
             if (systemPicker.SelectedItem is not SapSystem system) return;
-            var profiles = _settings.Profiles.Where(p => p.TargetKey == system.TargetKey).ToArray(); profilePicker.ItemsSource = profiles;
+            var profiles = _settings.Profiles.Where(p => p.TargetKey.Equals(system.TargetKey, StringComparison.OrdinalIgnoreCase)).ToArray(); profilePicker.ItemsSource = profiles;
             var activeId = _settings.ActiveProfiles.GetValueOrDefault(system.TargetKey); profilePicker.SelectedItem = profiles.FirstOrDefault(p => p.Id == activeId) ?? profiles.FirstOrDefault();
             activeLabel.Text = profiles.FirstOrDefault(p => p.Id == activeId) is { } active ? UiText.Get("ActiveProfile", active.ToString()) : UiText.Get("ActiveProfileNone"); Fill(profilePicker.SelectedItem as ConnectionProfile);
         }
@@ -311,6 +322,10 @@ public partial class MainWindow : Window
             Action(UiText.Get("Text188"), async () => { if (current == null) throw new InvalidOperationException(UiText.Get("Text187")); _settings.ActiveProfiles[current.TargetKey] = current.Id; await ProfileService.MaterializeAsync(_settings, Token); await PersistAsync(); await AuditAsync("profile.activated", new { target = current.TargetKey, profile = current.Name }); RefreshProfiles(); SetStatus(UiText.Get("Text189")); })));
         edit.Children.Add(Row(Action(UiText.Get("Text190"), () => PingAsync(systemPicker.SelectedItem as SapSystem, "rfc")), Action(UiText.Get("Text191"), () => PingAsync(systemPicker.SelectedItem as SapSystem, "adt")),
             Action(UiText.Get("Text192"), async () => { if (current == null) return; if (!await ConfirmAsync(UiText.Get("Text193"), UiText.Get("RemoveProfile", current.Name))) return; var p = current; _settings.Profiles.RemoveAll(x => x.Id == p.Id); if (_settings.ActiveProfiles.GetValueOrDefault(p.TargetKey) == p.Id) _settings.ActiveProfiles.Remove(p.TargetKey); await ProfileService.MaterializeAsync(_settings, Token); await PersistAsync(); RefreshProfiles(); SetStatus(UiText.Get("Text195")); })));
+        foreach (var field in new[] { name, user, client, language, password, adt, bw })
+            field.PropertyChanged += (_, change) => { if (change.Property == TextBox.TextProperty && !_fillingProfiles) _connectionsDirty = true; };
+        insecure.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
+        activate.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
         Body.Children.Add(Card(edit));
     }
 
@@ -422,11 +437,11 @@ public partial class MainWindow : Window
     private async Task<string?> PickFileAsync(string title, string pattern) { var selected = await StorageProvider.OpenFilePickerAsync(new() { Title = title, AllowMultiple = false, FileTypeFilter = [new(UiText.Get("Text241")) { Patterns = [pattern] }] }); return selected.FirstOrDefault()?.TryGetLocalPath(); }
     private async Task<string?> PickSaveAsync(string name) { var selected = await StorageProvider.SaveFilePickerAsync(new() { SuggestedFileName = name, ShowOverwritePrompt = true }); return selected?.TryGetLocalPath(); }
     private static void OpenUrl(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-    private async Task<bool> ConfirmAsync(string title, string description)
+    private async Task<bool> ConfirmAsync(string title, string description, Window? owner = null)
     {
-        var dialog = new Window { Title = title, Width = 480, SizeToContent = SizeToContent.Height, WindowStartupLocation = WindowStartupLocation.CenterOwner, CanResize = false };
+        var dialog = new Window { Title = title, Width = 520, MaxHeight = 650, SizeToContent = SizeToContent.Height, WindowStartupLocation = WindowStartupLocation.CenterOwner, CanResize = false };
         var yes = new Button { Content = UiText.Get("Text242") }; var no = new Button { Content = UiText.Get("Text243") }; yes.Click += (_, _) => dialog.Close(true); no.Click += (_, _) => dialog.Close(false);
-        dialog.Content = new StackPanel { Margin = new(24), Spacing = 20, Children = { Text(description), Row(no, yes) } };
-        return await dialog.ShowDialog<bool>(this);
+        dialog.Content = new ScrollViewer { Content = new StackPanel { Margin = new(24), Spacing = 20, Children = { Text(description), Row(no, yes) } } };
+        return await dialog.ShowDialog<bool>(owner ?? this);
     }
 }

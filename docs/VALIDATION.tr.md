@@ -43,3 +43,7 @@ Bu matrisin tamamlanması mevcut geliştirici bilgisayardaki testin yerine geçm
 | İmza / kurumsal güvenlik politikası | Kurum sertifikasıyla imzalı EXE ve installer kabul edilir |
 
 Mac, SNC/SSO, message-server grupları, gerçek SAP parola değişikliği ve otomatik güncelleme sunucusu bu sürümün kabul kapsamına dahil değildir.
+
+## Bağlantı kaynağı kabulü
+
+Boş JSON/oluşturma/düzenleme/silme/yeniden açma, iki mevcut MCP’nin üretilen XML’i okuması, hedef/profil taşıma, DPAPI dosyası koruma, mükerrer/çakışan hedefler, salt okunur GUI kaynağı, klasör adayları, bozuk kaynağın yöneticiyi engellememesi, geri alma ve kaynak değişimini iptal etme kapsanır. Headless arayüz iki kaynak modunu, iki dilde yerel ekran/düzenleyiciyi ve mevcut dil/tema/genişlik matrisini kapsar. Temiz GUI’siz Windows ve canlı SAP bekler.

@@ -36,6 +36,16 @@ settings.HostExecutable = Path.Combine(publish, "SapMcpHost.exe");
 settings.LandscapeFile = Path.Combine(data, "SAPUILandscape.xml"); Directory.CreateDirectory(data);
 await File.WriteAllTextAsync(settings.LandscapeFile, "<Landscape><Services><Service type='SAPGUI' uuid='test' name='Offline test' systemid='TST' server='127.0.0.1:3200'/></Services></Landscape>");
 var store = new SettingsStore(Path.Combine(data, "config", "settings.json"));
+await Step("Managed JSON generates landscape without SAP GUI and preserves external XML", async () =>
+{
+    var externalBefore = await File.ReadAllBytesAsync(settings.LandscapeFile);
+    var manager = new ConnectionManager(store);
+    settings = await manager.SelectSourceAsync(settings, "managed");
+    settings = await manager.SaveSystemAsync(settings, new() { Name = "Offline managed test", Host = "127.0.0.1", Sysnr = "00", Sid = "TST" });
+    Ensure(settings.LandscapeFile == ConnectionManager.GeneratedPath(settings), "Managed projection not selected");
+    Ensure(LandscapeService.Load(settings.LandscapeFile).Single().TargetKey == "127.0.0.1:00", "Managed target mismatch");
+    Ensure(externalBefore.SequenceEqual(await File.ReadAllBytesAsync(settings.ExternalLandscapeFile!)), "External XML changed");
+});
 var packages = new PackageService(offlinePayload); var prerequisites = new PrerequisiteService(packages);
 var deploy = new DeploymentService(packages, prerequisites);
 await Step("Missing Node blocks MCP installation", async () =>
@@ -59,6 +69,7 @@ await Step("Published ADT host initialize, tools/list and landscape", async () =
     var tools = await session.RequestAsync("tools/list"); Ensure(tools.GetProperty("tools").GetArrayLength() > 10, "ADT tools missing");
     var systems = await session.RequestAsync("tools/call", new { name = "list_systems", arguments = new { } });
     Ensure(!systems.TryGetProperty("isError", out var failed) || failed.ValueKind != JsonValueKind.True, "Landscape call failed");
+    Ensure(systems.GetRawText().Contains("127.0.0.1:00"), "ADT could not resolve generated target");
 });
 await Step("ADT RFC request blocked before forwarding", async () =>
 {
@@ -97,6 +108,7 @@ if (args.Length > 3 && Directory.Exists(args[3]))
         await using var session = await McpSession.StartAsync(settings, store.FilePath, "rfc");
         var tools = await session.RequestAsync("tools/list"); Ensure(tools.GetProperty("tools").EnumerateArray().Any(t => t.GetProperty("name").GetString() == "sap_rfc_list_systems"), "RFC tool missing");
         var result = await session.RequestAsync("tools/call", new { name = "sap_rfc_list_systems", arguments = new { } }); Ensure(!result.TryGetProperty("isError", out var failed) || !failed.GetBoolean(), "RFC landscape call failed");
+        Ensure(result.GetRawText().Contains("127.0.0.1:00"), "RFC could not resolve generated target");
     });
 }
 await Step("Two selected MCP components start independently", async () =>

@@ -19,7 +19,7 @@
         <StackPanel Spacing="10" Margin="12,0,0,35">
           <TextBlock Text="SAP / MCP" Foreground="#A4E9D0" FontSize="25" FontWeight="Bold"/>
           <TextBlock x:Name="BrandCaption" Foreground="#94ACB6" FontSize="10" LetterSpacing="2"/>
-          <Border Background="#25424D" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left" Margin="0,8,0,0"><TextBlock Text="WINDOWS · 0.1.0-preview.1" Foreground="#C6D6DC" FontSize="10"/></Border>
+          <Border Background="#25424D" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left" Margin="0,8,0,0"><TextBlock Text="WINDOWS · 0.1.0-preview.2" Foreground="#C6D6DC" FontSize="10"/></Border>
         </StackPanel>
         <StackPanel x:Name="Navigation" Grid.Row="1" Spacing="6"/>
         <StackPanel Grid.Row="2" Margin="12,0,12,0" Spacing="8">

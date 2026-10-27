@@ -25,7 +25,7 @@ internal static class Program
             {
                 var service = new PrerequisiteService(new PackageService(Path.Combine(AppContext.BaseDirectory, "payload")));
                 var checks = await service.CheckAsync(settings);
-                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.1", checks }, JsonDefaults.Options));
+                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.2", checks }, JsonDefaults.Options));
                 return checks.Any(c => c.State is CheckState.Blocked or CheckState.Missing or CheckState.Waiting) ? 2 : 0;
             }
             var component = Value("--component");

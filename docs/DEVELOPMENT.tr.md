@@ -8,6 +8,8 @@
 
 Core içindeki `Resources/Strings.json` ortak İngilizce/Türkçe kaynaktır; sabit kaynak anahtarları MCP teşhis kimliklerinden ayrıdır. İsteğe bağlı `uiLanguage` şema-1 uyumunu korur. Arayüz yeniden gösterimi açık formu yeniden oluşturmadan ve alan değerlerini yazmadan etiketleri günceller. Kullanıcının TextBox girdisini yerelleştirmeden geçirmeyin. Mac şifre/kurulum adaptörleri sonraki aşamadır.
 
+Bağlantı kaynakları ortak okuyucu arayüzünü uygular: dış SAP GUI XML’i salt okunur, yönetilen JSON doğrulanan CRUD destekler ve değişmeyen MCP paketleri için uygulamaya ait XML üretir. Kaynak modu/yolları isteğe bağlı şema-1 alanlarıdır. Kayıt doğrulanan içerikleri hazırlar, değişiklikleri kilitle sıraya alır, yazma/iptal hatasında katalog, mapping, XML ve ayarları geri alır. Bu hata geri almadır; çökme dayanıklı çok dosyalı veritabanı transaction değildir. Şifre dosyaları katalog dışındadır. Algılama öneridir, kayıtlı mod önceliklidir, eski landscape ayarları dış kaynak kalır. [Bağlantı kaynaklarına](CONNECTIONS.tr.md) bakın.
+
 ## Public kaynak derleme ve test
 
 Gerekenler Windows x64 ve .NET SDK 10’dur (global.json). Özel depo veya SAP hesabı gerekmez:
@@ -43,7 +45,7 @@ Paketlerde derlenmiş kod, üretim bağımlılıkları, kilitler ve kaynak bilgi
 2. Directory.Build.props, kurulum/dosya adları, host teşhisi, katalog ve sürüm notlarını eşitleyin. uiLanguage içermeyen eski ayarları doğrulayın.
 3. Paket hazırlama, derleme, çekirdek/arayüz/entegrasyon/kurulum testleri ve Test-Publication çalıştırın. Yayın kontrolü kaynak ve dağıtımı kişisel yol, şifre ve SDK için tarar. Görselleri ve raporları da inceleyin.
 4. Maskelenmiş doğrulama özeti ve İngilizce/Türkçe sürüm notlarını yayın dosyalarına ekleyin. İki EXE ve belge arşivi için SHA256SUMS.txt üretin. Lisans ve kaynak kayıtlarını inceleyin. Temiz VM/canlı SAP yapılmadıysa tamamlandı yazmayın.
-5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.1` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
+5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.2` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
 6. Dosyaları oturumsuz HTTPS üzerinden indirip hash karşılaştırın. README/kılavuz bağlantılarını oturum kapalı kontrol edin. Başarısız kontrol düzeltilmeden yayınlamayın.
 
 Bu önizlemede otomatik güncelleme sunucusu veya imza sertifikası yoktur. Mevcut kullanıcı kurulumu kayıtlıysa smoke test çalışmaz. Workspace artifacts içine kurup kaldırır ve kullanıcı verisini korur; üretim kabulü için temiz VM kullanın.

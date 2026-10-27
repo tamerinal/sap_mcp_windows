@@ -18,3 +18,5 @@
 | İzin veya geçersiz ayar hatası | Yazılabilir mutlak yollar seçip dosyayı düzeltin. `--config <mutlak yol>` izole ayar açar; bozuk dosyayı otomatik onarmaz. |
 
 Sürüm, Windows derlemesi, bileşen, teşhis kimliği ve tekrar adımlarını bildirin. **Şifre, DPAPI dosyası, gerçek landscape/mapping/istemci ayarı, erişim anahtarı veya ham SAP verisi yüklemeyin.** Hatayı maskelenmiş metinle açıklayın. Güvenlik açıkları için [Güvenlik](../SECURITY.tr.md) belgesine bakın.
+
+Bağlantı kaynağı hatasında SAP GUI salt okunur XML veya uygulama kataloğunu açıkça seçin. Eksik/bozuk kaynak diğer yönetim sayfalarını engellemez. Düzenlemeden önce modu kontrol edin; GUI modunda yerel CRUD kapalıdır. Hedef taşıma, silme ve geri alma için [bağlantı yönetimine](CONNECTIONS.tr.md) bakın.

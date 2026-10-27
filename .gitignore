@@ -13,6 +13,8 @@ payload/dependency-notices.json
 SAPUILandscape.xml
 sap_credentials.json
 settings.json
+connections.json
+SAPMcpLandscape.xml
 *.pdb
 *.log
 *.jsonl

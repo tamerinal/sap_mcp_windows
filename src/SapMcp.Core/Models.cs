@@ -24,6 +24,9 @@ public sealed class AppSettings
     public string AppliedSetupId { get; set; } = "";
     public string DataDirectory { get; set; } = "";
     public string LandscapeFile { get; set; } = "";
+    public string? ConnectionSourceMode { get; set; }
+    public string? ExternalLandscapeFile { get; set; }
+    public string? ManagedConnectionsFile { get; set; }
     public string CredentialsFile { get; set; } = "";
     public string SecretsDirectory { get; set; } = "";
     public string SdkDirectory { get; set; } = "";
@@ -35,7 +38,12 @@ public sealed class AppSettings
     public ComponentSettings Rfc { get; set; } = new();
     public ComponentSettings Adt { get; set; } = new();
     public List<ConnectionProfile> Profiles { get; set; } = [];
-    public Dictionary<string, string> ActiveProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, string> _activeProfiles = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, string> ActiveProfiles
+    {
+        get => _activeProfiles;
+        set => _activeProfiles = new(value, StringComparer.OrdinalIgnoreCase);
+    }
     public bool CodexEnabled { get; set; } = true;
     public bool ClaudeEnabled { get; set; } = true;
     public List<ClientRegistration> Registrations { get; set; } = [];
@@ -65,11 +73,17 @@ public sealed class AppSettings
 
     public void Validate()
     {
+        if (ConnectionSourceMode is not (null or "sapGui" or "managed")) throw new InvalidDataException(UiText.Get("Connections.InvalidMode"));
+        foreach (var path in new[] { ExternalLandscapeFile, ManagedConnectionsFile })
+            if (!string.IsNullOrEmpty(path) && !Path.IsPathFullyQualified(path)) throw new InvalidDataException(UiText.Get("Text020"));
         if (UiLanguage is not (null or "en" or "tr")) throw new InvalidDataException(UiText.Get("InvalidUiLanguage"));
         if (SchemaVersion != 1) throw new InvalidDataException(UiText.Get("Text019"));
         foreach (var p in new[] { DataDirectory, CredentialsFile, SecretsDirectory, NodeExecutable, PythonExecutable, PowerShellExecutable, PackageDirectory, HostExecutable, Rfc.LogDirectory, Adt.LogDirectory })
             if (!Path.IsPathFullyQualified(p)) throw new InvalidDataException(UiText.Get("Text020"));
         if (LandscapeFile.Length > 0 && !Path.IsPathFullyQualified(LandscapeFile)) throw new InvalidDataException(UiText.Get("Text021"));
+        var external = ExternalLandscapeFile ?? (ConnectionSourceMode != "managed" ? LandscapeFile : "");
+        if (external.Length > 0 && new[] { CredentialsFile, ManagedConnectionsFile }.Where(p => !string.IsNullOrEmpty(p)).Any(p => Path.GetFullPath(p!).Equals(Path.GetFullPath(external), StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidDataException(UiText.Get("Connections.PathConflict"));
         if (SdkDirectory.Length > 0 && !Path.IsPathFullyQualified(SdkDirectory)) throw new InvalidDataException(UiText.Get("Text022"));
         foreach (var c in new[] { Rfc, Adt })
             if (c.RetentionDays is < 1 or > 3650 || c.MaxFileBytes is < 1024 or > 1_073_741_824 || c.MaxFiles is < 1 or > 100 || c.TimeoutSeconds is < 1 or > 3600)

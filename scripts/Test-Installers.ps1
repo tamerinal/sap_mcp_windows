@@ -16,7 +16,7 @@ $taskScenarios = @(
 )
 foreach ($taskScenario in $taskScenarios) {
     $taskMode = $taskScenario.Mode
-    $taskInstaller = Join-Path $taskRoot ('artifacts\installers\SAP-MCP-Manager-0.1.0-preview.1-Windows-x64-' + $taskMode + '.exe')
+    $taskInstaller = Join-Path $taskRoot ('artifacts\installers\SAP-MCP-Manager-0.1.0-preview.2-Windows-x64-' + $taskMode + '.exe')
     $taskDestination = [IO.Path]::GetFullPath((Join-Path $taskArtifacts ('installer-smoke\' + $taskMode + '-' + $taskScenario.Name)))
     if (!$taskDestination.StartsWith($taskArtifacts + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid test destination' }
     $taskLog = Join-Path $taskArtifacts ('installer-smoke-' + $taskMode + '-' + $taskScenario.Name + '.log')

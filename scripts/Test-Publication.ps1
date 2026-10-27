@@ -5,7 +5,7 @@ $taskRoot = Split-Path $PSScriptRoot -Parent
 $taskFindings = [Collections.Generic.List[string]]::new()
 # These patterns identify local workspace/user paths, not public GitHub owner names.
 $taskPersonal = '(?i)([A-Z]:[\\/]+Users[\\/]+(?!\.{3})[^\\/\s"'']+|[A-Z]:[\\/]+Codex[\\/]|[A-Z]:[\\/]+OneDrive[\\/]|\.openclaw[\\/])'
-$taskForbiddenFile = '(?i)(^|/)(sapnwrfc|libsapucum|icudt\d*|icuin\d*|icuuc\d*)\.(dll|so|dylib)$|\.password\.dpapi$|(^|/)(SAPUILandscape\.xml|sap_credentials\.json|settings\.json)$|\.pdb$'
+$taskForbiddenFile = '(?i)(^|/)(sapnwrfc|libsapucum|icudt\d*|icuin\d*|icuuc\d*)\.(dll|so|dylib)$|\.password\.dpapi$|(^|/)(SAPUILandscape\.xml|SAPMcpLandscape\.xml|connections\.json|sap_credentials\.json|settings\.json)$|\.pdb$'
 $taskCredential = '(?i)-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----\s+[A-Za-z0-9+/]{32,}|gh[pousr]_[A-Za-z0-9]{30,}'
 Push-Location $taskRoot
 try {

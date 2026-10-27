@@ -1122,5 +1122,181 @@
   "UnsupportedClient": {
     "en": "Unsupported client.",
     "tr": "Desteklenmeyen istemci."
+  },
+  "Connections.InvalidMode": {
+    "en": "Invalid connection source mode.",
+    "tr": "Geçersiz bağlantı kaynağı modu."
+  },
+  "Connections.InvalidSystem": {
+    "en": "Enter a name and a valid host (without a URL or port). SID is optional, up to three letters/digits.",
+    "tr": "Ad ve geçerli sunucu girin (URL veya port olmadan). SID isteğe bağlı, en fazla üç harf/rakamdır."
+  },
+  "Connections.InvalidNumber": {
+    "en": "System number must contain exactly two digits (00–99).",
+    "tr": "Sistem numarası tam iki rakam olmalı (00–99)."
+  },
+  "Connections.InvalidCatalog": {
+    "en": "The connection catalog is invalid or too large.",
+    "tr": "Bağlantı kataloğu geçersiz veya çok büyük."
+  },
+  "Connections.Duplicate": {
+    "en": "A connection with this host/system number or ID already exists.",
+    "tr": "Bu sunucu/sistem numarası veya kimlik için bağlantı zaten var."
+  },
+  "Connections.TargetConflict": {
+    "en": "The new target already has profiles. No profiles were overwritten.",
+    "tr": "Yeni hedefte zaten profiller var. Hiçbir profilin üzerine yazılmadı."
+  },
+  "Connections.ReadOnly": {
+    "en": "SAP GUI mode: manage systems in SAP Logon. This application only reads the XML; account profiles remain editable here.",
+    "tr": "SAP GUI modu: sistemleri SAP Logon üzerinden yönetin. Uygulama XML’i yalnız okur; hesap profilleri burada düzenlenebilir."
+  },
+  "Connections.PathConflict": {
+    "en": "Settings, catalog, mapping and generated XML must use different paths and must not overwrite the external landscape.",
+    "tr": "Ayar, katalog, mapping ve üretilen XML farklı yollar kullanmalı; dış landscape üzerine yazılmamalı."
+  },
+  "Connections.RollbackFailed": {
+    "en": "Saving failed and some files could not be restored. Close MCP clients and repair the connection configuration before continuing.",
+    "tr": "Kayıt başarısız ve bazı dosyalar geri alınamadı. MCP istemcilerini kapatıp devam etmeden bağlantı yapılandırmasını onarın."
+  },
+  "Connections.SourceError": {
+    "en": "Connection source unavailable: {0}",
+    "tr": "Bağlantı kaynağı kullanılamıyor: {0}"
+  },
+  "Connections.UnsavedTitle": {
+    "en": "Discard unsaved profile changes?",
+    "tr": "Kaydedilmemiş profil değişiklikleri bırakılsın mı?"
+  },
+  "Connections.UnsavedBody": {
+    "en": "The open account form contains unsaved changes. Continue without saving them?",
+    "tr": "Açık hesap formunda kaydedilmemiş değişiklikler var. Kaydetmeden devam edilsin mi?"
+  },
+  "Connections.SourceTitle": {
+    "en": "Connection source",
+    "tr": "Bağlantı kaynağı"
+  },
+  "Connections.GuiDetected": {
+    "en": "SAP GUI detected. SAP GUI mode is suggested; you can choose either source.",
+    "tr": "SAP GUI algılandı. SAP GUI modu önerilir; iki kaynaktan birini seçebilirsiniz."
+  },
+  "Connections.GuiNotDetected": {
+    "en": "SAP GUI was not detected. Use the managed catalog, or select an existing landscape XML.",
+    "tr": "SAP GUI algılanmadı. Uygulamanın kataloğunu kullanın veya mevcut landscape XML’i seçin."
+  },
+  "Connections.GuiMode": {
+    "en": "SAP GUI connections (read-only)",
+    "tr": "SAP GUI bağlantıları (salt okunur)"
+  },
+  "Connections.ManagedMode": {
+    "en": "Application-managed connections",
+    "tr": "Uygulamanın bağlantıları"
+  },
+  "Connections.ChooseFolder": {
+    "en": "Choose SAP GUI folder",
+    "tr": "SAP GUI klasörünü seç"
+  },
+  "Connections.NoXml": {
+    "en": "No SAPUILandscape.xml or SAPUILandscapeGlobal.xml was found in this folder. Choose the XML directly.",
+    "tr": "Klasörde SAPUILandscape.xml veya SAPUILandscapeGlobal.xml bulunamadı. XML’i doğrudan seçin."
+  },
+  "Connections.ChooseXml": {
+    "en": "Choose the landscape XML to use",
+    "tr": "Kullanılacak landscape XML’i seçin"
+  },
+  "Connections.CatalogLocation": {
+    "en": "Managed JSON: {0}\nMCP-compatible XML is generated automatically; no SAP GUI installation is required.",
+    "tr": "Yönetilen JSON: {0}\nMCP uyumlu XML otomatik üretilir; SAP GUI kurulumu gerekmez."
+  },
+  "Connections.ApplySource": {
+    "en": "Use selected source",
+    "tr": "Seçilen kaynağı kullan"
+  },
+  "Connections.SourceSaved": {
+    "en": "Connection source saved. Restart MCP servers in your clients after a source/path change.",
+    "tr": "Bağlantı kaynağı kaydedildi. Kaynak/yol değişikliği sonrası istemcilerde MCP’leri yeniden başlatın."
+  },
+  "Connections.Refresh": {
+    "en": "Refresh systems",
+    "tr": "Sistemleri yenile"
+  },
+  "Connections.Refreshed": {
+    "en": "Connection list refreshed.",
+    "tr": "Bağlantı listesi yenilendi."
+  },
+  "Connections.ManagedHint": {
+    "en": "Managed mode: create and edit systems here. Passwords stay in DPAPI files, outside the connection catalog.",
+    "tr": "Uygulama modu: sistemleri burada oluşturup düzenleyin. Şifreler bağlantı kataloğu dışında DPAPI dosyalarında tutulur."
+  },
+  "Connections.Empty": {
+    "en": "No systems loaded. Apply a source, then add a connection in managed mode or select a valid SAP GUI XML.",
+    "tr": "Sistem yüklenmedi. Kaynak seçimini uygulayın; uygulama modunda bağlantı ekleyin veya geçerli SAP GUI XML’i seçin."
+  },
+  "Connections.Add": {
+    "en": "New connection",
+    "tr": "Yeni bağlantı"
+  },
+  "Connections.Edit": {
+    "en": "Edit connection",
+    "tr": "Bağlantıyı düzenle"
+  },
+  "Connections.Delete": {
+    "en": "Delete connection",
+    "tr": "Bağlantıyı sil"
+  },
+  "Connections.DeleteTitle": {
+    "en": "Delete system and its account profiles?",
+    "tr": "Sistem ve hesap profilleri silinsin mi?"
+  },
+  "Connections.DeleteBody": {
+    "en": "Delete {0} and {1} associated profiles? Their active mappings will be removed for both clients. DPAPI secret files and the SAP GUI XML will be kept.\n\n{2}",
+    "tr": "{0} ve bağlı {1} profil silinsin mi? İki istemcinin aktif eşleştirmeleri kaldırılır. DPAPI şifre dosyaları ve SAP GUI XML’i korunur.\n\n{2}"
+  },
+  "Connections.Deleted": {
+    "en": "Connection and associated profiles removed; DPAPI secret files were retained.",
+    "tr": "Bağlantı ve bağlı profiller kaldırıldı; DPAPI şifre dosyaları korundu."
+  },
+  "Connections.Name": {
+    "en": "Connection name",
+    "tr": "Bağlantı adı"
+  },
+  "Connections.Host": {
+    "en": "Application server host (no port)",
+    "tr": "Uygulama sunucusu (port olmadan)"
+  },
+  "Connections.Number": {
+    "en": "System number (00–99)",
+    "tr": "Sistem numarası (00–99)"
+  },
+  "Connections.AccountHint": {
+    "en": "Save the system, then enter user/client/password and ADT/BW URLs in the account profile below.",
+    "tr": "Sistemi kaydettikten sonra kullanıcı/client/şifre ve ADT/BW adreslerini aşağıdaki hesap profilinde girin."
+  },
+  "Connections.Save": {
+    "en": "Save connection",
+    "tr": "Bağlantıyı kaydet"
+  },
+  "Connections.MoveTitle": {
+    "en": "Move associated profiles to the new target?",
+    "tr": "Bağlı profiller yeni hedefe taşınsın mı?"
+  },
+  "Connections.MoveBody": {
+    "en": "Change {0} to {1} and move {2} associated profiles and active mappings? This affects both clients. Password files are unchanged.\n\n{3}",
+    "tr": "{0} yerine {1} kullanılıp bağlı {2} profil ve aktif mapping taşınsın mı? Bu işlem iki istemciyi etkiler. Şifre dosyaları değişmez.\n\n{3}"
+  },
+  "Connections.Saved": {
+    "en": "Connection saved. Account profiles can now be configured below.",
+    "tr": "Bağlantı kaydedildi. Hesap profillerini aşağıdan yapılandırabilirsiniz."
+  },
+  "Connections.AuditWarning": {
+    "en": "Change saved, but the activity log could not be written. Check log folder permissions.",
+    "tr": "Değişiklik kaydedildi ancak işlem logu yazılamadı. Log klasörü izinlerini kontrol edin."
+  },
+  "Connections.MissingCatalog": {
+    "en": "The managed JSON catalog is missing. The last generated XML was preserved; restore the catalog before refreshing.",
+    "tr": "Yönetilen JSON kataloğu eksik. Son üretilen XML korundu; yenilemeden önce kataloğu geri yükleyin."
+  },
+  "Connections.RouterPassword": {
+    "en": "Password-bearing SAProuter routes (/W/ or /P/) are not supported in managed mode. Passwords cannot be stored in the catalog.",
+    "tr": "Şifre içeren SAProuter rotaları (/W/ veya /P/) uygulama modunda desteklenmez. Şifreler kataloğa yazılamaz."
   }
 }

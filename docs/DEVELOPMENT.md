@@ -8,6 +8,8 @@
 
 `Resources/Strings.json` in Core is the shared English/Turkish catalog; stable resource keys are independent of MCP diagnostic IDs. Optional `uiLanguage` preserves schema-1 compatibility. UI redisplay updates labels without rebuilding open forms or writing their values. Never send user-entered TextBox content through localization. Platform adapters for macOS secret storage/install are future work.
 
+Connection sources implement a common reader interface: external SAP GUI XML is read-only; managed JSON supports validated CRUD and generates owned XML for unchanged MCP packages. Source mode and paths are optional schema-1 settings. A connection save stages validated content, serializes changes through a gate and rolls back the catalog, mapping, projection and settings on write failure; cancellation also rolls back. This is exception recovery, not a crash-proof multi-file database transaction. Password files are outside the catalog. Detection is advisory, saved mode wins, and legacy landscape settings remain external. See [connection sources](CONNECTIONS.md).
+
 ## Public source build and tests
 
 Requirements: Windows x64, .NET SDK 10 (see global.json). No private repository or SAP account is needed:
@@ -43,7 +45,7 @@ Packages contain compiled code, production dependencies, lockfiles and provenanc
 2. Align Directory.Build.props, installer/versioned asset names, host diagnostics, payload catalog and release notes. Test compatibility with settings lacking uiLanguage.
 3. Prepare, build, run core/UI/integration/installer checks, then Test-Publication. The publication gate scans source and distribution content for machine paths, secrets and SDK. Review screenshots and reports for personal information too.
 4. Copy a sanitized validation summary and English/Turkish release notes into assets. Generate SHA256SUMS.txt for the two EXEs and documentation archive. Review licenses and provenance. Do not label clean VM/live SAP tests complete unless performed.
-5. Push code and wait for Public Windows CI. Create tag `v0.1.0-preview.1` at the tested commit, publish a **prerelease**, upload both EXEs, guide archive, SHA files, notes and validation summary. README links must target the tag, not latest (prereleases are not stable latest).
+5. Push code and wait for Public Windows CI. Create tag `v0.1.0-preview.2` at the tested commit, publish a **prerelease**, upload both EXEs, guide archive, SHA files, notes and validation summary. README links must target the tag, not latest (prereleases are not stable latest).
 6. Download assets over unauthenticated HTTPS and compare hashes. Check README/guide links while signed out. A failure in any gate blocks publication until corrected.
 
 No automatic update server or signing certificate is supplied in this preview. Installer smoke tests refuse to run if an existing user installation is registered. They install/uninstall in workspace artifacts and preserve user data; use a clean VM for production acceptance.
