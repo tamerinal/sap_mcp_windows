@@ -1057,7 +1057,7 @@
   },
   "Text265": {
     "en": "Open the user guide in the installation docs folder.\n\nComponents → Prerequisites → SDK → Connections → MCP clients → Verification.",
-    "tr": "Kılavuz kurulum klasöründeki docs/KULLANIM.txt dosyasında bulunur.\n\nBileşen seçimi → Ön koşullar → SDK → Bağlantılar → MCP istemcileri → Doğrulama."
+    "tr": "Kılavuz kurulum klasöründeki docs/USER-GUIDE.tr.md dosyasında bulunur.\n\nBileşen seçimi → Ön koşullar → SDK → Bağlantılar → MCP istemcileri → Doğrulama."
   },
   "InvalidUiLanguage": {
     "en": "uiLanguage must be en or tr.",
@@ -1114,5 +1114,13 @@
   "LocalVerified": {
     "en": "Local verification successful · tools: {0}. No SAP connection was made.",
     "tr": "Yerel doğrulama başarılı · araçlar: {0}. SAP sistemine bağlanılmadı."
+  },
+  "InstallingPackage": {
+    "en": "Installing: {0} {1}",
+    "tr": "Kuruluyor: {0} {1}"
+  },
+  "UnsupportedClient": {
+    "en": "Unsupported client.",
+    "tr": "Desteklenmeyen istemci."
   }
 }

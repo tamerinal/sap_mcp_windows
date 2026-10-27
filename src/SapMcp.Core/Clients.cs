@@ -45,7 +45,7 @@ public static partial class ClientIntegration
             }
             after = root.ToJsonString(JsonDefaults.Options);
         }
-        else throw new ArgumentException("Desteklenmeyen istemci.");
+        else throw new ArgumentException(UiText.Get("UnsupportedClient"));
         return new(client, path, before, after, conflicts, names);
     }
 

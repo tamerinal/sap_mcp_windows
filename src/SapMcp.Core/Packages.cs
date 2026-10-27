@@ -125,7 +125,7 @@ public sealed class PackageService(string payloadDirectory)
         try
         {
             Directory.CreateDirectory(stage);
-            progress?.Report($"Kuruluyor: {asset.Id} {asset.Version}");
+            progress?.Report(UiText.Get("InstallingPackage", asset.Id, asset.Version));
             await Task.Run(() => Extract(archive, stage, asset.Format, asset.StripPrefix, ct), ct);
             await AtomicFile.WriteAsync(Path.Combine(stage, ".sapmcp-package.json"), JsonSerializer.Serialize(asset, JsonDefaults.Options), ct);
             ct.ThrowIfCancellationRequested();

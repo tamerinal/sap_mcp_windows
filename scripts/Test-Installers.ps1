@@ -4,6 +4,8 @@ $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
 $taskRegistry = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{950456B8-B9F0-443B-9CA9-A4F5FD067290}_is1'
 if (Test-Path -LiteralPath $taskRegistry) { throw 'An existing SAP MCP Manager installation is registered. Run installer smoke tests in a clean VM/user profile to preserve it.' }
+$taskExistingSettings = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'SapMcpManager/config/settings.json'
+if (Test-Path -LiteralPath $taskExistingSettings) { throw 'Existing manager settings found. Use a clean VM/user profile so uninstall smoke tests cannot alter real client registrations.' }
 $taskArtifacts = [IO.Path]::GetFullPath((Join-Path $taskRoot 'artifacts'))
 $taskResults = [System.Collections.Generic.List[object]]::new()
 $taskScenarios = @(
