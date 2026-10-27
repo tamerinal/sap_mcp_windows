@@ -1,1 +1,11 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Reporting and tracking guide / Bildirim ve takip kılavuzu
+    url: https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/docs/ISSUES.md
+    about: How to submit, follow and evaluate bugs and requests. English and Turkish links inside.
+  - name: Troubleshooting / Sorun giderme
+    url: https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/docs/TROUBLESHOOTING.md
+    about: Check setup, SDK and connection guidance before reporting a problem.
+  - name: Security reporting / Güvenlik bildirimi
+    url: https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/SECURITY.md
+    about: Follow private reporting guidance for vulnerabilities; do not post credentials publicly.

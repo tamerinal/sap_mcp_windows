@@ -35,6 +35,10 @@ The manager can stay closed while clients run MCP. The header's **English / Tür
 - A SAP GUI landscape with direct SAPGUI host/port connections. Message-server groups, SNC/SSO and include expansion are outside this preview.
 - Your own licensed RFC SDK for RFC operations. The manager does not grant SAP access or change SAP-side passwords.
 
+## Bugs and feature requests
+
+Use the [bug report](https://github.com/tamerinal/sap_mcp_windows/issues/new?template=bug_report.yml) or [feature request](https://github.com/tamerinal/sap_mcp_windows/issues/new?template=feature_request.yml) form. The [reporting and tracking guide](docs/ISSUES.md) explains required information, statuses, priorities and filtered queues. Follow progress and release links in the issue, and Subscribe for GitHub notifications. Do not post credentials or real SAP files. Reports require a GitHub account; the app does not send reports automatically.
+
 ## Documentation and licensing
 
 - [User guide](docs/USER-GUIDE.md): SDK later, profiles, password updates, clients, logs, repair and uninstall.

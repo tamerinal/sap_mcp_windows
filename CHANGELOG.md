@@ -2,6 +2,12 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## Unreleased
+
+- Documented English/Turkish bug and feature intake, triage, ownership, validation and release tracking.
+- Expanded issue forms with default type/triage labels, repository tracking labels and an idempotent label setup script.
+- Added reporting links to README/contribution guidance and a pinned GitHub reporting hub. Existing preview binaries are unchanged.
+
 ## v0.1.0-preview.1 — 2026-10-27
 
 - Initial Windows x64 Avalonia/.NET 10 manager, per-user Online/Offline Inno installers and independent stdio host.

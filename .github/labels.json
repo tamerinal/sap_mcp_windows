@@ -1,0 +1,21 @@
+[
+  { "name": "bug", "color": "d73a4a", "description": "Something isn't working" },
+  { "name": "enhancement", "color": "a2eeef", "description": "New feature or request" },
+  { "name": "status:triage", "color": "ededed", "description": "Awaiting initial review / İlk inceleme bekliyor" },
+  { "name": "status:needs-info", "color": "fbca04", "description": "Waiting for reporter details / Bildirenden bilgi bekleniyor" },
+  { "name": "status:accepted", "color": "0e8a16", "description": "Accepted backlog item / Kabul edilen iş" },
+  { "name": "status:in-progress", "color": "1d76db", "description": "Implementation underway / Geliştiriliyor" },
+  { "name": "status:blocked", "color": "b60205", "description": "Waiting on a documented dependency / Bağımlılık nedeniyle bekliyor" },
+  { "name": "status:verification", "color": "5319e7", "description": "Awaiting validation or a release / Doğrulama veya sürüm bekliyor" },
+  { "name": "priority:high", "color": "b60205", "description": "Blocking or serious impact / Engelleyici veya ciddi etki" },
+  { "name": "priority:normal", "color": "fbca04", "description": "Regular planned work / Normal öncelikli iş" },
+  { "name": "priority:low", "color": "c2e0c6", "description": "Small impact or optional improvement / Düşük etki veya isteğe bağlı iyileştirme" },
+  { "name": "area:installer", "color": "bfd4f2", "description": "Installation, prerequisites and repair / Kurulum, ön koşullar ve onarım" },
+  { "name": "area:rfc", "color": "bfd4f2", "description": "SAP RFC, Python, PyRFC and SDK" },
+  { "name": "area:adt", "color": "bfd4f2", "description": "SAP ADT and BW endpoints / SAP ADT ve BW adresleri" },
+  { "name": "area:connections", "color": "bfd4f2", "description": "Landscape, profiles and DPAPI / Landscape, profiller ve DPAPI" },
+  { "name": "area:clients", "color": "bfd4f2", "description": "Codex, Claude Desktop and MCP exports / MCP istemcileri" },
+  { "name": "area:ui", "color": "bfd4f2", "description": "Interface, language and themes / Arayüz, dil ve temalar" },
+  { "name": "area:docs", "color": "bfd4f2", "description": "User and developer documentation / Kullanıcı ve geliştirici belgeleri" },
+  { "name": "tracking", "color": "0052cc", "description": "Repository tracking guide / Depo takip rehberi" }
+]

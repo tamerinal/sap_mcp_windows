@@ -1,9 +1,13 @@
 name: Bug report / Hata bildirimi
 description: Report a reproducible problem without sharing sensitive SAP data.
+title: '[Bug]: '
+labels: [bug, 'status:triage']
 body:
   - type: markdown
     attributes:
-      value: 'Do not upload passwords, DPAPI files, real landscape/mapping/client settings, tokens or raw SAP payloads. Şifre, gerçek bağlantı/istemci dosyası ve ham SAP verisi paylaşmayın.'
+      value: |
+        Read the [reporting guide](https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/docs/ISSUES.md) / [bildirim kılavuzu](https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/docs/ISSUES.tr.md) and search existing issues first.
+        Do not upload passwords, DPAPI files, real landscape/mapping/client settings, tokens or raw SAP payloads. Şifre, gerçek bağlantı/istemci dosyası ve ham SAP verisi paylaşmayın.
   - type: input
     id: version
     attributes:
@@ -14,13 +18,40 @@ body:
   - type: input
     id: environment
     attributes:
-      label: Windows build, language, theme, component / Windows derlemesi, dil, tema, bileşen
+      label: Windows build, UI language and theme / Windows derlemesi, arayüz dili ve tema
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area / Etkilenen alan
+      options:
+        - Installer and prerequisites / Kurulum ve ön koşullar
+        - SAP RFC and SDK
+        - SAP ADT
+        - Connections and passwords / Bağlantılar ve şifreler
+        - MCP clients / MCP istemcileri
+        - UI and language / Arayüz ve dil
+        - Documentation / Dokümantasyon
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps, expected and actual behavior / Adımlar, beklenen ve gerçekleşen
+      label: Steps to reproduce / Tekrarlama adımları
+      description: Use fictional system/user names. Kurgusal sistem ve kullanıcı adları kullanın.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / Beklenen davranış
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / Gerçekleşen davranış
     validations:
       required: true
   - type: textarea

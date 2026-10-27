@@ -1,10 +1,53 @@
 name: Feature request / Geliştirme isteği
 description: Describe the user need without customer data.
+title: '[Feature]: '
+labels: [enhancement, 'status:triage']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Read the [reporting guide](https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/docs/ISSUES.md) / [bildirim kılavuzu](https://github.com/tamerinal/sap_mcp_windows/blob/YAPAY_ZEKA/docs/ISSUES.tr.md). Search first; add your use case to an existing request instead of duplicating it.
+        Use fictional examples; do not share SAP credentials or customer files. Kurgusal örnekler kullanın; şifre veya müşteri dosyası paylaşmayın.
   - type: textarea
     id: need
     attributes:
-      label: User need and proposed behavior / İhtiyaç ve önerilen davranış
-      description: Use fictional systems and users; do not provide SAP credentials.
+      label: Problem or user need / Sorun veya kullanıcı ihtiyacı
+      description: Who needs this and what is difficult today? Kim ihtiyaç duyuyor, bugün hangi işlem zor?
     validations:
       required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior / Önerilen davranış
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Related area / İlgili alan
+      options:
+        - Installer and prerequisites / Kurulum ve ön koşullar
+        - SAP RFC and SDK
+        - SAP ADT
+        - Connections and passwords / Bağlantılar ve şifreler
+        - MCP clients / MCP istemcileri
+        - UI and language / Arayüz ve dil
+        - Documentation / Dokümantasyon
+        - Other or multiple areas / Diğer veya birden fazla alan
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance example / Kabul örneği
+      description: What observable result would meet the need? Hangi gözlenebilir sonuç ihtiyacı karşılar?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workaround / Alternatifler veya geçici çözüm
+  - type: input
+    id: version
+    attributes:
+      label: Current app version, if applicable / Varsa mevcut uygulama sürümü

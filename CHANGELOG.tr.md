@@ -2,6 +2,12 @@
 
 [English](CHANGELOG.md)
 
+## Yayımlanmamış değişiklikler
+
+- İngilizce/Türkçe hata ve geliştirme kabulü, inceleme, sorumluluk, doğrulama ve sürüm takibi belgelendi.
+- Formlar varsayılan tür/inceleme etiketleriyle genişletildi; takip etiketleri ve tekrar çalıştırılabilir kurulum betiği eklendi.
+- README/katkı belgelerine bildirim bağlantıları ve GitHub’a sabit takip rehberi eklendi. Mevcut önizleme dosyaları değiştirilmedi.
+
 ## v0.1.0-preview.1 — 2026-10-27
 
 - İlk Windows x64 Avalonia/.NET 10 yönetici, kullanıcı başına Online/Offline Inno kurulumları ve bağımsız stdio host.
