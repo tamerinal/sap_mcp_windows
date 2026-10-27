@@ -21,3 +21,5 @@ Retain overridesByTarget/secretRef and read active credentials on subsequent cal
 Implement actual SAP_RFC_LOG_LEVEL filtering (Off/Error/Warn/Info/Debug/Trace), configurable folder, max bytes/count and retention days, redaction at every level and stderr-only startup errors. Stdout is MCP JSON-RPC only. Support paths containing spaces/Turkish characters. SDK missing/moved/incompatible and Python/PyRFC/VC failures must be classified without a SAP network call.
 
 Acceptance: initialize/tools/list without login, diagnose with/without SDK, cp311 wheel load on clean Windows x64, DPAPI interoperability, profile changes on next call, no raw secret in any logs, atomic release manifest and reproducible dependency inventory. Until supplied, this manager uses an isolated snapshot build and host-owned metadata logging; it is not full upstream diagnose/native logging support.
+
+[Preview.3 worker diagnostics / worker tanılama talebi](MCP-RFC-WORKER-DIAGNOSTICS.md) — pending / bekliyor.

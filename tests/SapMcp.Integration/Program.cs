@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using SapMcp.Core;
 
-if (args.Length == 2 && args[0] == "--probe") { await Probe.RunAsync(args[1]); return; }
+if (args.Length is 2 or 3 && args[0] == "--probe") { await Probe.RunAsync(args[1], args.Length == 3 ? args[2] : "adt"); return; }
 if (args.Length < 3) throw new ArgumentException("publish-root payload-root verification-root [sdk-directory]");
 var publish = Path.GetFullPath(args[0]); var sourcePayload = Path.GetFullPath(args[1]); var verification = Path.GetFullPath(args[2]);
 Directory.CreateDirectory(verification);
@@ -101,8 +101,65 @@ if (args.Length > 3 && Directory.Exists(args[3]))
     });
     await Step("Provided SDK loads with managed Python/PyRFC", async () =>
     {
-        settings.SdkDirectory = Path.GetFullPath(args[3]);
+        settings.SdkDirectory = Path.Combine(verification, "SDK Türkçe boşluk");
+        Directory.CreateDirectory(Path.Combine(settings.SdkDirectory, "lib"));
+        foreach (var name in SdkValidation.RequiredDlls)
+            File.Copy(Path.Combine(Path.GetFullPath(args[3]), "lib", name), Path.Combine(settings.SdkDirectory, "lib", name));
         var sdk = await PrerequisiteService.ValidateSdkAsync(settings); Ensure(sdk.State == CheckState.Ready, sdk.Detail); await store.SaveAsync(settings);
+    });
+    await Step("SDK diagnosis initializes ICU with no SDK in inherited PATH", async () =>
+    {
+        var environment = new Dictionary<string, string> { ["PATH"] = Environment.GetFolderPath(Environment.SpecialFolder.System), ["SAPNWRFC_HOME"] = "not-the-configured-sdk" };
+        var run = await ProcessRunner.RunAsync(settings.HostExecutable, ["--diagnose", "--json", "--config", store.FilePath], environment, TimeSpan.FromSeconds(60));
+        using var json = JsonDocument.Parse(run.Output);
+        Ensure(json.RootElement.GetProperty("checks").EnumerateArray().Any(c => c.GetProperty("id").GetString() == "sdk" && c.GetProperty("state").GetString() == "Ready"), "SDK did not initialize without inherited SDK PATH");
+    });
+    await Step("Missing ICU is blocked by Host and Manager before native initialization", async () =>
+    {
+        var dll = Path.Combine(settings.SdkDirectory, "lib", "icuuc57.dll"); var held = dll + ".held";
+        File.Move(dll, held);
+        try
+        {
+            var run = await ProcessRunner.RunAsync(settings.HostExecutable, ["--component", "rfc", "--config", store.FilePath]);
+            Ensure(run.ExitCode == 2 && string.IsNullOrWhiteSpace(run.Output), "Host did not block missing ICU cleanly");
+            using var json = JsonDocument.Parse(run.Error);
+            Ensure(json.RootElement.GetProperty("diagnostic").GetProperty("code").GetString() == "SDK_DLL_MISSING", "Safe SDK diagnostic missing");
+            try { await using var session = await McpSession.StartAsync(settings, store.FilePath, "rfc"); throw new Exception("Manager accepted missing ICU"); }
+            catch (IOException ex) when (ex.Message.Contains("SDK_DLL_MISSING", StringComparison.Ordinal)) { }
+        }
+        finally { File.Move(held, dll); }
+    });
+    await Step("Unchanged RFC Python worker initializes SDK and returns a structured local error", async () =>
+    {
+        var environment = SdkRuntimeEnvironment.Create(settings.SdkDirectory, Environment.GetFolderPath(Environment.SpecialFolder.System));
+        var scratch = Path.Combine(verification, "empty-worker-check"); Directory.CreateDirectory(scratch);
+        var run = await ProcessRunner.RunAsync(settings.PythonExecutable, [Path.Combine(settings.PackageDirectory, "rfc", "python", "worker.py")], environment,
+            TimeSpan.FromSeconds(30), stdin: "{\"action\":\"ping\",\"connection\":{\"ashost\":\"\",\"sysnr\":\"00\"}}", workingDirectory: scratch);
+        using var json = JsonDocument.Parse(run.Output);
+        Ensure(run.ExitCode == 1 && !json.RootElement.GetProperty("ok").GetBoolean(), "Expected structured local parameter failure");
+        Ensure(json.RootElement.GetProperty("error").GetProperty("message").GetString()!.Contains("RFC_INVALID_PARAMETER", StringComparison.Ordinal), "Native initialization did not reach local parameter validation");
+    });
+    await Step("Manager to Host to Node to Python inherits configured SDK and deduplicated PATH", async () =>
+    {
+        var originalPackages = settings.PackageDirectory;
+        var root = Path.Combine(verification, "environment-fixture"); var dist = Path.Combine(root, "rfc", "dist"); Directory.CreateDirectory(dist);
+        var code = "import os; home=os.environ['SAPNWRFC_HOME']; assert home==" + JsonSerializer.Serialize(settings.SdkDirectory)
+            + "; lib=os.path.join(home,'lib'); parts=os.environ['PATH'].split(';'); assert parts[0]==lib; assert sum(p.rstrip('\\\\/').lower()==lib.lower() for p in parts)==1; assert os.environ['PYTHONIOENCODING']=='utf-8'";
+        var script = "const cp=require('node:child_process');const r=cp.spawnSync(process.env.SAP_RFC_PYTHON_EXECUTABLE,['-c'," + JsonSerializer.Serialize(code)
+            + "],{env:process.env,windowsHide:true});if(r.status!==0)process.exit(41);const rl=require('node:readline').createInterface({input:process.stdin});rl.on('line',line=>{const m=JSON.parse(line);if(m.method==='initialize')console.log(JSON.stringify({jsonrpc:'2.0',id:m.id,result:{protocolVersion:'2024-11-05',capabilities:{},serverInfo:{name:'fixture',version:'1'}}}));if(m.method==='tools/list')console.log(JSON.stringify({jsonrpc:'2.0',id:m.id,result:{tools:[{name:'environment_verified'}]}}));});";
+        await File.WriteAllTextAsync(Path.Combine(dist, "server.js"), script);
+        settings.PackageDirectory = root; await store.SaveAsync(settings);
+        try
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            var environment = new Dictionary<string, string> { ["PATH"] = Environment.GetFolderPath(Environment.SpecialFolder.System), ["SAPNWRFC_HOME"] = "wrong-inherited-sdk" };
+            var executable = Environment.ProcessPath!;
+            string[] probeArgs = Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase)
+                ? [assembly, "--probe", store.FilePath, "rfc"] : ["--probe", store.FilePath, "rfc"];
+            var run = await ProcessRunner.RunAsync(executable, probeArgs, environment, TimeSpan.FromSeconds(60));
+            Ensure(run.ExitCode == 0 && run.Output.Contains("1 RFC tools", StringComparison.Ordinal), "Host/Node/Python environment fixture failed");
+        }
+        finally { settings.PackageDirectory = originalPackages; await store.SaveAsync(settings); }
     });
     await Step("RFC-only host handshake and tools/list", async () =>
     {

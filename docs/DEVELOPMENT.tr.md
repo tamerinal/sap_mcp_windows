@@ -45,7 +45,7 @@ Paketlerde derlenmiş kod, üretim bağımlılıkları, kilitler ve kaynak bilgi
 2. Directory.Build.props, kurulum/dosya adları, host teşhisi, katalog ve sürüm notlarını eşitleyin. uiLanguage içermeyen eski ayarları doğrulayın.
 3. Paket hazırlama, derleme, çekirdek/arayüz/entegrasyon/kurulum testleri ve Test-Publication çalıştırın. Yayın kontrolü kaynak ve dağıtımı kişisel yol, şifre ve SDK için tarar. Görselleri ve raporları da inceleyin.
 4. Maskelenmiş doğrulama özeti ve İngilizce/Türkçe sürüm notlarını yayın dosyalarına ekleyin. İki EXE ve belge arşivi için SHA256SUMS.txt üretin. Lisans ve kaynak kayıtlarını inceleyin. Temiz VM/canlı SAP yapılmadıysa tamamlandı yazmayın.
-5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.2` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
+5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.3` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
 6. Dosyaları oturumsuz HTTPS üzerinden indirip hash karşılaştırın. README/kılavuz bağlantılarını oturum kapalı kontrol edin. Başarısız kontrol düzeltilmeden yayınlamayın.
 
 Bu önizlemede otomatik güncelleme sunucusu veya imza sertifikası yoktur. Mevcut kullanıcı kurulumu kayıtlıysa smoke test çalışmaz. Workspace artifacts içine kurup kaldırır ve kullanıcı verisini korur; üretim kabulü için temiz VM kullanın.
@@ -53,3 +53,7 @@ Bu önizlemede otomatik güncelleme sunucusu veya imza sertifikası yoktur. Mevc
 ## Diğer projelere talepler
 
 [RFC talebi](MCP-RFC-DEVELOPMENT-REQUEST.md) ve [ADT talebi](MCP-ADT-DEVELOPMENT-REQUEST.md); taşınabilir yayın, diagnose --json, parametrik yollar, gerçek log filtreleme/saklama, tekrarlanabilir PyRFC ve bağımsız ADT/RFC engellerini tanımlar. Bunlar ayrı projelere iletilecek belgelerdir; otomatik mesaj veya kaynak değişikliği yapılmaz.
+
+## SDK runtime / Preview.3
+
+Ortak SDK ortamı Core içinde oluşturulur; başlatma ve doğrulama aynı ortamı kullanır. SDK kontrolü boş, uygulamaya ait geçici dizinde 20 saniye sınırı ve kapalı stdin ile çalışır; şema-1 ilerleme ve son başarı kaydı üretir, hedef/profil almaz. Hata sınırından yalnız izinli metadata geçer. Requirement isteğe bağlı diagnostic nesnesi kazanır (code/stage/errorClass/exitCode/exitCodeHex/source/signal); ayar şeması ve MCP araçları değişmez.

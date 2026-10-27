@@ -14,13 +14,35 @@ public sealed class McpSession : IAsyncDisposable
     private readonly SemaphoreSlim _writer = new(1, 1);
     private readonly Task _reader;
     private readonly Task _stderr;
+    private ProcessDiagnostic? _diagnostic;
     private int _sequence;
 
     private McpSession(Process process)
     {
         _process = process;
+        _stderr = Task.Run(async () =>
+        {
+            try
+            {
+                while (await _process.StandardError.ReadLineAsync(_stop.Token) is { } line)
+                    if (ReadHostDiagnostic(line) is { } diagnostic) _diagnostic = diagnostic;
+            }
+            catch (OperationCanceledException) { }
+        });
         _reader = Task.Run(ReadAsync);
-        _stderr = Task.Run(async () => { try { while (await _process.StandardError.ReadLineAsync(_stop.Token) != null) { } } catch (OperationCanceledException) { } });
+    }
+
+    internal static ProcessDiagnostic? ReadHostDiagnostic(string line)
+    {
+        if (line.Length > 8192) return null;
+        try
+        {
+            using var doc = JsonDocument.Parse(line); var root = doc.RootElement;
+            if (root.GetProperty("code").GetString() is not ("SAP_MCP_START_FAILED" or "SAP_MCP_PROCESS_FAILED")) return null;
+            var diagnostic = root.GetProperty("diagnostic").Deserialize<ProcessDiagnostic>(JsonDefaults.Options);
+            return diagnostic is { IsSafe: true } ? diagnostic : null;
+        }
+        catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException) { return null; }
     }
 
     public static async Task<McpSession> StartAsync(AppSettings settings, string configPath, string component, CancellationToken ct = default)
@@ -73,7 +95,11 @@ public sealed class McpSession : IAsyncDisposable
                 if (doc.RootElement.TryGetProperty("id", out var id) && id.TryGetInt32(out var number) && _pending.TryGetValue(number, out var pending))
                     pending.TrySetResult(doc.RootElement.Clone());
             }
-            foreach (var pending in _pending.Values) pending.TrySetException(new IOException(UiText.Get("Text017")));
+            try { await Task.WhenAll(_process.WaitForExitAsync(_stop.Token), _stderr).WaitAsync(TimeSpan.FromSeconds(2), _stop.Token); }
+            catch (TimeoutException) { }
+            var detail = _diagnostic ?? (_process.HasExited ? new ProcessDiagnostic("HOST_PROCESS_EXIT", "host", "ProcessExit", _process.ExitCode) : null);
+            var message = detail == null ? UiText.Get("Text017") : UiText.Get("Sdk.HostFailed", detail.Summary);
+            foreach (var pending in _pending.Values) pending.TrySetException(new IOException(message));
         }
         catch (Exception ex) { foreach (var pending in _pending.Values) pending.TrySetException(ex); }
     }

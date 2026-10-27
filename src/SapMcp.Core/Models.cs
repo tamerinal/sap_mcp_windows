@@ -149,7 +149,7 @@ public sealed record SapSystem(string Id, string Name, string Sid, string Host, 
     public override string ToString() => $"{Name}  ·  {Sid}  ·  {TargetKey}";
 }
 
-public sealed record Requirement(string Id, string Name, string Version, CheckState State, string Detail, bool Installable = false);
+public sealed record Requirement(string Id, string Name, string Version, CheckState State, string Detail, bool Installable = false, ProcessDiagnostic? Diagnostic = null);
 public sealed record ProcessResult(int ExitCode, string Output, string Error);
 public sealed record ClientRegistration(string Client, string ConfigPath, List<string> ServerNames);
 

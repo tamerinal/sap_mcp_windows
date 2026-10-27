@@ -62,7 +62,7 @@ public static class LaunchConfiguration
             Set(p + "LOG_MAX_FILES", c.MaxFiles.ToString());
             Set(p + "BUILD_VERSION", c.Version);
         }
-        Set("SAPNWRFC_HOME", s.SdkDirectory); Set("PYTHONIOENCODING", "utf-8"); Set("PYTHONUTF8", "1");
+        if (component == "rfc" || rfcReady) SdkRuntimeEnvironment.Apply(start, s.SdkDirectory);
         Set("SAP_RFC_PYTHON_EXECUTABLE", s.PythonExecutable); Set("SAP_RFC_PYTHON_WORKER_FILE", Path.Combine(s.PackageDirectory, "rfc", "python", "worker.py"));
         Set("SAP_RFC_DEFAULT_TIMEOUT_SECONDS", s.Rfc.TimeoutSeconds.ToString()); Set("SAP_RFC_FUNCTION_ALLOWLIST", s.Rfc.FunctionAllowlist);
         Set("SAP_ADT_RFC_ENABLED", rfcReady ? "true" : "false");

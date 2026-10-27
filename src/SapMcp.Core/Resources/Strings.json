@@ -628,16 +628,16 @@
     "tr": "SDK’yı doğrula ve kaydet"
   },
   "Text158": {
-    "en": "Expected files: lib\\sapnwrfc.dll and lib\\libsapucum.dll. Install Python and PyRFC for an actual load test.",
-    "tr": "Beklenen dosyalar: lib\\sapnwrfc.dll ve lib\\libsapucum.dll. Gerçek yükleme testi için Python ve PyRFC de kurulu olmalı."
+    "en": "Required x64 files in lib: sapnwrfc.dll, libsapucum.dll, icuuc57.dll, icudt57.dll, icuin57.dll. Python/PyRFC is required for isolated ICU and SDK initialization.",
+    "tr": "lib altında gereken x64 dosyalar: sapnwrfc.dll, libsapucum.dll, icuuc57.dll, icudt57.dll, icuin57.dll. Yalıtılmış ICU ve SDK başlatması için Python/PyRFC gerekir."
   },
   "Text159": {
     "en": "Waiting for SDK · RFC is disabled. You can continue preparing ADT connections.",
     "tr": "SDK bekleniyor · RFC etkinleştirilmez. ADT bağlantılarını hazırlamaya devam edebilirsiniz."
   },
   "Text160": {
-    "en": "SDK path saved. Readiness is checked again whenever MCP starts.",
-    "tr": "SDK yolu kaydedildi. Etkinlik durumu her MCP başlangıcında yeniden doğrulanır."
+    "en": "SDK path saved. Readiness is checked at every MCP start. Restart existing MCP servers after an SDK path change.",
+    "tr": "SDK yolu kaydedildi. Her MCP başlangıcında yeniden doğrulanır. SDK yolu değişince açık MCP sunucularını yeniden başlatın."
   },
   "Text161": {
     "en": "Continue to SAP connections →",
@@ -1298,5 +1298,25 @@
   "Connections.RouterPassword": {
     "en": "Password-bearing SAProuter routes (/W/ or /P/) are not supported in managed mode. Passwords cannot be stored in the catalog.",
     "tr": "Şifre içeren SAProuter rotaları (/W/ veya /P/) uygulama modunda desteklenmez. Şifreler kataloğa yazılamaz."
+  },
+  "Sdk.Ready": {
+    "en": "ICU and PyRFC/SDK initialized locally; no SAP login was attempted.",
+    "tr": "ICU ve PyRFC/SDK yerelde başlatıldı; SAP girişi denenmedi."
+  },
+  "Sdk.Failed": {
+    "en": "SDK initialization failed. Verify the SDK folder and ICU libraries, then restart your MCP servers.",
+    "tr": "SDK başlatılamadı. SDK klasörünü ve ICU kütüphanelerini doğrulayıp MCP sunucularını yeniden başlatın."
+  },
+  "Sdk.Diagnostic": {
+    "en": "Code: {0}; stage: {1}; class: {2}; exit: {3} ({4}).",
+    "tr": "Kod: {0}; aşama: {1}; sınıf: {2}; çıkış: {3} ({4})."
+  },
+  "Sdk.HostFailed": {
+    "en": "The MCP process could not continue. {0}",
+    "tr": "MCP süreci devam edemedi. {0}"
+  },
+  "Sdk.PingFailed": {
+    "en": "Connection test failed. Verify the SDK/ICU check and restart MCP servers after an SDK change. For EmptyStdout, Python worker exit details require the RFC package diagnostic update.",
+    "tr": "Bağlantı testi başarısız. SDK/ICU kontrolünü doğrulayın ve SDK değişiminden sonra MCP sunucularını yeniden başlatın. EmptyStdout için Python worker çıkış ayrıntıları RFC paketindeki tanılama güncellemesini gerektirir."
   }
 }

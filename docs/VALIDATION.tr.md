@@ -47,3 +47,7 @@ Mac, SNC/SSO, message-server grupları, gerçek SAP parola değişikliği ve oto
 ## Bağlantı kaynağı kabulü
 
 Boş JSON/oluşturma/düzenleme/silme/yeniden açma, iki mevcut MCP’nin üretilen XML’i okuması, hedef/profil taşıma, DPAPI dosyası koruma, mükerrer/çakışan hedefler, salt okunur GUI kaynağı, klasör adayları, bozuk kaynağın yöneticiyi engellememesi, geri alma ve kaynak değişimini iptal etme kapsanır. Headless arayüz iki kaynak modunu, iki dilde yerel ekran/düzenleyiciyi ve mevcut dil/tema/genişlik matrisini kapsar. Temiz GUI’siz Windows ve canlı SAP bekler.
+
+## Preview.3 SDK regression
+
+SDK içermeyen başlangıç PATH’i, mükerrer/büyük harf/tırnaklı SDK girdisi, Türkçe/boşluklu yollar, beş DLL mimarisi, bozuk kontrol çıktısı, native çıkış kodunun hex gösterimi ve iptal/zaman aşımı sınanır. Yerel yayın testleri yalnız Git dışında kalan artifacts altında özel SDK kopyası kullanır; yayınlara SDK alınmaz. Host → Node → Python ortam aktarımı, değişmeyen worker’ın yapılandırılmış yerel hatası ve Manager eksik-ICU tanılaması doğrulanır. TED/TEX canlı RFC_PING sorunlu makinede beklemektedir.

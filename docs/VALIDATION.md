@@ -40,3 +40,7 @@ Clean Windows VM and live SAP rows remain **pending** until evidence is collecte
 ## Connection-source acceptance
 
 Managed JSON empty/create/edit/delete/reopen, XML projection consumed by both existing MCPs, target/profile migration, retained DPAPI files, duplicate/conflicting targets, read-only GUI source, folder candidates, broken source without manager failure, rollback and cancelled source-change dialogs are covered. Headless UI coverage includes both source modes, bilingual managed screens/editor and existing locale/theme/width coverage. Clean GUI-free Windows and live SAP remain pending.
+
+## Preview.3 SDK regression
+
+Checks cover missing inherited SDK PATH, duplicate/cased/quoted SDK entries, Turkish/spaced paths, five DLL architectures, malformed probe output, native exit hexadecimal values and cancellation/timeout. Local release tests use a private SDK copy under ignored artifacts, never in publication. Host → Node → Python environment inheritance, unchanged worker structured local failure and Manager missing-ICU diagnostics are verified. TED/TEX live RFC_PING remains pending on the affected machine.

@@ -1,38 +1,9 @@
-using System.Reflection.PortableExecutable;
-
 namespace SapMcp.Core;
 
 public sealed class PrerequisiteService(PackageService packages)
 {
-    public static async Task<Requirement> ValidateSdkAsync(AppSettings s, CancellationToken ct = default)
-    {
-        if (string.IsNullOrWhiteSpace(s.SdkDirectory)) return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Waiting, UiText.Get("Text051"));
-        foreach (var name in new[] { "sapnwrfc.dll", "libsapucum.dll" })
-        {
-            var file = Path.Combine(s.SdkDirectory, "lib", name);
-            if (!File.Exists(file)) return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text052" , name));
-            try
-            {
-                using var stream = File.OpenRead(file); using var pe = new PEReader(stream);
-                if (pe.PEHeaders.CoffHeader.Machine != System.Reflection.PortableExecutable.Machine.Amd64)
-                    return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text053"));
-            }
-            catch (BadImageFormatException) { return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text054")); }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text055")); }
-        }
-        if (!File.Exists(s.PythonExecutable)) return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Waiting, UiText.Get("Text056"));
-        try
-        {
-            Directory.CreateDirectory(s.Rfc.LogDirectory);
-            var result = await ProcessRunner.RunAsync(s.PythonExecutable,
-                ["-c", "from pyrfc import Connection, get_nwrfclib_version; import json; print(json.dumps(list(get_nwrfclib_version())))"],
-                new Dictionary<string, string> { ["SAPNWRFC_HOME"] = s.SdkDirectory, ["PYTHONIOENCODING"] = "utf-8" }, TimeSpan.FromSeconds(20), ct: ct, workingDirectory: s.Rfc.LogDirectory);
-            return result.ExitCode == 0 ? new("sdk", "SAP NetWeaver RFC SDK", result.Output.Trim(), CheckState.Ready, UiText.Get("Text057"))
-                : new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text058"));
-        }
-        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text059")); }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception) { return new("sdk", "SAP NetWeaver RFC SDK", "x64", CheckState.Blocked, UiText.Get("Text060")); }
-    }
+    public static Task<Requirement> ValidateSdkAsync(AppSettings s, CancellationToken ct = default)
+        => SdkValidation.CheckAsync(s, ct);
 
     public async Task<List<Requirement>> CheckAsync(AppSettings s, CancellationToken ct = default)
     {

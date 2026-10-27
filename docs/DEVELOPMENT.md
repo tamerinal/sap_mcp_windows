@@ -45,7 +45,7 @@ Packages contain compiled code, production dependencies, lockfiles and provenanc
 2. Align Directory.Build.props, installer/versioned asset names, host diagnostics, payload catalog and release notes. Test compatibility with settings lacking uiLanguage.
 3. Prepare, build, run core/UI/integration/installer checks, then Test-Publication. The publication gate scans source and distribution content for machine paths, secrets and SDK. Review screenshots and reports for personal information too.
 4. Copy a sanitized validation summary and English/Turkish release notes into assets. Generate SHA256SUMS.txt for the two EXEs and documentation archive. Review licenses and provenance. Do not label clean VM/live SAP tests complete unless performed.
-5. Push code and wait for Public Windows CI. Create tag `v0.1.0-preview.2` at the tested commit, publish a **prerelease**, upload both EXEs, guide archive, SHA files, notes and validation summary. README links must target the tag, not latest (prereleases are not stable latest).
+5. Push code and wait for Public Windows CI. Create tag `v0.1.0-preview.3` at the tested commit, publish a **prerelease**, upload both EXEs, guide archive, SHA files, notes and validation summary. README links must target the tag, not latest (prereleases are not stable latest).
 6. Download assets over unauthenticated HTTPS and compare hashes. Check README/guide links while signed out. A failure in any gate blocks publication until corrected.
 
 No automatic update server or signing certificate is supplied in this preview. Installer smoke tests refuse to run if an existing user installation is registered. They install/uninstall in workspace artifacts and preserve user data; use a clean VM for production acceptance.
@@ -53,3 +53,7 @@ No automatic update server or signing certificate is supplied in this preview. I
 ## Upstream requests
 
 The [RFC request](MCP-RFC-DEVELOPMENT-REQUEST.md) and [ADT request](MCP-ADT-DEVELOPMENT-REQUEST.md) specify portable releases, diagnose --json, configurable paths, actual log filtering/retention, reproducible PyRFC and standalone ADT/RFC guards. These are documents for separate projects; no automatic messages or source changes are made there.
+
+## SDK runtime / Preview.3
+
+Shared SDK environment is constructed in Core and reused by launch/validation. SDK probes run in an empty owned scratch directory with a 20-second limit and closed stdin, produce schema-1 progress and a final success record, and never receive a target/profile. Only whitelisted metadata crosses the error boundary. Requirement gains an optional diagnostic object (code/stage/errorClass/exitCode/exitCodeHex/source/signal); settings schema and MCP wire tools stay unchanged.

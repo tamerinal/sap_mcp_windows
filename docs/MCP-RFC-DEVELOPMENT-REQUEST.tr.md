@@ -27,3 +27,5 @@ Hedef depo: `tamerinal/SAP_RFC_MCP`. Bu dosya o projeye aktarılacak geliştirme
 SDK yok/yanlış mimari/bozuk DLL; CPython 3.11’in uyumlu güncel yamaları; SDK yolu boşluk/Türkçe karakter; başka kullanıcının DPAPI dosyası; şifrede Türkçe karakter ve baş/son boşluk; log seviyeleri/döndürme; temiz Windows 10/11 x64.
 
 Mevcut çoklu profil çözümü MCP şema değişikliği gerektirmez: yönetici aktif profili `overridesByTarget[target_key]` ve `secretRef` ile yayınlar. Mac için Windows DPAPI çözümünü platforma ait secret provider arayüzüne ayırmak ikinci faz talebidir.
+
+[Preview.3 worker diagnostics / worker tanılama talebi](MCP-RFC-WORKER-DIAGNOSTICS.tr.md) — pending / bekliyor.

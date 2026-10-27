@@ -25,19 +25,21 @@ internal static class Program
             {
                 var service = new PrerequisiteService(new PackageService(Path.Combine(AppContext.BaseDirectory, "payload")));
                 var checks = await service.CheckAsync(settings);
-                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.2", checks }, JsonDefaults.Options));
+                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.3", checks }, JsonDefaults.Options));
                 return checks.Any(c => c.State is CheckState.Blocked or CheckState.Missing or CheckState.Waiting) ? 2 : 0;
             }
             var component = Value("--component");
             if (component is not ("rfc" or "adt")) throw new InvalidDataException(UiText.Get("Text249"));
-            var rfcReady = settings.Rfc.Selected && settings.Rfc.Installed && (await PrerequisiteService.ValidateSdkAsync(settings)).State == CheckState.Ready;
+            var sdk = settings.Rfc.Selected && settings.Rfc.Installed ? await PrerequisiteService.ValidateSdkAsync(settings) : null;
+            var rfcReady = sdk?.State == CheckState.Ready;
+            if (component == "rfc" && sdk is { State: not CheckState.Ready }) throw new SdkUnavailableException(sdk);
             var start = LaunchConfiguration.Create(settings, component, rfcReady);
             start.Environment["SAP_ADT_RFC_MCP_ARGS"] = JsonSerializer.Serialize(new[] { "--component", "rfc", "--config", path });
             return await ProxyAsync(start, settings.Component(component), component, rfcReady);
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_START_FAILED", message = Redaction.Text(ex.Message) }));
+            await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_START_FAILED", message = Redaction.Text(ex.Message), diagnostic = (ex as SdkUnavailableException)?.Diagnostic }, JsonDefaults.Options));
             return 2;
         }
     }
@@ -134,7 +136,12 @@ internal static class Program
             else if (!child.HasExited) child.Kill(true);
             await child.WaitForExitAsync();
             await outgoing;
-            if (child.ExitCode != 0) await Log(operations, LogLevel.Error, "process.failed", new { exitCode = child.ExitCode });
+            if (child.ExitCode != 0)
+            {
+                var diagnostic = new ProcessDiagnostic("UPSTREAM_PROCESS_EXIT", "upstream", "ProcessExit", child.ExitCode);
+                await Log(operations, LogLevel.Error, "process.failed", diagnostic);
+                await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_PROCESS_FAILED", diagnostic }, JsonDefaults.Options));
+            }
             return child.ExitCode;
         }
         finally

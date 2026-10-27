@@ -337,7 +337,7 @@ public partial class MainWindow : Window
         var result = await session.RequestAsync("tools/call", new { name = component == "rfc" ? "sap_rfc_ping_system" : "ping_system", arguments = new { target_key = system.TargetKey } }, Token);
         var failed = result.TryGetProperty("isError", out var error) && error.ValueKind == JsonValueKind.True;
         await AuditAsync("connection.tested", new { component, target = system.TargetKey, success = !failed });
-        SetStatus(failed ? UiText.Get("Text198") : UiText.Get("ConnectionSuccess", system.Name, component.ToUpperInvariant()));
+        SetStatus(failed ? UiText.Get(component == "rfc" ? "Sdk.PingFailed" : "Text198") : UiText.Get("ConnectionSuccess", system.Name, component.ToUpperInvariant()));
     }
 
     private async Task VerifyLocalAsync()

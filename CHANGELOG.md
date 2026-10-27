@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## 0.1.0-preview.3 — 2026-10-27
+
+- Fix saved SDK lib propagation in child PATH across Host, Node and Python; preserve OS PATH and existing configuration.
+- Require x64 SAP/ICU DLLs and isolated ICU/PyRFC/SDK initialization before Ready; safe stage/decimal/hex exit diagnostics for Manager and Host.
+- Add SDK regression tests, bilingual help and a separate pending RFC worker exitCode/signal request. Issue #3. Private MCP payloads remain unchanged.
+- New Online/Offline preview installers; clean Windows and live TED/TEX acceptance remain pending.
+
 ## v0.1.0-preview.2 — 2026-10-27
 
 - Added read-only SAP GUI and editable managed JSON connection sources, automatic MCP XML projection, confirmed target/profile migration and deletion with retained DPAPI files.
