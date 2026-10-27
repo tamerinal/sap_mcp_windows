@@ -149,6 +149,7 @@ public sealed class ProfileService(ISecretStore secrets)
 {
     public async Task SaveAsync(AppSettings settings, ConnectionProfile profile, string? password, bool activate, CancellationToken ct = default)
     {
+        if (!string.IsNullOrWhiteSpace(profile.AdtBaseUrl)) profile.AdtBaseUrl = AdtProfiles.NormalizeUrl(profile.AdtBaseUrl);
         profile.Validate();
         if (!string.IsNullOrEmpty(password))
         {
@@ -193,6 +194,9 @@ public sealed class ProfileService(ISecretStore secrets)
             if (p.AdtBaseUrl.Length > 0) { node["adtBaseUrl"] = p.AdtBaseUrl; node.Remove("adtBaseUrls"); }
             if (p.BwModelingBaseUrl.Length > 0) { node["bwModelingBaseUrl"] = p.BwModelingBaseUrl; node.Remove("bwModelingBaseUrls"); }
             node["allowInsecureTls"] = p.AllowInsecureTls;
+            node["adtTlsCertificates"] = JsonSerializer.SerializeToNode(p.AdtCertificates, JsonDefaults.Options);
+            node["adtTimeoutMs"] = p.AdtTimeoutSeconds * 1000;
+            node["adtAutoDiscovery"] = p.AdtAutoDiscovery;
             // DNS case differences between a GUI landscape and the managed catalog
             // must not select a different account in the upstream case-sensitive JSON map.
             foreach (var key in new[] { target }.Concat((systems ?? []).Where(s => s.TargetKey.Equals(target, StringComparison.OrdinalIgnoreCase)).Select(s => s.TargetKey)).Distinct(StringComparer.Ordinal))

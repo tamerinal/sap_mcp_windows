@@ -22,6 +22,52 @@ public static class TestAppBuilder
 
 public sealed class WindowTests
 {
+    [AvaloniaFact]
+    public async Task AdtHelpAndProfileControlsPreserveUnsavedValuesInBothLanguages()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "SapMcp ADT UI " + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);
+        var store = new SettingsStore(Path.Combine(root, "config", "settings.json"));
+        var settings = AppSettings.CreateDefault(root); settings.UiLanguage = "en";
+        await store.SaveAsync(settings); var manager = new ConnectionManager(store);
+        settings = await manager.SelectSourceAsync(settings, "managed");
+        settings = await manager.SaveSystemAsync(settings, new() { Name = "Fictional", Host = "fictional.example.invalid", Sysnr = "00" });
+        var profile = new ConnectionProfile { Name = "Account", TargetKey = "fictional.example.invalid:00", User = "DEMO" };
+        await new ProfileService(new DpapiSecretStore()).SaveAsync(settings, profile, "fictional-test-password", true); await store.SaveAsync(settings);
+        var window = new MainWindow(store.FilePath); window.Show();
+        try
+        {
+            await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[3]);
+            var timeout = Named<TextBox>(window, "AdtTimeout"); timeout.Text = "27";
+            var checkbox = Named<CheckBox>(window, "AdtAutoDiscovery"); checkbox.IsChecked = true;
+            foreach (var locale in new[] { "en", "tr" })
+            {
+                window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = locale == "tr" ? 1 : 0;
+                await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                Assert.Equal("27", timeout.Text); Assert.True(checkbox.IsChecked);
+                Click(Named<Button>(window, "AdtUrlHelp")); await Until(() => window.OwnedWindows.Any());
+                var dialog = window.OwnedWindows.Single(); var text = Named<TextBox>(dialog, "AdtUrlHelpText").Text!;
+                Assert.Contains("SMICM", text); Assert.Contains("Basis", text); Assert.Contains("example.invalid", text);
+                Assert.Equal(UiText.Get("Adt.UrlHelpBody") + "\n\n" + UiText.Get("Adt.BasisRequest"), text);
+                if (Environment.GetEnvironmentVariable("SAP_MCP_UI_SNAPSHOTS") is { Length: > 0 } output)
+                {
+                    Directory.CreateDirectory(output); await Task.Delay(30); Dispatcher.UIThread.RunJobs();
+                    using var frame=dialog.CaptureRenderedFrame(); frame!.Save(Path.Combine(output,$"{locale}-adt-url-help.png"),Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+                }
+                dialog.Close(); await Until(() => !window.OwnedWindows.Any());
+            }
+            Assert.Equal(15, (await store.LoadAsync()).Profiles.Single().AdtTimeoutSeconds); // No implicit form save.
+            Click(Named<Button>(window, "AdtCertificates"));
+            await Task.Delay(20); Dispatcher.UIThread.RunJobs(); Assert.Empty(window.OwnedWindows); // Dirty form requires save first.
+            Click(Caption(window, UiText.Get("Text185"))); await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click(Named<Button>(window, "AdtCertificates")); await Until(() => window.OwnedWindows.Any());
+            var trust = window.OwnedWindows.Single(); Assert.Empty(Named<ListBox>(trust, "AdtTrustedCertificates").ItemsSource!);
+            trust.Close();
+            Assert.Equal(profile.Id, (await store.LoadAsync()).ActiveProfiles[profile.TargetKey]);
+            window.Close();
+        }
+        finally { window.Close(); if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
     private static T Named<T>(Window owner, string name) where T : Control => owner.GetLogicalDescendants().OfType<T>().Single(c => c.Name == name);
     private static void Click(Button button) => button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     private static async Task Until(Func<bool> done)

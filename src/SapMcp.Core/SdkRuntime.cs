@@ -37,9 +37,9 @@ public sealed record ProcessDiagnostic(string Code, string Stage, string ErrorCl
     public string? Signal => null; // Windows does not report a POSIX termination signal.
     [System.Text.Json.Serialization.JsonIgnore]
     public bool IsSafe => Codes.Contains(Code) && Stages.Contains(Stage) && Classes.Contains(ErrorClass);
-    internal static readonly string[] Codes = ["SDK_DLL_MISSING", "SDK_ARCH_MISMATCH", "SDK_DLL_INVALID", "SDK_FILE_UNREADABLE", "SDK_PROBE_FAILED", "SDK_PROBE_TIMEOUT", "SDK_PROBE_INVALID_OUTPUT", "SDK_PROBE_START_FAILED", "HOST_PROCESS_EXIT", "UPSTREAM_PROCESS_EXIT"];
+    internal static readonly string[] Codes = ["ADT_PACKAGE_UPGRADE_REQUIRED", "SDK_DLL_MISSING", "SDK_ARCH_MISMATCH", "SDK_DLL_INVALID", "SDK_FILE_UNREADABLE", "SDK_PROBE_FAILED", "SDK_PROBE_TIMEOUT", "SDK_PROBE_INVALID_OUTPUT", "SDK_PROBE_START_FAILED", "HOST_PROCESS_EXIT", "UPSTREAM_PROCESS_EXIT"];
     internal static readonly string[] Stages = ["files", "start", "icu.load", "icu.init", "pyrfc.import", "sdk.version", "sdk.init", "complete", "host", "upstream"];
-    internal static readonly string[] Classes = ["MissingDll", "Architecture", "BadImageFormat", "IOError", "ProcessExit", "Timeout", "InvalidOutput", "StartFailure", "OSError", "ImportError", "RuntimeError", "UnexpectedResult", "Exception"];
+    internal static readonly string[] Classes = ["CapabilityMismatch", "MissingDll", "Architecture", "BadImageFormat", "IOError", "ProcessExit", "Timeout", "InvalidOutput", "StartFailure", "OSError", "ImportError", "RuntimeError", "UnexpectedResult", "Exception"];
     public string Summary => UiText.Get("Sdk.Diagnostic", Code, Stage, ErrorClass,
         ExitCode?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "—", ExitCodeHex ?? "—");
 }

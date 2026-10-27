@@ -26,7 +26,14 @@ try {
     New-Item -ItemType Directory -Force -Path $taskPublishPayload | Out-Null
     Copy-Item -LiteralPath (Join-Path $taskRoot 'payload\catalog.json') -Destination $taskPublishPayload -Force
     Copy-Item -LiteralPath (Join-Path $taskRoot 'payload\dependency-notices.json') -Destination $taskPublishPayload -Force
-    Copy-Item -LiteralPath (Join-Path $taskRoot 'payload\packages') -Destination $taskPublishPayload -Recurse -Force
+    $taskCatalog = Get-Content -Raw -LiteralPath (Join-Path $taskRoot 'payload/catalog.json') | ConvertFrom-Json
+    New-Item -ItemType Directory -Force -Path (Join-Path $taskPublishPayload 'packages'),(Join-Path $taskPublishPayload 'cache') | Out-Null
+    foreach ($taskAsset in $taskCatalog.assets) {
+        $taskKind = if ($taskAsset.id -in @('rfc','adt','pyrfc')) { 'packages' } else { 'cache' }
+        $taskSourceAsset = Join-Path $taskRoot ('payload/' + $taskKind + '/' + $taskAsset.fileName)
+        if ((Get-FileHash -LiteralPath $taskSourceAsset -Algorithm SHA256).Hash -ne $taskAsset.sha256) { throw 'Payload hash mismatch' }
+        Copy-Item -LiteralPath $taskSourceAsset -Destination (Join-Path $taskPublishPayload $taskKind)
+    }
     Copy-Item -LiteralPath (Join-Path $taskRoot 'docs') -Destination $taskPublish -Recurse -Force
     Copy-Item -LiteralPath (Join-Path $taskRoot 'LICENSE'),(Join-Path $taskRoot 'THIRD-PARTY-NOTICES.md') -Destination $taskPublish -Force
     # Runtime NuGet packages can copy native debug symbols; they are not needed to run.
@@ -35,7 +42,7 @@ try {
     if (!$InnoCompiler) { $InnoCompiler = Join-Path $taskRoot '.tools\inno\ISCC.exe' }
     if (!(Test-Path -LiteralPath $InnoCompiler)) { throw 'Inno Setup 6.7.3 compiler required. Pass -InnoCompiler or install in .tools/inno.' }
     foreach ($taskOffline in @('0','1')) {
-        & $InnoCompiler /Qp ('/DBuildRoot=' + $taskPublish) ('/DPayloadRoot=' + (Join-Path $taskRoot 'payload')) ('/DOffline=' + $taskOffline) (Join-Path $taskRoot 'installer\SapMcpManager.iss')
+        & $InnoCompiler /Qp ('/DBuildRoot=' + $taskPublish) ('/DPayloadRoot=' + $taskPublishPayload) ('/DOffline=' + $taskOffline) (Join-Path $taskRoot 'installer\SapMcpManager.iss')
         if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
     }
     Get-ChildItem -LiteralPath (Join-Path $taskRoot 'artifacts\installers') -Filter ("SAP-MCP-Manager-$taskVersion-Windows-x64-*.exe") | Get-FileHash -Algorithm SHA256 | Select-Object @{Name='fileName';Expression={Split-Path $_.Path -Leaf}},Hash | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRoot 'artifacts\installers\SHA256SUMS.json') -Encoding utf8NoBOM

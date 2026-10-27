@@ -125,10 +125,15 @@ public sealed class ConnectionProfile
     public string AdtBaseUrl { get; set; } = "";
     public string BwModelingBaseUrl { get; set; } = "";
     public bool AllowInsecureTls { get; set; }
+    public bool AdtAutoDiscovery { get; set; }
+    public int AdtTimeoutSeconds { get; set; } = 15;
+    public List<TrustedCertificate> AdtCertificates { get; set; } = [];
     public Dictionary<string, JsonElement> Extra { get; set; } = [];
 
     public void Validate()
     {
+        if (AdtTimeoutSeconds is < 1 or > 120 || AdtCertificates == null || AdtCertificates.Count > 20 || AdtCertificates.Any(c => !Path.IsPathFullyQualified(c.File) || c.Sha256.Length != 64 || !c.Sha256.All(char.IsAsciiHexDigit)))
+            throw new InvalidDataException(UiText.Get("Adt.InvalidCertificate"));
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(TargetKey) || string.IsNullOrWhiteSpace(User))
             throw new InvalidDataException(UiText.Get("Text027"));
         if (Client.Length != 3 || !Client.All(char.IsAsciiDigit)) throw new InvalidDataException(UiText.Get("Text028"));

@@ -300,8 +300,17 @@ public partial class MainWindow : Window
         var adt = Field(edit, UiText.Get("Text178"), ""); var bw = Field(edit, UiText.Get("Text179"), "");
         var insecure = new CheckBox { Content = UiText.Get("Text180") }; edit.Children.Add(insecure);
         var activate = new CheckBox { Content = UiText.Get("Text181"), IsChecked = true }; edit.Children.Add(activate);
+        var adtTimeout = Field(edit, UiText.Get("Adt.Timeout"), "15"); adtTimeout.Name = "AdtTimeout";
+        var autoDiscovery = new CheckBox { Content = UiText.Get("Adt.AllowDiscovery"), Name = "AdtAutoDiscovery" }; edit.Children.Add(autoDiscovery);
+        var warning = Text(UiText.Get("Adt.TrustScope"), "muted"); edit.Children.Add(warning);
+        void Warn() => warning.Text = UiText.Get(insecure.IsChecked == true ? "Adt.TlsWarning" : Read(adt).StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "Adt.HttpWarning" : "Adt.TrustScope");
+        adt.PropertyChanged += (_, e) => { if (e.Property == TextBox.TextProperty) Warn(); };
+        insecure.IsCheckedChanged += (_, _) => Warn();
         ConnectionProfile? current = null;
-        void Fill(ConnectionProfile? p) { _fillingProfiles = true; current = p; name.Text = p?.Name ?? ""; user.Text = p?.User ?? ""; client.Text = p?.Client ?? "100"; language.Text = p?.Language ?? "TR"; password.Text = ""; adt.Text = p?.AdtBaseUrl ?? ""; bw.Text = p?.BwModelingBaseUrl ?? ""; insecure.IsChecked = p?.AllowInsecureTls ?? false; _fillingProfiles = false; _connectionsDirty = false; }
+        edit.Children.Add(Row(DialogAction(UiText.Get("Adt.UrlHelp"), ShowAdtUrlHelpAsync, "AdtUrlHelp"),
+            DialogAction(UiText.Get("Adt.Certificates"), async () => { var saved = await EditAdtTrustAsync(current); if (saved != null) Fill(saved); }, "AdtCertificates"),
+            Action(UiText.Get("Adt.Discover"), () => DiscoverAdtAsync(current, adt))));
+        void Fill(ConnectionProfile? p) { _fillingProfiles = true; current = p; name.Text = p?.Name ?? ""; user.Text = p?.User ?? ""; client.Text = p?.Client ?? "100"; language.Text = p?.Language ?? "TR"; password.Text = ""; adt.Text = p?.AdtBaseUrl ?? ""; bw.Text = p?.BwModelingBaseUrl ?? ""; insecure.IsChecked = p?.AllowInsecureTls ?? false; adtTimeout.Text = (p?.AdtTimeoutSeconds ?? 15).ToString(); autoDiscovery.IsChecked = p?.AdtAutoDiscovery ?? false; _fillingProfiles = false; _connectionsDirty = false; }
         void RefreshProfiles()
         {
             if (systemPicker.SelectedItem is not SapSystem system) return;
@@ -315,17 +324,18 @@ public partial class MainWindow : Window
             {
                 if (systemPicker.SelectedItem is not SapSystem system) return;
                 var p = current == null ? new ConnectionProfile() : JsonSerializer.Deserialize<ConnectionProfile>(JsonSerializer.Serialize(current, JsonDefaults.Options), JsonDefaults.Options)!;
-                p.TargetKey = system.TargetKey; p.Name = Read(name); p.User = Read(user); p.Client = Read(client); p.Language = Read(language).ToUpperInvariant(); p.AdtBaseUrl = Read(adt); p.BwModelingBaseUrl = Read(bw); p.AllowInsecureTls = insecure.IsChecked == true;
+                p.TargetKey = system.TargetKey; p.Name = Read(name); p.User = Read(user); p.Client = Read(client); p.Language = Read(language).ToUpperInvariant(); p.AdtBaseUrl = Read(adt); p.BwModelingBaseUrl = Read(bw); p.AllowInsecureTls = insecure.IsChecked == true; p.AdtTimeoutSeconds = int.Parse(Read(adtTimeout)); p.AdtAutoDiscovery = autoDiscovery.IsChecked == true;
                 var secret = password.Text; password.Text = "";
                 await new ProfileService(_secrets).SaveAsync(_settings, p, secret, activate.IsChecked == true, Token); await PersistAsync(); await AuditAsync("profile.saved", new { target = p.TargetKey, profile = p.Name }); RefreshProfiles(); SetStatus(UiText.Get("Text186"));
             }, true),
             Action(UiText.Get("Text188"), async () => { if (current == null) throw new InvalidOperationException(UiText.Get("Text187")); _settings.ActiveProfiles[current.TargetKey] = current.Id; await ProfileService.MaterializeAsync(_settings, Token); await PersistAsync(); await AuditAsync("profile.activated", new { target = current.TargetKey, profile = current.Name }); RefreshProfiles(); SetStatus(UiText.Get("Text189")); })));
-        edit.Children.Add(Row(Action(UiText.Get("Text190"), () => PingAsync(systemPicker.SelectedItem as SapSystem, "rfc")), Action(UiText.Get("Text191"), () => PingAsync(systemPicker.SelectedItem as SapSystem, "adt")),
+        edit.Children.Add(Row(Action(UiText.Get("Text190"), () => PingAsync(systemPicker.SelectedItem as SapSystem, "rfc")), Action(UiText.Get("Text191"), () => TestAdtProfileAsync(current)),
             Action(UiText.Get("Text192"), async () => { if (current == null) return; if (!await ConfirmAsync(UiText.Get("Text193"), UiText.Get("RemoveProfile", current.Name))) return; var p = current; _settings.Profiles.RemoveAll(x => x.Id == p.Id); if (_settings.ActiveProfiles.GetValueOrDefault(p.TargetKey) == p.Id) _settings.ActiveProfiles.Remove(p.TargetKey); await ProfileService.MaterializeAsync(_settings, Token); await PersistAsync(); RefreshProfiles(); SetStatus(UiText.Get("Text195")); })));
-        foreach (var field in new[] { name, user, client, language, password, adt, bw })
+        foreach (var field in new[] { name, user, client, language, password, adt, bw, adtTimeout })
             field.PropertyChanged += (_, change) => { if (change.Property == TextBox.TextProperty && !_fillingProfiles) _connectionsDirty = true; };
         insecure.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
         activate.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
+        autoDiscovery.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
         Body.Children.Add(Card(edit));
     }
 

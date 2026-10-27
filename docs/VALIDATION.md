@@ -44,3 +44,7 @@ Managed JSON empty/create/edit/delete/reopen, XML projection consumed by both ex
 ## Preview.3 SDK regression
 
 Checks cover missing inherited SDK PATH, duplicate/cased/quoted SDK entries, Turkish/spaced paths, five DLL architectures, malformed probe output, native exit hexadecimal values and cancellation/timeout. Local release tests use a private SDK copy under ignored artifacts, never in publication. Host → Node → Python environment inheritance, unchanged worker structured local failure and Manager missing-ICU diagnostics are verified. TED/TEX live RFC_PING remains pending on the affected machine.
+
+## Preview.4 ADT/TLS
+
+Local generated root/intermediate/leaf/self-signed/expired/mismatched certificates exercise HTTP, HTTPS, custom ports, IPv6, proxies, trust isolation, redirects, authentication retry counts, content validation and masked diagnosis. Integration starts a local server and compares selected-profile Manager snapshots with active-profile MCP tools, preserving original mappings and checking Unicode/whitespace DPAPI secrets. No real SAP, customer certificate or OS store mutation is a prerequisite.

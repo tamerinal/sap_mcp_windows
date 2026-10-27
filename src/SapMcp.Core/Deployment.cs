@@ -42,6 +42,16 @@ public static class LaunchConfiguration
         var root = Path.Combine(s.PackageDirectory, component);
         var entry = Path.Combine(root, "dist", "server.js");
         if (!File.Exists(entry) || !File.Exists(s.NodeExecutable)) throw new FileNotFoundException(UiText.Get("Text013"));
+        if (component == "adt")
+        {
+            try
+            {
+                using var metadata = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "build-info.json")));
+                if (!metadata.RootElement.TryGetProperty("connectionPolicyVersion", out var version) || version.GetInt32() != 1) throw new InvalidDataException();
+            }
+            catch (Exception ex) when (ex is IOException or JsonException or InvalidOperationException or UnauthorizedAccessException)
+            { throw new AdtPackageUnavailableException(); }
+        }
         Directory.CreateDirectory(options.LogDirectory);
         var start = new ProcessStartInfo(s.NodeExecutable) { WorkingDirectory = component == "rfc" ? options.LogDirectory : root, UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true };

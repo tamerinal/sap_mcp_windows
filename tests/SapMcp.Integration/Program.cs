@@ -175,6 +175,7 @@ await Step("Two selected MCP components start independently", async () =>
     await using var session = await McpSession.StartAsync(settings, store.FilePath, "adt");
     var result = await session.RequestAsync("tools/list"); Ensure(result.GetProperty("tools").GetArrayLength() > 10, "ADT tools missing");
 });
+await AdtVerification.RunAsync(settings, Step);
 await Step("Off logging creates no operation/session files", async () =>
 {
     settings.Adt.LogLevel = LogLevel.Off; settings.Adt.LogDirectory = Path.Combine(data, "logs-off"); await store.SaveAsync(settings);
@@ -184,6 +185,7 @@ await Step("Off logging creates no operation/session files", async () =>
 await Step("Fake upstream receives no blocked mutation", async () =>
 {
     var fakeRoot = Path.Combine(verification, "fake-upstream"); var fakePackage = Path.Combine(fakeRoot, "adt", "dist"); Directory.CreateDirectory(fakePackage);
+    await File.WriteAllTextAsync(Path.Combine(fakeRoot, "adt", "build-info.json"), "{\"connectionPolicyVersion\":1}");
     var marker = Path.Combine(fakeRoot, "mutation-marker.txt");
     var script = "const readline = require('node:readline'); const fs = require('node:fs'); const rl=readline.createInterface({input:process.stdin}); rl.on('line',line=>{ const m=JSON.parse(line); if(m.method==='initialize') console.log(JSON.stringify({jsonrpc:'2.0',id:m.id,result:{protocolVersion:'2024-11-05',capabilities:{},serverInfo:{name:'fixture',version:'1'}}})); else if(m.method==='tools/call'){fs.writeFileSync(" + JsonSerializer.Serialize(marker) + ",'BAD');console.log(JSON.stringify({jsonrpc:'2.0',id:m.id,result:{content:[]}}));}});";
     await File.WriteAllTextAsync(Path.Combine(fakePackage, "server.js"), script); settings.PackageDirectory = fakeRoot; settings.Rfc.Installed = false; await store.SaveAsync(settings);

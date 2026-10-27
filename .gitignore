@@ -21,3 +21,10 @@ SAPMcpLandscape.xml
 test-data/
 dev_rfc*.log
 *.trc
+certificates/
+*.pem
+*.cer
+*.crt
+*.key
+*.pfx
+*.p12

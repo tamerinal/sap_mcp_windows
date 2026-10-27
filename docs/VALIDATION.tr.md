@@ -51,3 +51,7 @@ Boş JSON/oluşturma/düzenleme/silme/yeniden açma, iki mevcut MCP’nin üreti
 ## Preview.3 SDK regression
 
 SDK içermeyen başlangıç PATH’i, mükerrer/büyük harf/tırnaklı SDK girdisi, Türkçe/boşluklu yollar, beş DLL mimarisi, bozuk kontrol çıktısı, native çıkış kodunun hex gösterimi ve iptal/zaman aşımı sınanır. Yerel yayın testleri yalnız Git dışında kalan artifacts altında özel SDK kopyası kullanır; yayınlara SDK alınmaz. Host → Node → Python ortam aktarımı, değişmeyen worker’ın yapılandırılmış yerel hatası ve Manager eksik-ICU tanılaması doğrulanır. TED/TEX canlı RFC_PING sorunlu makinede beklemektedir.
+
+## Preview.4 ADT/TLS
+
+Yerelde üretilen kök/ara/leaf/self-signed/süresi dolmuş/adı farklı sertifikalar; HTTP, HTTPS, özel port, IPv6, proxy, güven yalıtımı, redirect, kimlik deneme sayısı, içerik ve maskelenmiş raporu sınar. Entegrasyon yerel sunucuyla seçili-profil Manager snapshot’ını aktif-profil MCP araçlarıyla karşılaştırır; özgün mapping’i korur ve Türkçe/boşluklu DPAPI şifresini kontrol eder. Canlı SAP, müşteri sertifikası ve OS deposu değişikliği ön koşul değildir.

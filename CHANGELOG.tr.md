@@ -2,6 +2,13 @@
 
 [English](CHANGELOG.md)
 
+## v0.1.0-preview.4 — 2026-10-28
+
+- Açık ADT adresi, adres bulma yardımı, isteğe bağlı kimlik bilgisiz öneri ve şifreyle tahmin yapmayan geçiş.
+- Profile özel PEM/DER güveni, sertifika inceleme, ortak Node katmanı, aşamalı tanılama ve maskelenmiş destek raporu.
+- Seçili profil Manager testi ortak aktif hesabı değiştirmez; eski ADT paketi onarım ister. ADT güncellendi; RFC/PyRFC/runtime hashleri korundu.
+- Yerel HTTP/TLS regresyonları ve iki dilde dokümantasyon. Temiz Windows/canlı SAP bekler.
+
 ## 0.1.0-preview.3 — 2026-10-27
 
 - Kayıtlı SDK lib yolunu Host, Node ve Python alt süreçlerinin PATH’ine aktar; işletim sistemi PATH’i ve mevcut ayarlar korunur.

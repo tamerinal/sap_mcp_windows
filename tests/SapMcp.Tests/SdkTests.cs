@@ -41,6 +41,7 @@ public sealed class SdkTests
         {
             s.Component(component).Installed = true;
             var dist = Path.Combine(s.PackageDirectory, component, "dist"); Directory.CreateDirectory(dist); File.WriteAllText(Path.Combine(dist, "server.js"), "fixture");
+            if (component == "adt") File.WriteAllText(Path.Combine(s.PackageDirectory, component, "build-info.json"), "{\"connectionPolicyVersion\":1}");
         }
         var rfc = LaunchConfiguration.Create(s, "rfc", true); var adt = LaunchConfiguration.Create(s, "adt", true);
         Assert.Equal(rfc.Environment["PATH"], adt.Environment["PATH"]);

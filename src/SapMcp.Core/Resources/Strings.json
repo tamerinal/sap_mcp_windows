@@ -1318,5 +1318,217 @@
   "Sdk.PingFailed": {
     "en": "Connection test failed. Verify the SDK/ICU check and restart MCP servers after an SDK change. For EmptyStdout, Python worker exit details require the RFC package diagnostic update.",
     "tr": "Bağlantı testi başarısız. SDK/ICU kontrolünü doğrulayın ve SDK değişiminden sonra MCP sunucularını yeniden başlatın. EmptyStdout için Python worker çıkış ayrıntıları RFC paketindeki tanılama güncellemesini gerektirir."
+  },
+  "Adt.InvalidUrl": {
+    "en": "Enter an HTTP/HTTPS base URL without credentials, query or fragment.",
+    "tr": "Kimlik bilgisi, query veya fragment içermeyen HTTP/HTTPS kök adresi girin."
+  },
+  "Adt.ServicePath": {
+    "en": "Enter the base URL, not a discovery or deeper service address. A trailing /sap/bc/adt is normalized automatically.",
+    "tr": "Discovery veya alt servis adresi yerine kök URL girin. Sondaki /sap/bc/adt otomatik düzeltilir."
+  },
+  "Adt.InvalidCertificate": {
+    "en": "Choose public PEM/DER certificates only (up to 1 MB). Private keys/PFX are not accepted.",
+    "tr": "Yalnız açık PEM/DER sertifikaları seçin (en fazla 1 MB). Özel anahtar/PFX kabul edilmez."
+  },
+  "Adt.SaveFirst": {
+    "en": "Save the selected profile and pending form changes first. Testing does not change the shared active profile.",
+    "tr": "Önce seçili profili ve form değişikliklerini kaydedin. Test, ortak aktif profili değiştirmez."
+  },
+  "Adt.UrlAdvice": {
+    "en": "Check the profile ADT base URL. Use “How do I find this address?”; do not infer the web port from the RFC system number.",
+    "tr": "Profilin ADT kök adresini kontrol edin. “Bu adresi nasıl bulurum?” yardımını kullanın; RFC sistem numarasından web portu çıkarmayın."
+  },
+  "Adt.NameAdvice": {
+    "en": "Use the DNS/IP covered by the server SAN, or ask Basis to correct the certificate. Adding a CA does not fix a name mismatch.",
+    "tr": "Sertifikanın SAN alanındaki DNS/IP adresini kullanın veya Basis’ten sertifikayı düzeltmesini isteyin. CA eklemek ad uyuşmazlığını çözmez."
+  },
+  "Adt.DateAdvice": {
+    "en": "Check the computer clock and certificate validity; ask Basis for a renewed certificate.",
+    "tr": "Bilgisayar saatini ve sertifika tarihlerini kontrol edin; Basis’ten yenilenmiş sertifika isteyin."
+  },
+  "Adt.CaAdvice": {
+    "en": "Inspect the chain and import verified CA certificates for this profile. Missing chain versus untrusted issuer can be ambiguous.",
+    "tr": "Zinciri inceleyip doğrulanmış CA sertifikalarını bu profile ekleyin. Eksik zincir ile güvenilmeyen düzenleyen her zaman kesin ayrılamaz."
+  },
+  "Adt.AuthAdvice": {
+    "en": "Check this profile’s account/client/password. Automatic retries stop after the first failed login.",
+    "tr": "Bu profilin hesap/client/şifresini kontrol edin. İlk hatalı girişten sonra otomatik tekrar yapılmaz."
+  },
+  "Adt.AuthorizationAdvice": {
+    "en": "Ask Basis to check this account’s ADT authorizations and service access.",
+    "tr": "Basis’ten bu hesabın ADT yetkilerini ve servis erişimini kontrol etmesini isteyin."
+  },
+  "Adt.NetworkAdvice": {
+    "en": "Check the saved host/port, DNS, VPN, firewall and existing proxy configuration.",
+    "tr": "Kayıtlı sunucu/port, DNS, VPN, güvenlik duvarı ve mevcut proxy ayarlarını kontrol edin."
+  },
+  "Adt.ServiceAdvice": {
+    "en": "Check the URL and ADT routing/service with Basis. An open port, 401, root 404 or arbitrary XML is not proof of ADT access.",
+    "tr": "Basis ile URL ve ADT servis/yönlendirmesini kontrol edin. Açık port, 401, kök 404 veya herhangi bir XML ADT erişimini kanıtlamaz."
+  },
+  "Adt.UrlHelp": {
+    "en": "How do I find this address?",
+    "tr": "Bu adresi nasıl bulurum?"
+  },
+  "Adt.CopyBasisRequest": {
+    "en": "Copy request for Basis",
+    "tr": "Basis talebini kopyala"
+  },
+  "Adt.BasisRequest": {
+    "en": "Please provide the ADT HTTP/HTTPS base URL reachable from my workstation, the web port, any reverse-proxy path prefix, VPN/proxy requirements and the verified root/intermediate CA chain. Please confirm that ADT discovery and read-only compatibility services are available to my SAP user/client. Do not send passwords.",
+    "tr": "Lütfen bilgisayarımdan erişilebilen ADT HTTP/HTTPS kök adresini, web portunu, varsa ters proxy yol önekini, VPN/proxy gereksinimlerini ve doğrulanmış kök/ara CA zincirini paylaşın. SAP kullanıcı/client hesabımın ADT discovery ve salt okunur compatibility servislerine erişebildiğini doğrulayın. Şifre göndermeyin."
+  },
+  "Adt.UrlHelpBody": {
+    "en": "Ask your SAP Basis team for the workstation-accessible ADT web address. A working Eclipse ADT project can identify the intended system, but its RFC system number does not determine the HTTP port. An authorized administrator can read active HTTP/HTTPS services in SMICM → Goto → Services. The external Web Dispatcher/load-balancer address may differ from that internal address. Prefer the DNS name present in the certificate SAN. Enter a base URL such as https://sap.example.invalid:8443 (fictional); the application appends /sap/bc/adt/discovery itself. Automatic discovery proposes candidates without passwords and does not prove availability. If you cannot access SAP GUI or Eclipse, use the Basis request below. See SAP Help: https://help.sap.com/docs/SUPPORT_CONTENT/abapconn/3354079914.html",
+    "tr": "Bilgisayarınızdan erişilebilen ADT web adresini SAP Basis ekibinden isteyin. Çalışan Eclipse ADT projesini sistem referansı olarak gösterebilirsiniz; RFC sistem numarası HTTP portunu belirlemez. Yetkili yönetici SMICM → Goto → Services üzerinden etkin HTTP/HTTPS servislerini okuyabilir. Dış Web Dispatcher/yük dengeleyici adresi bu iç adresten farklı olabilir. Sertifikanın SAN alanındaki DNS adını tercih edin. https://sap.example.invalid:8443 gibi kök URL girin (kurgusal); uygulama /sap/bc/adt/discovery yolunu ekler. Otomatik keşif şifresiz aday önerir, erişimi kanıtlamaz. SAP GUI/Eclipse erişiminiz yoksa aşağıdaki Basis talebini kullanın. SAP Yardım: https://help.sap.com/docs/SUPPORT_CONTENT/abapconn/3354079914.html"
+  },
+  "Adt.Timeout": {
+    "en": "ADT timeout (seconds, 1–120)",
+    "tr": "ADT zaman aşımı (saniye, 1–120)"
+  },
+  "Adt.AllowDiscovery": {
+    "en": "Enable unauthenticated address suggestions for this profile",
+    "tr": "Bu profil için kimlik bilgisiz adres önerilerini etkinleştir"
+  },
+  "Adt.TrustScope": {
+    "en": "Trust scope: Node defaults + Windows trust + certificates explicitly added to this profile. Other profiles do not inherit these files.",
+    "tr": "Güven kapsamı: Node varsayılanları + Windows güveni + bu profile açıkça eklenen sertifikalar. Diğer profiller bu dosyalara güvenmez."
+  },
+  "Adt.TlsWarning": {
+    "en": "WARNING: TLS verification is disabled for this profile. This is not a verified secure connection.",
+    "tr": "UYARI: Bu profilde TLS doğrulaması kapalı. Bu, doğrulanmış güvenli bağlantı değildir."
+  },
+  "Adt.HttpWarning": {
+    "en": "HTTP: account credentials are not protected by TLS.",
+    "tr": "HTTP: hesap bilgileri TLS ile korunmaz."
+  },
+  "Adt.PackageUpgrade": {
+    "en": "Install/repair the Preview.4 ADT package, then restart MCP servers. This package lacks the required diagnostic capability.",
+    "tr": "Preview.4 ADT paketini kurun/onarın ve MCP sunucularını yeniden başlatın. Bu pakette gereken tanılama yeteneği yok."
+  },
+  "Adt.Diagnostics": {
+    "en": "ADT connection diagnostics",
+    "tr": "ADT bağlantı tanılaması"
+  },
+  "Adt.Verified": {
+    "en": "ADT connection verified across all required stages.",
+    "tr": "ADT bağlantısı gereken tüm aşamalarda doğrulandı."
+  },
+  "Adt.NotVerified": {
+    "en": "Connection is not fully verified. Review failed, unverified stages and warnings.",
+    "tr": "Bağlantı tam doğrulanmadı. Hatalı/doğrulanmamış aşamaları ve uyarıları inceleyin."
+  },
+  "Adt.StageLine": {
+    "en": "{0}: {1} · {2}",
+    "tr": "{0}: {1} · {2}"
+  },
+  "Adt.ExportSupport": {
+    "en": "Export masked support report",
+    "tr": "Maskelenmiş destek raporu dışa aktar"
+  },
+  "Adt.StageConfig": {
+    "en": "Configuration",
+    "tr": "Yapılandırma"
+  },
+  "Adt.StageDns": {
+    "en": "DNS resolution",
+    "tr": "DNS çözümleme"
+  },
+  "Adt.StageTcp": {
+    "en": "TCP access",
+    "tr": "TCP erişimi"
+  },
+  "Adt.StageTls": {
+    "en": "TLS validation",
+    "tr": "TLS doğrulaması"
+  },
+  "Adt.StageAuth": {
+    "en": "Authentication",
+    "tr": "Kimlik doğrulama"
+  },
+  "Adt.StageDiscovery": {
+    "en": "ADT discovery",
+    "tr": "ADT discovery"
+  },
+  "Adt.StageRead": {
+    "en": "Read-only ADT operation",
+    "tr": "Salt okunur ADT işlemi"
+  },
+  "Adt.Certificates": {
+    "en": "Profile certificates",
+    "tr": "Profil sertifikaları"
+  },
+  "Adt.ImportCertificate": {
+    "en": "Import verified certificate",
+    "tr": "Doğrulanmış sertifika ekle"
+  },
+  "Adt.ViewCertificate": {
+    "en": "View certificate",
+    "tr": "Sertifikayı göster"
+  },
+  "Adt.RemoveCertificate": {
+    "en": "Remove trust reference",
+    "tr": "Güven referansını kaldır"
+  },
+  "Adt.InspectCertificate": {
+    "en": "Inspect server certificate (no login)",
+    "tr": "Sunucu sertifikasını incele (giriş yapmadan)"
+  },
+  "Adt.ConfirmTrust": {
+    "en": "Confirm profile trust",
+    "tr": "Profil güvenini onayla"
+  },
+  "Adt.ConfirmTrustBody": {
+    "en": "Confirm only after verifying the SHA-256 fingerprint with your administrator. This adds trust only to this profile. Intermediate certificates complete the chain; they do not become standalone roots. Hostname and expiry checks remain enabled.",
+    "tr": "Yalnız SHA-256 parmak izini yöneticinizle doğruladıktan sonra onaylayın. Güven yalnız bu profile eklenir. Ara sertifikalar zinciri tamamlar; tek başına kök olmaz. Ad ve süre kontrolleri devam eder."
+  },
+  "Adt.InspectionWarning": {
+    "en": "UNVERIFIED inspection only. No credentials sent; no certificate was trusted automatically.",
+    "tr": "Yalnız DOĞRULANMAMIŞ inceleme. Kimlik bilgisi gönderilmedi; sertifikaya otomatik güvenilmedi."
+  },
+  "Adt.TrustSaved": {
+    "en": "Profile trust saved. New calls read the new policy; restart MCP after package/runtime or Windows trust changes.",
+    "tr": "Profil güveni kaydedildi. Yeni çağrılar güncel ayarı okur; paket/runtime veya Windows güven değişiminden sonra MCP’yi yeniden başlatın."
+  },
+  "Adt.Discover": {
+    "en": "Suggest ADT addresses (no login)",
+    "tr": "ADT adresi öner (giriş yapmadan)"
+  },
+  "Adt.EnableDiscovery": {
+    "en": "Enable address suggestions in this profile and save it first.",
+    "tr": "Önce profilde adres önerisini etkinleştirip kaydedin."
+  },
+  "Adt.UseCandidate": {
+    "en": "Use selected URL in form",
+    "tr": "Seçili URL’yi forma al"
+  },
+  "Adt.CandidateWarning": {
+    "en": "Candidates only: not proof of ADT access. Select a URL, verify it with Basis, then save the profile before authentication.",
+    "tr": "Yalnız adaylar: ADT erişimini kanıtlamaz. URL seçin, Basis ile doğrulayın ve kimlik doğrulamadan önce profili kaydedin."
+  },
+  "Adt.IdentityAdvice": {
+    "en": "The server did not require authentication on the checked resources. ADT read access was observed, but the supplied account was not proven. Ask Basis to verify the authentication policy.",
+    "tr": "Sunucu kontrol edilen kaynaklarda kimlik doğrulama istemedi. ADT okuma erişimi görüldü, ancak girilen hesap doğrulanamadı. Basis’ten kimlik doğrulama politikasını kontrol etmesini isteyin."
+  },
+  "Adt.Status.passed": {
+    "en": "Passed",
+    "tr": "Geçti"
+  },
+  "Adt.Status.failed": {
+    "en": "Failed",
+    "tr": "Başarısız"
+  },
+  "Adt.Status.skipped": {
+    "en": "Skipped",
+    "tr": "Atlandı"
+  },
+  "Adt.Status.pending": {
+    "en": "Pending",
+    "tr": "Bekliyor"
+  },
+  "Adt.Status.unverified": {
+    "en": "Unverified",
+    "tr": "Doğrulanmadı"
   }
 }

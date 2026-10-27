@@ -2,6 +2,13 @@
 
 [Türkçe](CHANGELOG.tr.md)
 
+## v0.1.0-preview.4 — 2026-10-28
+
+- Explicit ADT endpoints, address-finding help, opt-in unauthenticated suggestions and migration without password-bearing guesses.
+- Profile-only PEM/DER trust, certificate inspection, shared Node transport, staged diagnostics and masked support export.
+- Selected-profile Manager tests leave shared active accounts unchanged; old ADT packages require repair. Updated ADT package; RFC/PyRFC/runtime hashes preserved.
+- Local HTTP/TLS regression coverage and bilingual documentation. Clean Windows/live SAP remain pending.
+
 ## 0.1.0-preview.3 — 2026-10-27
 
 - Fix saved SDK lib propagation in child PATH across Host, Node and Python; preserve OS PATH and existing configuration.

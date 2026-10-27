@@ -16,7 +16,7 @@ $taskScenarios = @(
 )
 foreach ($taskScenario in $taskScenarios) {
     $taskMode = $taskScenario.Mode
-    $taskInstaller = Join-Path $taskRoot ('artifacts\installers\SAP-MCP-Manager-0.1.0-preview.3-Windows-x64-' + $taskMode + '.exe')
+    $taskInstaller = Join-Path $taskRoot ('artifacts\installers\SAP-MCP-Manager-0.1.0-preview.4-Windows-x64-' + $taskMode + '.exe')
     $taskDestination = [IO.Path]::GetFullPath((Join-Path $taskArtifacts ('installer-smoke\' + $taskMode + '-' + $taskScenario.Name)))
     if (!$taskDestination.StartsWith($taskArtifacts + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid test destination' }
     $taskLog = Join-Path $taskArtifacts ('installer-smoke-' + $taskMode + '-' + $taskScenario.Name + '.log')
@@ -40,6 +40,7 @@ foreach ($taskScenario in $taskScenarios) {
             $taskFile = Join-Path $taskDestination ('payload\packages\' + $taskAsset.fileName)
             if (!(Test-Path -LiteralPath $taskFile)) { $taskFile = Join-Path $taskDestination ('payload\cache\' + $taskAsset.fileName) }
             $taskMustExist = $taskMode -eq 'Offline' -or $taskAsset.id -in @('rfc','adt','pyrfc')
+            if (!$taskMustExist -and (Test-Path -LiteralPath $taskFile)) { throw 'Online installer unexpectedly contains runtime cache' }
             if ($taskMustExist) {
                 if (!(Test-Path -LiteralPath $taskFile)) { throw "Installer asset missing: $($taskAsset.id)" }
                 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $taskFile).Hash -ne $taskAsset.sha256) { throw "Installed package hash mismatch: $($taskAsset.id)" }

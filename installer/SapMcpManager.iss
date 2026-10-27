@@ -16,7 +16,7 @@
 [Setup]
 AppId={{950456B8-B9F0-443B-9CA9-A4F5FD067290}
 AppName=SAP MCP Manager
-AppVersion=0.1.0-preview.3
+AppVersion=0.1.0-preview.4
 AppPublisher=SAP MCP Manager
 DefaultDirName={localappdata}\Programs\SapMcpManager
 DefaultGroupName=SAP MCP Manager
@@ -26,7 +26,7 @@ MinVersion=10.0.19045
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\artifacts\installers
-OutputBaseFilename=SAP-MCP-Manager-0.1.0-preview.3-Windows-x64-{#PackageName}
+OutputBaseFilename=SAP-MCP-Manager-0.1.0-preview.4-Windows-x64-{#PackageName}
 Compression=lzma2/fast
 SolidCompression=yes
 WizardStyle=modern
@@ -72,7 +72,7 @@ Name: "rfc"; Description: "{cm:Rfc}"; Types: full
 Name: "adt"; Description: "SAP ADT MCP"; Types: full
 
 [Files]
-Source: "{#BuildRoot}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#BuildRoot}\*"; DestDir: "{app}"; Excludes: "payload\cache\*"; Flags: ignoreversion recursesubdirs createallsubdirs
 #if Offline == "1"
 Source: "{#PayloadRoot}\cache\*"; DestDir: "{app}\payload\cache"; Excludes: "*.download"; Flags: ignoreversion
 #endif

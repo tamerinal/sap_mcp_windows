@@ -45,11 +45,12 @@ public sealed class McpSession : IAsyncDisposable
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException) { return null; }
     }
 
-    public static async Task<McpSession> StartAsync(AppSettings settings, string configPath, string component, CancellationToken ct = default)
+    public static async Task<McpSession> StartAsync(AppSettings settings, string configPath, string component, CancellationToken ct = default, string? profileId = null)
     {
         var start = new ProcessStartInfo(settings.HostExecutable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true,
             StandardInputEncoding = new System.Text.UTF8Encoding(false), StandardOutputEncoding = System.Text.Encoding.UTF8, StandardErrorEncoding = System.Text.Encoding.UTF8 };
         foreach (var arg in new[] { "--component", component, "--config", configPath }) start.ArgumentList.Add(arg);
+        if (profileId != null) { start.ArgumentList.Add("--profile"); start.ArgumentList.Add(profileId); }
         var session = new McpSession(Process.Start(start) ?? throw new IOException(UiText.Get("Text014")));
         try
         {
@@ -98,7 +99,7 @@ public sealed class McpSession : IAsyncDisposable
             try { await Task.WhenAll(_process.WaitForExitAsync(_stop.Token), _stderr).WaitAsync(TimeSpan.FromSeconds(2), _stop.Token); }
             catch (TimeoutException) { }
             var detail = _diagnostic ?? (_process.HasExited ? new ProcessDiagnostic("HOST_PROCESS_EXIT", "host", "ProcessExit", _process.ExitCode) : null);
-            var message = detail == null ? UiText.Get("Text017") : UiText.Get("Sdk.HostFailed", detail.Summary);
+            var message = detail?.Code == "ADT_PACKAGE_UPGRADE_REQUIRED" ? UiText.Get("Adt.PackageUpgrade") : detail == null ? UiText.Get("Text017") : UiText.Get("Sdk.HostFailed", detail.Summary);
             foreach (var pending in _pending.Values) pending.TrySetException(new IOException(message));
         }
         catch (Exception ex) { foreach (var pending in _pending.Values) pending.TrySetException(ex); }
