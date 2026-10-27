@@ -129,7 +129,7 @@ public partial class MainWindow
         _basicCertificateButton=Action(UiText.Get("Adt.Certificates"),ImportBasicTrustAsync);_basicCertificateButton.IsVisible=false;
         form.Children.Add(Row(Action(UiText.Get("Basic.Back"),()=>{CancelBasicDiscovery();SetBasicStep(0);return Task.CompletedTask;}),Action(UiText.Get("Basic.Help"),ShowAdtUrlHelpAsync),_basicCertificateButton,Action(UiText.Get("Basic.Save"),SaveBasicConnectionAsync,true)));
         _basicHost.TextChanged+=(_,_)=>BasicEndpointChanged();_basicUrl.TextChanged+=(_,_)=>BasicEndpointChanged();
-        _basicInstance.TextChanged+=(_,_)=>{if(!_basicFilling)_basicInstanceWasDerived=false;};
+        _basicInstance.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty&&!_basicFilling)_basicInstanceWasDerived=false;};
         foreach(var box in new[]{_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicInstance})box.TextChanged+=(_,_)=>{if(!_basicFilling&&_basicResult!=null)_basicResult.Text=UiText.Get("Basic.Changed");};
         RefreshBasicProfiles();_basicLoadedFields=BasicFields();
         root.Children.Add(form);_basicSteps.Add(form);

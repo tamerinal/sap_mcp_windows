@@ -56,7 +56,7 @@ public sealed class WindowTests
                 }
             }
             typeof(MainWindow).GetMethod("SetInferredInstance",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.Invoke(window,[4]);
-            Assert.Equal("04",Named<TextBox>(window,"BasicInstance").Text);host.Text="changed.example.invalid";Assert.Equal("",Named<TextBox>(window,"BasicInstance").Text);
+            Assert.Equal("04",Named<TextBox>(window,"BasicInstance").Text);host.Text="changed.example.invalid";await Task.Delay(30);Dispatcher.UIThread.RunJobs();Assert.Equal("",Named<TextBox>(window,"BasicInstance").Text);
             switcher.SelectedIndex=1;await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);Assert.Equal("advanced unsaved",advanced.Text);
             Assert.Same(advanced,window.GetLogicalDescendants().OfType<TextBox>().First(b=>b.PasswordChar!='\0'));
         }
