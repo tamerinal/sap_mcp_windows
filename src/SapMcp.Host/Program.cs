@@ -7,6 +7,7 @@ using SapMcp.Core;
 
 internal static class Program
 {
+    private static readonly JsonSerializerOptions ErrorJsonOptions = new(JsonDefaults.Options) { WriteIndented = false };
     public static async Task<int> Main(string[] args)
     {
         Console.InputEncoding = Encoding.UTF8; Console.OutputEncoding = new UTF8Encoding(false);
@@ -39,7 +40,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_START_FAILED", message = Redaction.Text(ex.Message), diagnostic = (ex as SdkUnavailableException)?.Diagnostic }, JsonDefaults.Options));
+            await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_START_FAILED", message = Redaction.Text(ex.Message), diagnostic = (ex as SdkUnavailableException)?.Diagnostic }, ErrorJsonOptions));
             return 2;
         }
     }
@@ -140,7 +141,7 @@ internal static class Program
             {
                 var diagnostic = new ProcessDiagnostic("UPSTREAM_PROCESS_EXIT", "upstream", "ProcessExit", child.ExitCode);
                 await Log(operations, LogLevel.Error, "process.failed", diagnostic);
-                await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_PROCESS_FAILED", diagnostic }, JsonDefaults.Options));
+                await Console.Error.WriteLineAsync(JsonSerializer.Serialize(new { code = "SAP_MCP_PROCESS_FAILED", diagnostic }, ErrorJsonOptions));
             }
             return child.ExitCode;
         }
