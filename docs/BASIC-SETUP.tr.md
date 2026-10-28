@@ -39,3 +39,11 @@ Mevcut istemci önizleme/uygulama adımı kullanılır. Yalnız ayrı ayrı doğ
 Bu önizleme imzasızdır. Temiz Windows ve canlı SAP kabulü bekler; yerel kurgusal testler her SAP ortamını doğrulamaz. Gerçek sonuçlar ve sınırlar sürüm doğrulama raporundadır.
 
 ![Basic kurulum](images/basic-setup-tr.png)
+
+## Preview.5 portsuz keşif hatası (Preview.6 ile düzeltildi)
+
+Preview.5, sunucu portsuz girildiğinde ağa istek göndermeden durabiliyordu. Manager isteğe bağlı portu JSON `null` olarak gönderiyor, ADT keşif süreci bunu yanlışlıkla `DISCOVERY_PORT_INVALID` ile reddediyordu. Genel mesaj bunu ağ/sertifika sorunu gibi gösteriyordu. RFC ayrı yoldan çalıştığı için başarılı olabiliyordu. Bu hata, ADT'nin erişilebilir olup olmadığını göstermiyordu.
+
+Manager'ı Preview.6'ya yükseltin; ardından Basic'te **Kurulumu hazırla** veya Advanced'te ADT kur/onar ile güncel ADT paketini kurun. İstemcilerde MCP süreçlerini yeniden başlatın. Mevcut profiller, DPAPI şifreleri ve RFC paketleri korunur. Manager boş isteğe bağlı alanları artık göndermez; yeni ADT paketi eski null alanlarını da kabul eder. Girdi/süreç hataları uzak ağ hatası gibi gösterilmek yerine güvenli ve özel hata koduyla sunulur.
+
+Kayıtlı bağlantıyı tekrar doğrulayın. Bilinen adres için **ADT adresi / portu gir** taramadan önceliklidir. Gerekirse Basis'ten bu bilgisayardan erişilebilen gerçek HTTPS base URL'sini isteyin; RFC instance numarası web portunu kesinleştirmez. IP adresi sertifikanın DNS adıyla eşleşmeyebilir: gerektiğinde onaylı ve eşleşen DNS adresini ve profil CA güvenini kullanın. TLS doğrulamasını kapatmayın. Bu düzeltme canlı sistem erişimini kanıtlamaz; VPN, port, TLS ve yetkiler ayrıca doğrulanmalıdır. [#6 takip kaydı](https://github.com/tamerinal/sap_mcp_windows/issues/6).

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-preview.6 — 2026-10-28
+
+Fix Basic host-only ADT discovery: omit absent optional port fields and accept legacy null fields in the updated ADT package. Show safe input/process error codes. Add exact Manager-to-Node and local HTTPS regressions; update bilingual help. RFC package unchanged. Clean Windows and live affected-machine acceptance remain pending.
+
 ## 0.1.0-preview.5 — 2026-10-28
 
 Basic/Advanced modes; SDK-first automatic preparation; bounded credential-free HTTPS discovery; independent ADT/RFC verification and partial success; shared record preservation; bilingual help and regression tests. RFC payload unchanged.

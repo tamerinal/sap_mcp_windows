@@ -46,7 +46,7 @@ function handler(req,res){
  res.writeHead(200,{'content-type':'application/xml','x-csrf-token':'fixture-token'});
  res.end(req.url.includes('/discovery')?'<app:service xmlns:app="http://www.w3.org/2007/app"><app:workspace><app:collection href="/sap/bc/adt/repository/informationsystem/search"/></app:workspace></app:service>':'<compatibility:graph xmlns:compatibility="http://www.sap.com/adt/compatibility"><nodes/><edges/></compatibility:graph>');
 }
-(async()=>{const plain=http.createServer(handler),secure=https.createServer({key:fs.readFileSync(path.join(root,'leaf.key')),cert:fs.readFileSync(path.join(root,'leaf.pem'))},handler);servers.push(plain,secure);for(const s of servers)await new Promise(r=>s.listen(0,'127.0.0.1',r));fs.writeFileSync(path.join(root,'ready.json'),JSON.stringify({http:'http://127.0.0.1:'+plain.address().port,https:'https://127.0.0.1:'+secure.address().port}));})();
+(async()=>{const options={key:fs.readFileSync(path.join(root,'leaf.key')),cert:fs.readFileSync(path.join(root,'leaf.pem'))};const plain=http.createServer(handler),secure=https.createServer(options,handler),automatic=https.createServer(options,handler);servers.push(plain,secure,automatic);for(const s of [plain,secure])await new Promise(r=>s.listen(0,'127.0.0.1',r));let automaticPort;for(const port of [44304,...Array.from({length:100},(_,i)=>44300+i).filter(p=>p!==44304)]){try{await new Promise((resolve,reject)=>{const error=e=>{automatic.off('listening',ready);reject(e);};const ready=()=>{automatic.off('error',error);resolve();};automatic.once('error',error);automatic.once('listening',ready);automatic.listen(port,'127.0.0.1');});automaticPort=port;break;}catch(e){if(!['EADDRINUSE','EACCES'].includes(e.code))throw e;}}if(!automaticPort)throw new Error('No local fixture port');fs.writeFileSync(path.join(root,'ready.json'),JSON.stringify({http:'http://127.0.0.1:'+plain.address().port,https:'https://127.0.0.1:'+secure.address().port,automatic:'https://127.0.0.1:'+automaticPort}));})();
 process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.closeAllConnections();s.close();}setTimeout(()=>process.exit(0),30);});
 """);
         var start = new ProcessStartInfo(source.NodeExecutable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardError = true, RedirectStandardOutput = true };
@@ -112,6 +112,14 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
             });
             BasicDiscovery? basicDiscovery=null;
             var draft=new BasicDraft{ProfileId=selected.Id,SystemId=LandscapeService.Load(s.LandscapeFile).Single().Id,Host="127.0.0.1",Sysnr="00",User="TEST",Password="  fixture şifre  ",ManualUrl=endpoints.RootElement.GetProperty("https").GetString()!,Certificates=selected.AdtCertificates.ToList()};
+            await step("Basic Manager host-only request discovers actual local HTTPS without a manual URL or explicit port",async()=>
+            {
+                var noPort=BasicPolicy.Copy(draft);noPort.ManualUrl="";var before=await File.ReadAllTextAsync(Path.Combine(root,"count.json"));
+                var automatic=await new BasicDiscoveryService().DiscoverAsync(s,noPort);
+                var expected=endpoints.RootElement.GetProperty("automatic").GetString();
+                Ensure(automatic.Candidates.Any(c=>c.Url==expected&&c.HttpStatus==401&&!c.Verified),"Host-only discovery did not reach local TLS candidate");
+                Ensure(before==await File.ReadAllTextAsync(Path.Combine(root,"count.json")),"Host-only discovery sent credentials");
+            });
             await step("Basic real Node discovery finds a TLS-verified candidate without credentials",async()=>
             {
                 var before=await File.ReadAllTextAsync(Path.Combine(root,"count.json"));basicDiscovery=await new BasicDiscoveryService().DiscoverAsync(s,draft);

@@ -1,5 +1,9 @@
 # Sürüm geçmişi
 
+## 0.1.0-preview.6 — 2026-10-28
+
+Basic portsuz ADT keşfi düzeltildi: boş isteğe bağlı port alanları gönderilmez, yeni ADT paketi eski null alanlarını kabul eder. Güvenli girdi/süreç hata kodları gösterilir. Manager–Node ve yerel HTTPS regresyonları, iki dilde yardım eklendi. RFC paketi değişmedi. Temiz Windows ve sorunlu makinede canlı kabul bekliyor.
+
 ## 0.1.0-preview.5 — 2026-10-28
 
 Basic/Advanced modları; SDK’dan başlayan otomatik hazırlık; şifresiz sınırlı HTTPS keşfi; bağımsız ADT/RFC doğrulama ve kısmi başarı; ortak kayıtların korunması; EN/TR yardım ve regresyon testleri. RFC paketi değişmedi.

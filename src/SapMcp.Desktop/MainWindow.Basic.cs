@@ -222,6 +222,8 @@ public partial class MainWindow
             _basicDiscoveryStatus!.Text=UiText.Get(useful?.Verified==true?"Basic.Discovered":useful!=null?"Basic.AuthCandidate":error!=null?"Basic.DiscoveryIssue":"Basic.NotFound")+(error==null?"":" · "+BasicPolicy.SafeCode(error));
         }
         catch(OperationCanceledException){}
+        catch(BasicDiscoveryException ex){if(generation==_discoveryGeneration)_basicDiscoveryStatus!.Text=ex.Message;}
+        catch(InvalidDataException ex){if(generation==_discoveryGeneration)_basicDiscoveryStatus!.Text=Redaction.Text(ex.Message);}
         catch{if(generation==_discoveryGeneration)_basicDiscoveryStatus!.Text=UiText.Get("Basic.DiscoveryIssue");}
     }
     private async Task SaveBasicConnectionAsync()

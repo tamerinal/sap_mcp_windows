@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
 namespace SapMcp.Core;
@@ -16,6 +17,17 @@ public sealed record BasicValidation(BasicCheck Adt, BasicCheck Rfc, DateTimeOff
 public sealed record BasicDiscoveryOptions(int Concurrency=16,int ProbeTimeoutMs=1500,int BudgetMs=15000,int DebounceMs=500,int MaxAgeSeconds=60);
 public sealed record BasicCandidate(string Url,int Priority,string Code,int? HttpStatus,bool Verified);
 public sealed record BasicDiscovery(int SchemaVersion,List<BasicCandidate> Candidates,bool BudgetExpired,bool Found,int DurationMs);
+public sealed class BasicDiscoveryException(string code):IOException(UiText.Get("Basic.DiscoveryError",UiText.Get(code switch
+{
+    "DISCOVERY_PORT_INVALID"=>"Basic.PortInvalid",
+    "DISCOVERY_HOST_INVALID"=>"Basic.InvalidHost",
+    "BASIC_HTTPS_REQUIRED"=>"Basic.HttpsOnly",
+    "DISCOVERY_OPTIONS_INVALID" or "DISCOVERY_INPUT_INVALID"=>"Basic.DiscoveryInputInvalid",
+    "DISCOVERY_PROCESS_TIMEOUT"=>"Basic.DiscoveryProcessTimeout",
+    "DISCOVERY_PACKAGE_MISSING"=>"Basic.PrepareFirst",
+    _=>"Basic.DiscoveryInvalid"
+}),code))
+{public string Code {get;}=code;}
 public sealed class BasicDraft
 {
     public string ProfileId {get;set;}=Guid.NewGuid().ToString("N");
@@ -86,19 +98,44 @@ public static class BasicPolicy
 
 public sealed class BasicDiscoveryService
 {
+    private static readonly JsonSerializerOptions InputJson=new(JsonDefaults.Options){DefaultIgnoreCondition=JsonIgnoreCondition.WhenWritingNull};
+    internal static string SerializeRequest(BasicDraft draft)
+    {
+        var (host,port)=BasicPolicy.ParseHost(draft.Host);
+        var manual=BasicPolicy.ManualUrl(draft.ManualUrl,draft.Host);var url=manual.Length==0?null:manual;
+        var input=new {host,explicitPort=port,manualUrl=url,certificates=draft.Certificates,options=new {concurrency=BasicPolicy.Discovery.Concurrency,probeTimeoutMs=BasicPolicy.Discovery.ProbeTimeoutMs,budgetMs=BasicPolicy.Discovery.BudgetMs}};
+        return JsonSerializer.Serialize(input,InputJson);
+    }
+    internal static BasicDiscovery ReadResponse(ProcessResult run)
+    {
+        try
+        {
+            using var json=JsonDocument.Parse(run.Output);
+            if(run.ExitCode!=0)
+            {
+                var raw=json.RootElement.TryGetProperty("code",out var code)&&code.ValueKind==JsonValueKind.String?code.GetString():null;
+                var safe=raw is "DISCOVERY_PORT_INVALID" or "DISCOVERY_HOST_INVALID" or "BASIC_HTTPS_REQUIRED" or "DISCOVERY_OPTIONS_INVALID" or "DISCOVERY_INPUT_INVALID"?raw:"DISCOVERY_PROCESS_FAILED";
+                throw new BasicDiscoveryException(safe);
+            }
+            var result=json.RootElement.Deserialize<BasicDiscovery>(JsonDefaults.Options);
+            if(result is not {SchemaVersion:1}||result.Candidates==null||result.Candidates.Count>102)throw new InvalidDataException();
+            return result;
+        }
+        catch(Exception ex)when(ex is JsonException or InvalidDataException or InvalidOperationException){throw new BasicDiscoveryException("DISCOVERY_OUTPUT_INVALID");}
+    }
     public async Task<BasicDiscovery> DiscoverAsync(AppSettings settings,BasicDraft draft,CancellationToken ct=default)
     {
         var (host,port)=BasicPolicy.ParseHost(draft.Host);
         var manual=BasicPolicy.ManualUrl(draft.ManualUrl,draft.Host);var url=manual.Length==0?null:manual;
         if(url!=null&&!url.StartsWith("https://",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException(UiText.Get("Basic.HttpsOnly"));
         var entry=Path.Combine(settings.PackageDirectory,"adt","dist","basic-connection.js");
-        if(!File.Exists(entry)||!File.Exists(settings.NodeExecutable))throw new InvalidOperationException(UiText.Get("Basic.PrepareFirst"));
-        var input=new {host,explicitPort=port,manualUrl=url,certificates=draft.Certificates,options=new {concurrency=BasicPolicy.Discovery.Concurrency,probeTimeoutMs=BasicPolicy.Discovery.ProbeTimeoutMs,budgetMs=BasicPolicy.Discovery.BudgetMs}};
-        var run=await ProcessRunner.RunAsync(settings.NodeExecutable,[entry],timeout:TimeSpan.FromSeconds(20),stdin:JsonSerializer.Serialize(input,JsonDefaults.Options),ct:ct);
+        if(!File.Exists(entry)||!File.Exists(settings.NodeExecutable))throw new BasicDiscoveryException("DISCOVERY_PACKAGE_MISSING");
+        ProcessResult run;
+        try{run=await ProcessRunner.RunAsync(settings.NodeExecutable,[entry],timeout:TimeSpan.FromSeconds(20),stdin:SerializeRequest(draft),ct:ct);}
+        catch(OperationCanceledException)when(!ct.IsCancellationRequested){throw new BasicDiscoveryException("DISCOVERY_PROCESS_TIMEOUT");}
         try
         {
-            var result=JsonSerializer.Deserialize<BasicDiscovery>(run.Output,JsonDefaults.Options);
-            if(run.ExitCode!=0||result is not {SchemaVersion:1}||result.Candidates==null||result.Candidates.Count>102)throw new InvalidDataException();
+            var result=ReadResponse(run);
             foreach(var candidate in result.Candidates)
             {
                 var normalized=AdtProfiles.NormalizeUrl(candidate.Url);var parsed=new Uri(normalized);

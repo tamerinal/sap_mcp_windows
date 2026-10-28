@@ -6,6 +6,24 @@ namespace SapMcp.Tests;
 
 public sealed class BasicTests
 {
+    [Theory][InlineData("fictional.example.invalid",null)][InlineData("127.0.0.1",null)][InlineData("[::1]",null)][InlineData("fictional.example.invalid:44304",44304)]
+    public void DiscoveryRequestOmitsAbsentOptionalsAndAllCredentials(string host,int? port)
+    {
+        var request=BasicDiscoveryService.SerializeRequest(new(){Host=host,User="PRIVATE_USER",Password="PRIVATE_PASSWORD",Client="123"});using var json=JsonDocument.Parse(request);
+        Assert.False(json.RootElement.TryGetProperty("manualUrl",out _));
+        if(port==null)Assert.False(json.RootElement.TryGetProperty("explicitPort",out _));else Assert.Equal(port,json.RootElement.GetProperty("explicitPort").GetInt32());
+        Assert.DoesNotContain("PRIVATE",request);Assert.False(json.RootElement.TryGetProperty("user",out _));Assert.False(json.RootElement.TryGetProperty("client",out _));
+    }
+    [Theory][InlineData("DISCOVERY_PORT_INVALID")][InlineData("DISCOVERY_INPUT_INVALID")]
+    public void DiscoveryConfigurationFailureIsNotDisguisedAsNetworkOrCertificateError(string code)
+    {
+        var ex=Assert.Throws<BasicDiscoveryException>(()=>BasicDiscoveryService.ReadResponse(new(2,"{\"schemaVersion\":1,\"code\":\""+code+"\",\"candidates\":[]}","secret stderr")));Assert.Equal(code,ex.Code);Assert.DoesNotContain("secret",ex.Message);
+    }
+    [Fact] public void UnknownOrBrokenDiscoveryOutputCannotLeakProcessContent()
+    {
+        foreach(var output in new[]{"not-json secret","{\"code\":\"SENSITIVE_ENDPOINT\"}","{\"schemaVersion\":1,\"candidates\":null}"})
+        {var ex=Assert.Throws<BasicDiscoveryException>(()=>BasicDiscoveryService.ReadResponse(new(2,output,"secret stderr")));Assert.DoesNotContain("SENSITIVE",ex.Message);Assert.DoesNotContain("secret",ex.Message);}
+    }
     private static SettingsStore Store(TestDirectory t)=>new(Path.Combine(t.Root,"config","settings.json"));
     [Fact] public void UnverifiedSdkCandidateCannotReplaceExistingSharedSdk()
     {

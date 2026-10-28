@@ -1750,5 +1750,21 @@
   "Basic.SourceUnsupported": {
     "en": "Some source connections cannot be preserved safely. Keep the current source and manage them in Advanced.",
     "tr": "Bazı kaynak bağlantıları güvenli olarak korunamıyor. Mevcut kaynağı koruyup Advanced ile yönetin."
+  },
+  "Basic.DiscoveryError": {
+    "en": "ADT discovery could not run: {0} ({1})",
+    "tr": "ADT keşfi çalıştırılamadı: {0} ({1})"
+  },
+  "Basic.PortInvalid": {
+    "en": "The discovery request contains an invalid port. Repair/update Manager and the ADT package; use a valid HTTPS port if entering one.",
+    "tr": "Keşif isteğinde geçersiz port var. Manager ve ADT paketini güncelleyin/onarın; port giriyorsanız geçerli HTTPS portu kullanın."
+  },
+  "Basic.DiscoveryInputInvalid": {
+    "en": "The discovery request is incompatible or invalid. Update/repair Manager and ADT together.",
+    "tr": "Keşif isteği uyumsuz veya geçersiz. Manager ve ADT paketini birlikte güncelleyin/onarın."
+  },
+  "Basic.DiscoveryProcessTimeout": {
+    "en": "The local discovery process timed out; this does not prove that ADT is unavailable.",
+    "tr": "Yerel keşif süresi aşıldı; bu ADT servisinin bulunmadığını kanıtlamaz."
   }
 }

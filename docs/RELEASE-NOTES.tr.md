@@ -1,11 +1,11 @@
-# v0.1.0-preview.5 — Basic / Advanced kurulum
+# v0.1.0-preview.6 — Basic ADT keşif düzeltmesi
 
-Yeni kurulumlar Basic, mevcut kullanıcılar Advanced ile açılır. Advanced ekranları korunur. Basic: SDK ve tek tuşla otomatik hazırlık → tek SAP bağlantısı → mevcut Codex/Claude entegrasyonu. SDK’sız yalnız ADT kullanılabilir.
+[English](RELEASE-NOTES.md)
 
-HTTPS keşfi yalnız belirtilen sunucuda şifresiz, 500 ms debounce, en fazla 16 paralel kontrol, 1,5 saniye aday/15 saniye toplam bütçe ile çalışır. HTTP fallback/redirect yoktur. 401, HTML veya rastgele XML başarı değildir. Sertifika güveni yalnız profile aittir; Basic TLS doğrulamasını atlamaz. Manuel URL/port ve SMICM/Basis yardımı bulunur.
+Preview.5 hatası düzeltildi: sunucu portsuz girildiğinde `explicitPort: null` gönderilebiliyor, ADT süreci ağa çıkmadan bunu reddediyordu. Genel uyarı bu girdi hatasını gizliyordu; RFC bağımsız olarak başarılı olabiliyordu. Manager artık boş isteğe bağlı alanları göndermez; güncel ADT 0.3.1 eski null alanlarını da kabul eder. Güvenli girdi/süreç kodları, yerel keşif hatalarını ağ/TLS sonuçlarından ayırır.
 
-Kaydet gerçek ADT MCP ve ayrı RFC_PING kullanır. Yanlış şifrede otomatik denemeler durur. Bir MCP doğrulanırsa uyarılı kayıt ve yalnız çalışan MCP ile devam; ikisi başarısızsa önceki profil korunur. Profiller/DPAPI/XML/diğer istemci kayıtları korunur. RFC kaynak ve paket hashleri değişmedi.
+Manager'ı yükseltin; Basic'te **Kurulumu hazırla** veya Advanced'te ADT kur/onar ile güncel ADT paketini kurun ve istemcilerde MCP süreçlerini yeniden başlatın. Hem Manager hem ADT paketi güncellenmelidir. Profiller, şifreler, ayarlar ve RFC arşivleri korunur. Bilinen HTTPS adresi elle girilebilir. Instance numarası HTTPS portunu kesinleştirmez; gerçek servisin DNS adı ve CA güveni ayrıca doğru olmalıdır.
 
-Yükseltme: yeni Manager’ı kurun, Basic’te **Kurulumu hazırla** veya Advanced’te ADT kur/onar işlemini yapın; istemci MCP süreçlerini yeniden başlatın. Önceki yayınlar korunur. [Basic kılavuzu](https://github.com/tamerinal/sap_mcp_windows/blob/v0.1.0-preview.5/docs/BASIC-SETUP.tr.md) ve [#5](https://github.com/tamerinal/sap_mcp_windows/issues/5) ayrıntıları içerir. Gerçek test sonuçları VALIDATION-SUMMARY dosyalarındadır.
+Regresyonlar gerçek Manager portsuz JSON isteğini, eski null isteğinin gerçek Node CLI'da çalışmasını ve Manager–Node yerel HTTPS keşfini kapsar. Gerçek test sayıları ve sınırlar doğrulama dosyalarındadır. [Basic yardımı](https://github.com/tamerinal/sap_mcp_windows/blob/v0.1.0-preview.6/docs/BASIC-SETUP.tr.md) · [#6 takip kaydı](https://github.com/tamerinal/sap_mcp_windows/issues/6).
 
-İmzasız önizleme. Temiz Windows, GUI’siz/ağ kapalı kurulum, native erişilebilirlik ve canlı SAP kabulü bekler. Bu ortamda SAP GUI kuruludur; testler GUI çağırmaz. SDK kuruluma dahil değildir. Inno Setup 6.7.3 non-commercial use only bildirir; ticari dağıtım uygun lisans gerektirir. MIT üçüncü taraf koşullarını değiştirmez. Özel ADT kaynağı private kalır; derlenmiş JS/bağımlılıklar EXE’den çıkarılabilir. Her SAP ortamında koşulsuz çalışma iddiası yoktur.
+İmzasız önizleme. Temiz Windows, canlı SAP ve sorunlu makinede kabul bekliyor. SDK dağıtılmaz. Inno Setup 6.7.3 non-commercial use only bildirir; ticari dağıtım uygun lisans ister. MIT üçüncü taraf koşullarını değiştirmez. Özel MCP'nin derlenmiş JavaScript ve bağımlılıkları EXE'den çıkarılabilir. Önceki yayınlar korunur. Her ortamda koşulsuz uyumluluk iddiası yoktur.

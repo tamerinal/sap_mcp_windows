@@ -45,7 +45,7 @@ Paketlerde derlenmiş kod, üretim bağımlılıkları, kilitler ve kaynak bilgi
 2. Directory.Build.props, kurulum/dosya adları, host teşhisi, katalog ve sürüm notlarını eşitleyin. uiLanguage içermeyen eski ayarları doğrulayın.
 3. Paket hazırlama, derleme, çekirdek/arayüz/entegrasyon/kurulum testleri ve Test-Publication çalıştırın. Yayın kontrolü kaynak ve dağıtımı kişisel yol, şifre ve SDK için tarar. Görselleri ve raporları da inceleyin.
 4. Maskelenmiş doğrulama özeti ve İngilizce/Türkçe sürüm notlarını yayın dosyalarına ekleyin. İki EXE ve belge arşivi için SHA256SUMS.txt üretin. Lisans ve kaynak kayıtlarını inceleyin. Temiz VM/canlı SAP yapılmadıysa tamamlandı yazmayın.
-5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.5` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
+5. Kaynağı gönderip Public Windows CI sonucunu bekleyin. Test edilen commit’te `v0.1.0-preview.6` etiketi oluşturup **prerelease** yayınlayın. İki EXE, kılavuz arşivi, SHA dosyaları, notlar ve doğrulama özeti ekleyin. README etiket bağlantısı kullanmalı; önizlemeler kararlı latest değildir.
 6. Dosyaları oturumsuz HTTPS üzerinden indirip hash karşılaştırın. README/kılavuz bağlantılarını oturum kapalı kontrol edin. Başarısız kontrol düzeltilmeden yayınlamayın.
 
 Bu önizlemede otomatik güncelleme sunucusu veya imza sertifikası yoktur. Mevcut kullanıcı kurulumu kayıtlıysa smoke test çalışmaz. Workspace artifacts içine kurup kaldırır ve kullanıcı verisini korur; üretim kabulü için temiz VM kullanın.
