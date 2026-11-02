@@ -46,6 +46,10 @@ public sealed class RfcReadinessTests
         Assert.DoesNotContain("rfc",RfcReadinessService.Eligible(s,p,ready,true));ready=RfcReadinessService.Evaluate(s,true,Ready());Assert.Contains("rfc",RfcReadinessService.Eligible(s,p,ready,true));
         p.BasicValidation=p.BasicValidation with{Rfc=BasicCheck.Failed("AUTHENTICATION_FAILED")};Assert.DoesNotContain("rfc",RfcReadinessService.Eligible(s,p,ready,true));
     }
+    [Fact] public void MissingOptionalRfcPackageDoesNotBlockAdtPreparation()
+    {
+        Assert.True(BasicInstallation.SharedReady([new("node","Node","24",CheckState.Ready,""),new("rfc-package","RFC","",CheckState.Missing,"")]));
+    }
     [Fact] public void ChangingAdtPinsInvalidatesStoredValidation()
     {
         using var t=new TestDirectory();var s=AppSettings.CreateDefault(t.Root);var p=new ConnectionProfile{TargetKey="fixture.invalid:04"};s.ActiveProfiles[p.TargetKey]=p.Id;

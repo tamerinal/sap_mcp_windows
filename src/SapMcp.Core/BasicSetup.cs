@@ -146,7 +146,7 @@ public static class BasicInstallation
         if (!File.Exists(Path.Combine(root, "dist", "server.js")) || (component == "adt" && !File.Exists(Path.Combine(root, "dist", "basic-connection.js")))) return "Repair";
         return "Current";
     }
-    public static bool SharedReady(IEnumerable<Requirement> checks) => checks.Where(c => c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013" or "rfc-native")).All(c => c.State is CheckState.Ready or CheckState.Warning);
+    public static bool SharedReady(IEnumerable<Requirement> checks) => checks.Where(c => c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013" or "rfc-native" or "rfc-package")).All(c => c.State is CheckState.Ready or CheckState.Warning);
     public static bool RfcReady(IEnumerable<Requirement> checks) => SharedReady(checks) && new[]{"sdk","python","pyrfc","vc-runtime","vc2013","rfc-native"}.All(id => checks.Any(c => c.Id == id && c.State == CheckState.Ready));
 }
 
