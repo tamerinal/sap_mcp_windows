@@ -47,4 +47,3 @@ Doğrulamada Kaydet, İleri, gezinme ve istemci kurulumu pasiftir. İptal alt s�
 ## Sürüm kontrolleri
 
 Yerel fixture'lar HTTP, self-signed HTTPS, yetki dalları, onay reddi, iptal, tüm portların taranması ve istemci uygunluğunu kapsar. Canlı SAP kabulü ayrıca raporlanır; fixture başarısı canlı bağlantı kanıtı değildir. Online/Offline EXE ve SHA256 dosyaları GitHub ön sürümünde yayımlanır.
-

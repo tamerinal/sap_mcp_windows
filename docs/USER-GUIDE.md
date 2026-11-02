@@ -253,4 +253,3 @@ During verification, Save, Next, navigation and client installation are disabled
 ## Release checks
 
 Local fixtures cover HTTP, self-signed HTTPS, authorization branches, consent rejection, cancellation, all-port scanning and client eligibility. Live SAP acceptance is separately reported; a fixture pass does not establish live connectivity. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease.
-
