@@ -170,6 +170,7 @@ public partial class MainWindow
         var summary=new StackPanel{Spacing=12,Name="BasicSummaryStep"};
         _basicSummary=Text("");_basicSummary.Name="BasicSummaryText";summary.Children.Add(_basicSummary);
         summary.Children.Add(Row(Action(UiText.Get("Basic.RefreshStatus"),async()=>await InspectBasicAsync()),Action(UiText.Get("Basic.AdvancedRepair"),OpenBasicRepairAsync)));
+        summary.Children.Add(BuildCustomIntegration(true,"BasicSummary",out _refreshCustomSummary));
         root.Children.Add(summary);_basicSteps.Add(summary);return root;
     }
 
@@ -226,6 +227,7 @@ public partial class MainWindow
     }
     private void RefreshBasicSummary()
     {
+        _refreshCustomSummary?.Invoke();
         if(_basicSummary==null)return;
         var lines=new List<string>{UiText.Get("Basic.LocalStatus")};
         if(_settings.BasicSetup is {PreparedAt:null})lines.Add(UiText.Get("Basic.PreparationIncomplete"));

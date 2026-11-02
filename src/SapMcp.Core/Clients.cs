@@ -118,12 +118,12 @@ public static partial class ClientIntegration
 
     private static string Quote(string text) => JsonSerializer.Serialize(text);
     private static string TomlEntry(string name, string component, string host, string config) =>
-        $"[mcp_servers.{name}]\ncommand = {Quote(host)}\nargs = [{Quote("--component")}, {Quote(component)}, {Quote("--config")}, {Quote(config)}]\nstartup_timeout_sec = 60\ntool_timeout_sec = 180\nenabled = true\n";
+        $"[mcp_servers.{name}]\ncommand = {Quote(host)}\nargs = [{string.Join(", ", LaunchArguments(component, config).Select(Quote))}]\nstartup_timeout_sec = 60\ntool_timeout_sec = 180\nenabled = true\n";
 
     public static JsonObject JsonEntry(string component, string host, string config) => new()
     {
         ["command"] = host,
-        ["args"] = new JsonArray("--component", component, "--config", config)
+        ["args"] = new JsonArray(LaunchArguments(component, config).Select(a => (JsonNode?)JsonValue.Create(a)).ToArray())
     };
 
     private static string RemoveTomlServer(string input, string name)

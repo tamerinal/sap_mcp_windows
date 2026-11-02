@@ -119,6 +119,7 @@ public partial class MainWindow : Window
         theme.ItemsSource = new[] { UiText.Get("Text106"), UiText.Get("Text107"), UiText.Get("Text108") };
         theme.SelectedIndex = selectedTheme;
         _refreshConnectionLanguage?.Invoke();
+        _refreshCustomAdvanced?.Invoke();
         this.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = language == "tr" ? 1 : 0;
         RefreshModeLanguage();
     }

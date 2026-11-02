@@ -30,19 +30,12 @@ public partial class MainWindow
         var result=Text("");result.Name=prefix+"ClientSaveResult";
         List<ClientPreview> previews=[];
         Button? save=null;
-        string[] Components()
-        {
-            if (basic)
-            {
-                var p=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
-                if (p==null || !_basicPrepared || BasicFields()!=_basicLoadedFields) return [];
-                return RfcReadinessService.Eligible(_settings,p,_basicReadiness,!BasicInstallation.AdtOnly(_settings));
-            }
-            return new[]{"adt","rfc"}.Where(c=>_settings.Component(c).Installed && _settings.Component(c).Selected).ToArray();
-        }
+        string[] Components() => ClientComponents(basic);
+        var custom=BuildCustomIntegration(basic,prefix,out var refreshCustom);
         void UpdateSave() { if(save!=null)save.IsEnabled=previews.Count>0 && (previews.All(p=>p.Conflicts.Count==0)||replace.IsChecked==true); }
         void Preview()
         {
+            refreshCustom();
             previews=[];replace.IsChecked=false;replace.IsVisible=false;UpdateSave();details.Text="";result.Text="";
             try
             {
@@ -82,10 +75,11 @@ public partial class MainWindow
             RefreshBasicSummary();
         },true);save.Name=prefix+"SaveClients";save.IsEnabled=false;
         form.Children.Add(Row(Action(UiText.Get("Text208"),()=>{Preview();return Task.CompletedTask;}),save));form.Children.Add(result);
+        form.Children.Add(custom);
         replace.IsCheckedChanged+=(_,_)=>UpdateSave();
         foreach(var box in new[]{codex,desktop,code})box.IsCheckedChanged+=(_,_)=>Preview();
         foreach(var field in new[]{codexPath,desktopPath,codePath}.OfType<TextBox>())field.TextChanged+=(_,_)=>Preview();
-        if(basic)_refreshBasicClients=Preview;
+        if(basic)_refreshBasicClients=()=>{Preview();_refreshCustomSummary?.Invoke();};
         Preview();return form;
     }
 }

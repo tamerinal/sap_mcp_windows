@@ -2050,5 +2050,65 @@
   "Adt.PinAdvice": {
     "en": "Verify the server certificate independently and check the SHA-256 pin for the exact HTTPS origin. A pin mismatch never falls back to insecure TLS.",
     "tr": "Sunucu sertifikasını bağımsız olarak doğrulayın ve tam HTTPS origin için SHA-256 kaydını kontrol edin. Parmak izi uyuşmazlığında doğrulamasız TLS’e geçilmez."
+  },
+  "Custom.Title": {
+    "tr": "Diğer agent ve uygulamalara ekle",
+    "en": "Add to other agents and applications"
+  },
+  "Custom.Steps": {
+    "tr": "1. Hedef uygulamada Custom / Local MCP ekleme ekranını veya MCP yapılandırma dosyasını açın.\n2. Yerel stdio bağlantısını seçin. JSON/TOML örneğini uygulamanın beklediği bölüme ekleyin veya komut ve argümanları ayrı alanlara girin.\n3. Mevcut ayarları koruyun. JSON dosyasında mcpServers zaten varsa yalnız sunucu girdilerini bu nesneye birleştirin; ikinci bir mcpServers oluşturmayın. TOML tablolarını tekrar eklemeyin.\n4. Dosyayı kaydedin, istemcinin MCP süreçlerini yeniden başlatın ve SAP araçlarının listelendiğini kontrol edin. Şema uygulamaya göre değişebilir; JSON örneği mcpServers, TOML örneği mcp_servers düzenini kullanır.",
+    "en": "1. Open the target application’s Custom / Local MCP screen or MCP configuration file.\n2. Select local stdio transport. Add the JSON/TOML example in the section expected by the application, or enter the command and arguments in separate fields.\n3. Preserve existing settings. If JSON already contains mcpServers, merge only the server entries into that object; do not add a second mcpServers. Do not duplicate TOML tables.\n4. Save, restart the client’s MCP processes and check that SAP tools are listed. Schemas vary by application; the JSON example uses mcpServers and the TOML example uses mcp_servers."
+  },
+  "Custom.Scope": {
+    "tr": "Bu örnekler aynı bilgisayarda, Manager ile aynı Windows kullanıcısı altında çalışan yerel stdio MCP istemcileri içindir. Bulut/uzak HTTP istemcilerine doğrudan URL sağlamaz. Manager açık kalmak zorunda değildir. Tüm istemciler Manager’da seçili aktif SAP profilini kullanır; profil değişikliği sonrasında MCP süreçlerini yeniden başlatın. Şifre ve SDK ortam ayarlarını koda eklemeyin; Host bunları yerel ayarlardan yönetir. Bu yardım ağ testi başlatmaz ve istemci dosyalarını değiştirmez.",
+    "en": "These examples are for local stdio MCP clients running on the same computer under the same Windows account as Manager. They do not provide a URL for cloud/remote HTTP clients. Manager need not stay open. All clients use the active SAP profile selected in Manager; restart MCP processes after changing profiles. Do not add passwords or SDK environment settings to the example; Host manages these through local settings. This help does not run network tests or modify client files."
+  },
+  "Custom.Fields": {
+    "tr": "Alanları elle doldur",
+    "en": "Enter fields manually"
+  },
+  "Custom.FullJson": {
+    "tr": "JSON — yeni bir yapılandırma için tam örnek",
+    "en": "JSON — full example for a new configuration"
+  },
+  "Custom.JsonEntries": {
+    "tr": "JSON — mevcut mcpServers nesnesine birleştirilecek sunucu girdileri (dış süslü parantezler nesne sınırıdır)",
+    "en": "JSON — server entries to merge into an existing mcpServers object (outer braces delimit the object)"
+  },
+  "Custom.TomlHelp": {
+    "tr": "TOML — mcp_servers tabloları; yalnız bu düzeni destekleyen istemcilerde kullanın",
+    "en": "TOML — mcp_servers tables; use only with clients supporting this layout"
+  },
+  "Custom.FieldsHelp": {
+    "tr": "Her MCP için ayrı sunucu ekleyin. Komut alanına yalnız dosya yolunu yazın; argümanları sırayla, ayrı öğeler olarak girin. stdio kullanılır; URL ve ek ortam değişkeni gerekmez.",
+    "en": "Add each MCP as a separate server. Enter only the executable path in Command; add the arguments in order as separate items. Transport is stdio; no URL or additional environment variables are required."
+  },
+  "Custom.ManualEntry": {
+    "tr": "Sunucu adı: {0}\nBağlantı türü: stdio\nKomut: {1}",
+    "en": "Server name: {0}\nTransport: stdio\nCommand: {1}"
+  },
+  "Custom.Argument": {
+    "tr": "Argüman {0}: {1}",
+    "en": "Argument {0}: {1}"
+  },
+  "Custom.Copy": {
+    "tr": "Kodu kopyala",
+    "en": "Copy code"
+  },
+  "Custom.Copied": {
+    "tr": "Panoya kopyalandı.",
+    "en": "Copied to clipboard."
+  },
+  "Custom.NoClipboard": {
+    "tr": "Panoya kopyalanamadı. Metni seçip elle kopyalayabilirsiniz.",
+    "en": "Could not copy to clipboard. Select and copy the text manually."
+  },
+  "Custom.EmptyBasic": {
+    "tr": "Paylaşılabilir doğrulanmış bileşen yok. Kurulumu hazırlayın, SAP bağlantısını kaydedip Doğrula işlemini tamamlayın. Alan veya bağımlılık değiştiyse doğrulamayı yenileyin.",
+    "en": "No verified component is available to share. Prepare installation, save the SAP connection and complete Verify. Reverify after changing fields or dependencies."
+  },
+  "Custom.EmptyAdvanced": {
+    "tr": "Örnek üretmek için bileşeni seçin ve kurun. RFC için SDK/bağımlılık hazırlığını ve SAP bağlantı testini tamamlayın; ADT için bağlantıyı doğrulayın.",
+    "en": "Select and install a component to generate an example. Complete SDK/prerequisite preparation and SAP connection testing for RFC; verify the connection for ADT."
   }
 }

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
+using Avalonia.Input.Platform;
 using Avalonia.LogicalTree;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -22,6 +23,79 @@ public static class TestAppBuilder
 
 public sealed class WindowTests
 {
+    [AvaloniaFact]
+    public async Task CustomHelpCopiesActualPathsInEveryFormatWithoutWritingClientFiles()
+    {
+        using var temp=new UiTemporary(); var config=Path.Combine(temp.Root,"Türkçe # ayar","settings.json"); var store=new SettingsStore(config);
+        var seed=await store.LoadAsync(); seed.UiMode="advanced"; seed.UiLanguage="en"; seed.Adt.Installed=true; seed.Rfc.Installed=true;
+        await store.SaveAsync(seed); var window=new MainWindow(config); window.Show();
+        try
+        {
+            await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[4]);
+            var before=await File.ReadAllBytesAsync(config);
+            var help=Named<Expander>(window,"AdvancedCustomHelp"); help.IsExpanded=true;
+            var format=Named<ComboBox>(window,"AdvancedCustomFormat");
+            foreach(var (index,suffix) in new[]{(0,"CustomJson"),(0,"CustomJsonEntries"),(1,"CustomToml"),(2,"CustomFields")})
+            {
+                format.SelectedIndex=index;
+                var text=Named<TextBox>(window,"Advanced"+suffix).Text!;
+                Assert.Contains("sap_adt_mcp",text); Assert.Contains("sap_rfc_call",text);
+                Click(Named<Button>(window,"Advanced"+suffix+"Copy"));
+                await Until(()=>Named<TextBlock>(window,"AdvancedCustomStatus").Text==UiText.Get("Custom.Copied"));
+                Assert.Equal(text,await window.Clipboard!.TryGetTextAsync());
+                if(Environment.GetEnvironmentVariable("SAP_MCP_UI_SNAPSHOTS") is {Length:>0} output)
+                { format.BringIntoView();await Task.Delay(50);Dispatcher.UIThread.RunJobs();Directory.CreateDirectory(output);using var frame=window.CaptureRenderedFrame();frame!.Save(Path.Combine(output,$"custom-advanced-{index}.png"),Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default); }
+            }
+            var json=System.Text.Json.Nodes.JsonNode.Parse(Named<TextBox>(window,"AdvancedCustomJson").Text!)!;
+            Assert.Equal(config,json["mcpServers"]!["sap_adt_mcp"]!["args"]![3]!.GetValue<string>());
+            Assert.Equal(before,await File.ReadAllBytesAsync(config));
+            foreach(var locale in new[]{"tr","en"})
+            {
+                window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex=locale=="tr"?1:0;
+                await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                Assert.Equal(UiText.Get("Custom.Title"),help.Header);
+                Assert.Equal(UiText.Get("Custom.Fields"),format.Items.Cast<string>().Last());
+            }
+            Assert.Empty((await store.LoadAsync()).Registrations); Assert.Null(typeof(MainWindow).GetField("_discoveryCancel",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.GetValue(window));
+            // Only the explicit language changes above may persist settings; help itself is read-only.
+            var current=await store.LoadAsync(); Assert.Equal(seed.ActiveProfiles,current.ActiveProfiles);
+        }
+        finally { window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public async Task BasicSummaryHelpSharesEligibilityAndClearsStaleExamples()
+    {
+        using var temp=new UiTemporary();var config=Path.Combine(temp.Root,"config","settings.json");var store=new SettingsStore(config);
+        var seed=await store.LoadAsync();seed.UiMode="basic";seed.UiLanguage="en";
+        seed=await new ConnectionManager(store).SelectSourceAsync(seed,"managed");
+        seed=await new ConnectionManager(store).SaveSystemAsync(seed,new(){Name="Fixture",Sid="TST",Host="fictional.example.invalid",Sysnr="04"});
+        var profile=new ConnectionProfile{Name="Fixture",Sid="TST",TargetKey="fictional.example.invalid:04",User="PRIVATE_USER"};
+        seed.Profiles.Add(profile);seed.BasicProfileId=profile.Id;seed.ActiveProfiles[profile.TargetKey]=profile.Id;
+        profile.BasicValidation=new(BasicCheck.Passed,BasicCheck.Failed("AUTHENTICATION_FAILED"),DateTimeOffset.UtcNow,BasicPolicy.Fingerprint(seed,profile),2);
+        await store.SaveAsync(seed);var window=new MainWindow(config);window.Show();
+        try
+        {
+            await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+            typeof(MainWindow).GetField("_basicPrepared",flags)!.SetValue(window,true);
+            typeof(MainWindow).GetMethod("SetBasicStep",flags)!.Invoke(window,[3]);
+            var help=Named<Expander>(window,"BasicSummaryCustomHelp");help.IsExpanded=true;
+            var json=Named<TextBox>(window,"BasicSummaryCustomJson");
+            Assert.Contains("sap_adt_mcp",json.Text);Assert.DoesNotContain("sap_rfc_call",json.Text);Assert.DoesNotContain("PRIVATE_USER",json.Text);
+            Click(Named<Button>(window,"BasicSummaryCustomJsonCopy"));
+            await Until(()=>Named<TextBlock>(window,"BasicSummaryCustomStatus").Text==UiText.Get("Custom.Copied"));
+            Assert.Equal(json.Text,await window.Clipboard!.TryGetTextAsync());
+            Named<TextBox>(window,"BasicUser").Text="CHANGED";
+            Assert.Equal("",json.Text);Assert.False(Named<Button>(window,"BasicSummaryCustomJsonCopy").IsEnabled);
+            Assert.Equal("",Named<TextBox>(window,"BasicCustomJson").Text);Assert.True(Named<TextBlock>(window,"BasicSummaryCustomEmpty").IsVisible);
+            Assert.Null(typeof(MainWindow).GetField("_discoveryCancel",flags)!.GetValue(window));
+            Assert.Empty((await store.LoadAsync()).Registrations);
+        }
+        finally { window.Close(); }
+    }
+
     [AvaloniaFact]
     public async Task BasicDefaultsAndBothModeFormsSurviveLocaleAndModeSwitches()
     {

@@ -1,4 +1,8 @@
-# Basic kurulum — 0.1.0-preview.11
+# Basic kurulum — 0.1.0-preview.12
+
+## 0.1.0-preview.12 — Özel MCP entegrasyon yardımı
+
+Basic ve Advanced istemci entegrasyonu ekranları ile son Basic özetinde diğer agent ve uygulamalara yerel stdio MCP ekleme yardımı bulunur. Gerçek kurulum yollarıyla tam JSON, mevcut `mcpServers` nesnesine eklenecek sunucu girdileri, TOML tabloları veya ayrı komut/argüman alanları kopyalanabilir. Basic örnekleri güncel doğrulama ve RFC hazırlığını izler; uygun bileşen yoksa çalıştırılabilir kod üretilmez. Yardımı açmak ve kopyalamak ağ kontrolü başlatmaz veya istemci yapılandırmasını değiştirmez. ADT/RFC paketleri değişmemiştir. [Özel entegrasyon yardımına](CUSTOM-INTEGRATION.tr.md) bakın.
 
 ## 0.1.0-preview.11 — RFC hazırlık durumu ve ADT 0.4.3
 
