@@ -12,7 +12,7 @@ Install SAP RFC and SAP ADT MCP servers, manage SAP connection profiles and Wind
 
 ![SAP MCP Manager overview](docs/images/overview-en.png)
 
-**Last published preview: v0.1.0-preview.6.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
+**Last published preview: v0.1.0-preview.10.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
 
 ## Download
 
