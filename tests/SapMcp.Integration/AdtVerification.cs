@@ -44,6 +44,7 @@ function handler(req,res){
  auth++;fs.writeFileSync(path.join(root,'count.json'),JSON.stringify({auth}));
  if(req.headers.authorization!=='Basic '+Buffer.from('TEST:  fixture şifre  ').toString('base64')){res.writeHead(401);res.end();return;}
  res.writeHead(200,{'content-type':'application/xml','x-csrf-token':'fixture-token'});
+ if(req.url.includes('/repository/informationsystem/search')){res.end('<adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core"><adtcore:objectReference adtcore:name="ZBASIC_FIXTURE" adtcore:type="PROG/P" adtcore:uri="/sap/bc/adt/programs/programs/zbasic_fixture" adtcore:packageName="ZLOCAL" adtcore:description="Basic fixture"/></adtcore:objectReferences>');return;}
  res.end(req.url.includes('/discovery')?'<app:service xmlns:app="http://www.w3.org/2007/app"><app:workspace><app:collection href="/sap/bc/adt/repository/informationsystem/search"/></app:workspace></app:service>':'<compatibility:graph xmlns:compatibility="http://www.sap.com/adt/compatibility"><nodes/><edges/></compatibility:graph>');
 }
 (async()=>{const options={key:fs.readFileSync(path.join(root,'leaf.key')),cert:fs.readFileSync(path.join(root,'leaf.pem'))};const plain=http.createServer(handler),secure=https.createServer(options,handler),automatic=https.createServer(options,handler);servers.push(plain,secure,automatic);for(const s of [plain,secure])await new Promise(r=>s.listen(0,'127.0.0.1',r));let automaticPort;for(const port of [44304,...Array.from({length:100},(_,i)=>44300+i).filter(p=>p!==44304)]){try{await new Promise((resolve,reject)=>{const error=e=>{automatic.off('listening',ready);reject(e);};const ready=()=>{automatic.off('error',error);resolve();};automatic.once('error',error);automatic.once('listening',ready);automatic.listen(port,'127.0.0.1');});automaticPort=port;break;}catch(e){if(!['EADDRINUSE','EACCES'].includes(e.code))throw e;}}if(!automaticPort)throw new Error('No local fixture port');fs.writeFileSync(path.join(root,'ready.json'),JSON.stringify({http:'http://127.0.0.1:'+plain.address().port,https:'https://127.0.0.1:'+secure.address().port,automatic:'https://127.0.0.1:'+automaticPort}));})();
@@ -60,7 +61,7 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
             var s = AppSettings.CreateDefault(Path.Combine(root, "manager")); s.NodeExecutable = source.NodeExecutable; s.HostExecutable = source.HostExecutable; s.PowerShellExecutable = source.PowerShellExecutable; s.PackageDirectory = source.PackageDirectory;
             s.Rfc.Selected = false; s.Adt.Selected = true; s.Adt.Installed = true;
             var store = new SettingsStore(Path.Combine(s.DataDirectory, "config", "settings.json")); await store.SaveAsync(s);
-            var manager = new ConnectionManager(store); s = await manager.SelectSourceAsync(s, "managed"); s = await manager.SaveSystemAsync(s, new() { Name = "Fictional local ADT", Host = "127.0.0.1", Sysnr = "00" });
+            var manager = new ConnectionManager(store); s = await manager.SelectSourceAsync(s, "managed"); s = await manager.SaveSystemAsync(s, new() { Name = "Fictional local ADT", Sid="TST", Host = "127.0.0.1", Sysnr = "00" });
             var profiles = new ProfileService(new DpapiSecretStore());
             var active = new ConnectionProfile { Name = "Active without extra trust", User = "TEST", TargetKey = "127.0.0.1:00", AdtBaseUrl = endpoints.RootElement.GetProperty("https").GetString()! };
             await profiles.SaveAsync(s, active, "  fixture şifre  ", true);
@@ -111,7 +112,7 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
                 Ensure(before == await File.ReadAllTextAsync(Path.Combine(root, "count.json")), "Blank URL sent credentials");
             });
             BasicDiscovery? basicDiscovery=null;
-            var draft=new BasicDraft{ProfileId=selected.Id,SystemId=LandscapeService.Load(s.LandscapeFile).Single().Id,Host="127.0.0.1",Sysnr="00",User="TEST",Password="  fixture şifre  ",ManualUrl=endpoints.RootElement.GetProperty("https").GetString()!,Certificates=selected.AdtCertificates.ToList()};
+            var draft=new BasicDraft{Sid="TST",ProfileId=selected.Id,SystemId=LandscapeService.Load(s.LandscapeFile).Single().Id,Host="127.0.0.1",Sysnr="00",User="TEST",Password="  fixture şifre  ",ManualUrl=endpoints.RootElement.GetProperty("https").GetString()!,Certificates=selected.AdtCertificates.ToList()};
             await step("Basic Manager host-only request discovers actual local HTTPS without a manual URL or explicit port",async()=>
             {
                 var noPort=BasicPolicy.Copy(draft);noPort.ManualUrl="";var before=await File.ReadAllTextAsync(Path.Combine(root,"count.json"));
@@ -120,10 +121,10 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
                 Ensure(automatic.Candidates.Any(c=>c.Url==expected&&c.HttpStatus==401&&!c.Verified),"Host-only discovery did not reach local TLS candidate");
                 Ensure(before==await File.ReadAllTextAsync(Path.Combine(root,"count.json")),"Host-only discovery sent credentials");
             });
-            await step("Basic real Node discovery finds a TLS-verified candidate without credentials",async()=>
+            await step("Basic real Node discovery finds unverified TLS without certificate files or credentials",async()=>
             {
                 var before=await File.ReadAllTextAsync(Path.Combine(root,"count.json"));basicDiscovery=await new BasicDiscoveryService().DiscoverAsync(s,draft);
-                Ensure(basicDiscovery.Candidates.Count==1&&basicDiscovery.Candidates[0].HttpStatus==401&&!basicDiscovery.Found,"401 incorrectly verified discovery");
+                Ensure(basicDiscovery.Candidates.Count==1&&basicDiscovery.Candidates[0].HttpStatus==401&&basicDiscovery.Found,"401 candidate was not discovered");
                 Ensure(before==await File.ReadAllTextAsync(Path.Combine(root,"count.json")),"Basic discovery authenticated");
             });
             await step("Basic real Host saves only verified ADT when RFC dependencies are unavailable",async()=>
@@ -133,11 +134,24 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
                 Ensure(BasicPolicy.Eligible(s,s.Profiles.Single(p=>p.Id==selected.Id)).SequenceEqual(new[]{"adt"}),"Unverified RFC offered to clients");
                 Ensure(s.Profiles.Count==2,"Basic removed another existing profile");
             });
+            await step("Shared ping_system retains its strict TLS verification verdict in Basic",async()=>
+            {
+                await using var session=await McpSession.StartAsync(s,store.FilePath,"adt");
+                var result=await session.RequestAsync("tools/call",new{name="ping_system",arguments=new{target_key=selected.TargetKey}});
+                Ensure(result.TryGetProperty("isError",out var failed)&&failed.ValueKind==JsonValueKind.True&&result.GetRawText().Contains("ADT_CONNECTION_UNVERIFIED"),"Shared strict ping policy unexpectedly changed");
+            });
+            await step("Basic unverified TLS profile runs an authenticated read-only MCP search",async()=>
+            {
+                await using var session=await McpSession.StartAsync(s,store.FilePath,"adt");
+                var result=await session.RequestAsync("tools/call",new{name="search_objects",arguments=new{target_key=selected.TargetKey,query="ZBASIC_FIXTURE",max_results=1}});
+                Ensure(!result.TryGetProperty("isError",out var failed)||failed.ValueKind!=JsonValueKind.True,"Basic read-only MCP tool failed");
+                Ensure(result.GetProperty("structuredContent").GetProperty("results")[0].GetProperty("name").GetString()=="ZBASIC_FIXTURE","Read-only search did not return fixture data");
+            });
             await step("Basic real Host rejects wrong credentials once and preserves prior active mapping",async()=>
             {
                 var before=await File.ReadAllTextAsync(s.CredentialsFile);using var oldCount=JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root,"count.json")));var count=oldCount.RootElement.GetProperty("auth").GetInt32();draft.Password="wrong fixture password";
                 var result=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(s,store,draft,basicDiscovery!,true);
-                Ensure(result.Settings==null&&result.Adt.Code=="AUTHENTICATION_FAILED"&&result.Rfc.Code=="AUTHENTICATION_RETRY_STOPPED","Basic did not stop credential retries");
+                Ensure(result.Settings==null&&result.Adt.Code=="AUTHENTICATION_FAILED"&&!result.Rfc.Success,"Basic did not stop credential retries");
                 using var newCount=JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root,"count.json")));Ensure(newCount.RootElement.GetProperty("auth").GetInt32()==count+1,"Basic repeated bad login");
                 Ensure(before==await File.ReadAllTextAsync(s.CredentialsFile),"Failed Basic save changed mapping");
             });

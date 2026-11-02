@@ -86,7 +86,7 @@ public partial class MainWindow : Window
             if (arguments.Contains("--adt=1")) _settings.Adt.Selected = true;
             if (_settings.ConnectionSourceMode == null && string.IsNullOrEmpty(_settings.LandscapeFile)) _settings.ExternalLandscapeFile ??= LandscapeService.Discover().FirstOrDefault();
             await LoadConnectionsAsync(repairManaged: true);
-            _loaded = true; DisplayInitialMode(); SetStatus(UiText.Get(_settings.UiMode=="basic"?"Basic.SdkIntro":"Text111"));
+            _loaded = true; DisplayInitialMode();if(_settings.UiMode=="basic")await RestoreBasicAsync();SetStatus(UiText.Get(_settings.UiMode=="basic"?"Basic.LocalStatus":"Text111"));
         });
     }
 
@@ -370,38 +370,15 @@ public partial class MainWindow : Window
 
     private void Clients()
     {
-        var form = new StackPanel { Spacing = 12 };
-        var codex = new CheckBox { Content = "Codex", IsChecked = _settings.CodexEnabled }; var claude = new CheckBox { Content = "Claude Desktop", IsChecked = _settings.ClaudeEnabled };
-        form.Children.Add(Row(codex, claude)); var codexPath = Field(form, "Codex config.toml", ClientIntegration.CodexPath); var claudePath = Field(form, UiText.Get("Text205"), ClientIntegration.ClaudePath);
-        var replace = new CheckBox { Content = UiText.Get("Text206") }; form.Children.Add(replace);
-        var preview = new TextBox { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 180, MaxHeight = 320, FontFamily = new("Consolas") };
-        List<ClientPreview> previews = [];
-        async Task<List<string>> Components()
+        Body.Children.Add(Card(BuildClientIntegration(false)));
+        Body.Children.Add(Notice(UiText.Get("Basic.ClientsNotice")));
+        Body.Children.Add(Action(UiText.Get("Text218"),async()=>
         {
-            var list = new List<string>(); if (_settings.Adt.Installed && _settings.Adt.Selected) list.Add("adt");
-            if (_settings.Rfc.Installed && _settings.Rfc.Selected && (await PrerequisiteService.ValidateSdkAsync(_settings, Token)).State == CheckState.Ready) list.Add("rfc");
-            if (list.Count == 0) throw new InvalidOperationException(UiText.Get("Text207")); return list;
-        }
-        form.Children.Add(Row(Action(UiText.Get("Text208"), async () =>
-        {
-            var components = await Components(); previews = [];
-            if (codex.IsChecked == true) previews.Add(ClientIntegration.Preview("Codex", Read(codexPath), _settings, _store.FilePath, components));
-            if (claude.IsChecked == true) previews.Add(ClientIntegration.Preview("Claude Desktop", Read(claudePath), _settings, _store.FilePath, components));
-            if (previews.Count == 0) throw new InvalidOperationException(UiText.Get("Text209"));
-            // Only our generated records are shown; existing client files can contain unrelated credentials.
-            preview.Text = string.Join("\n\n", previews.Select(p => p.Client + " → " + p.Path + UiText.Get("Text210") + string.Join(", ", p.Names) + UiText.Get("Text211") + (p.Conflicts.Count == 0 ? UiText.Get("Text212") : string.Join(", ", p.Conflicts)))) + "\n\n" + ExportJson(components);
-            SetStatus(UiText.Get("Text213"));
-        }), Action(UiText.Get("Text214"), async () =>
-        {
-            if (previews.Count == 0) throw new InvalidOperationException(UiText.Get("Text215"));
-            foreach (var p in previews) if (p.Conflicts.Count > 0 && replace.IsChecked != true) throw new InvalidOperationException(UiText.Get("Text216"));
-            foreach (var p in previews) { await ClientIntegration.ApplyAsync(p, replace.IsChecked == true, Token); _settings.Registrations.RemoveAll(r => r.Client == p.Client && r.ConfigPath == p.Path); _settings.Registrations.Add(new(p.Client, p.Path, p.Names)); }
-            _settings.CodexEnabled = codex.IsChecked == true; _settings.ClaudeEnabled = claude.IsChecked == true; await PersistAsync(); await AuditAsync("clients.configured", new { clients = previews.Select(p => p.Client) }); previews = [];
-            SetStatus(UiText.Get("Text217"));
-        }, true)));
-        form.Children.Add(preview); form.Children.Add(Action(UiText.Get("Text218"), async () => { var components = await Components(); var file = await PickSaveAsync("sap-mcp-config.json"); if (file == null) return; await AtomicFile.WriteAsync(file, ExportJson(components), Token); SetStatus(UiText.Get("Text219")); }));
-        Body.Children.Add(Card(form)); Body.Children.Add(Notice(UiText.Get("Text220")));
-        Body.Children.Add(Action(UiText.Get("Text221"), VerifyLocalAsync));
+            var components=new[]{"adt","rfc"}.Where(c=>_settings.Component(c).Installed&&_settings.Component(c).Selected).ToArray();
+            if(components.Length==0)throw new InvalidOperationException(UiText.Get("Text207"));
+            var file=await PickSaveAsync("sap-mcp-config.json");if(file!=null)await AtomicFile.WriteAsync(file,ExportJson(components),Token);
+        }));
+        Body.Children.Add(Action(UiText.Get("Text221"),VerifyLocalAsync));
     }
 
     private string ExportJson(IEnumerable<string> components)

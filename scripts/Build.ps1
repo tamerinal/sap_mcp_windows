@@ -46,4 +46,6 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
     }
     Get-ChildItem -LiteralPath (Join-Path $taskRoot 'artifacts\installers') -Filter ("SAP-MCP-Manager-$taskVersion-Windows-x64-*.exe") | Get-FileHash -Algorithm SHA256 | Select-Object @{Name='fileName';Expression={Split-Path $_.Path -Leaf}},Hash | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRoot 'artifacts\installers\SHA256SUMS.json') -Encoding utf8NoBOM
+    $taskChecksumLines = Get-ChildItem -LiteralPath (Join-Path $taskRoot 'artifacts\installers') -Filter ("SAP-MCP-Manager-$taskVersion-Windows-x64-*.exe") | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.Hash.ToLowerInvariant() + '  ' + (Split-Path $_.Path -Leaf) }
+    $taskChecksumLines | Set-Content -LiteralPath (Join-Path $taskRoot 'artifacts\installers\SHA256SUMS.txt') -Encoding utf8NoBOM
 } finally { Pop-Location }

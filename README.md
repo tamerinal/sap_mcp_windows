@@ -1,27 +1,33 @@
 # SAP MCP Manager for Windows
 
+## 0.1.0-preview.10 — 2026-11-02
+
+Basic separates Save from Verify and never discovers while editing. SID is required. With explicit acceptance, HTTP/HTTPS works without uploaded certificates. RFC ping, server-list permission, RFC-assisted candidates, consented smart/full TCP scanning and final ADT authentication are separate stages. Denied RFC discovery preserves a successful ping. Failed RFC candidates offer a consented scan instead of claiming the service is inactive. Candidates continue after login rejection and stop at the first complete success.
+
+Full TCP scanning targets 30 seconds and stops with partial results at 60 seconds; HTTP probing has a separate budget. ADT 0.4.2 discovery protocol 2 is required. Advanced, Host and shared production policy behavior are preserved. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease. See the [Basic guide](docs/BASIC-SETUP.md).
+
 [Türkçe](README.tr.md) · [User guide](docs/USER-GUIDE.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 Install SAP RFC and SAP ADT MCP servers, manage SAP connection profiles and Windows-protected passwords, and connect Codex or Claude Desktop from a desktop application. No source build, GitHub account, Git or compiler is required to use the installers.
 
 ![SAP MCP Manager overview](docs/images/overview-en.png)
 
-**Preview: v0.1.0-preview.6.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
+**Last published preview: v0.1.0-preview.6.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
 
 ## Download
 
 | Installer | Choose this when |
 |---|---|
-| [Online EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.6/SAP-MCP-Manager-0.1.0-preview.6-Windows-x64-Online.exe) | Internet is available to download missing runtimes. MCP packages and the self-contained manager are included. |
-| [Offline EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.6/SAP-MCP-Manager-0.1.0-preview.6-Windows-x64-Offline.exe) | The target cannot download runtimes. Includes the same MCP packages plus runtime installers. |
+| [Online EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.10/SAP-MCP-Manager-0.1.0-preview.10-Windows-x64-Online.exe) | Internet is available to download missing runtimes. MCP packages and the self-contained manager are included. |
+| [Offline EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.10/SAP-MCP-Manager-0.1.0-preview.10-Windows-x64-Offline.exe) | The target cannot download runtimes. Includes the same MCP packages plus runtime installers. |
 
-[Preview assets and checksums](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.6). Compare `Get-FileHash -Algorithm SHA256` with `SHA256SUMS.txt`. SAP access still requires your corporate network. **SAP NetWeaver RFC SDK is not included in either EXE.**
+[Preview assets and checksums](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.10). Compare `Get-FileHash -Algorithm SHA256` with `SHA256SUMS.txt`. SAP access still requires your corporate network. **SAP NetWeaver RFC SDK is not included in either EXE.**
 
 ## First setup
 
 1. Install the Online/Offline EXE under your normal Windows account and open Manager. New installations start in **Basic**, existing configurations in **Advanced**; switch from the header.
 2. In Basic select the SDK folder or **Continue with ADT only, without an SDK**. **Prepare installation** automatically checks/installs prerequisites and prepares MCP packages.
-3. Enter one SAP server, user, password, client, language and instance. Credential-free HTTPS ADT discovery starts automatically. Use a manual URL/port or the address-finding help if needed; **Save and verify** tests ADT and RFC separately.
+3. Enter host, instance, SID, client, user and password. **Save** stores local configuration only; **Verify** starts RFC and anonymous ADT discovery after warning/consent.
 4. One working connection permits a warning and continuation with only its MCP; neither working preserves the previous profile. Preview/apply Codex/Claude configuration and restart client MCP processes.
 
 The [Basic guide](docs/BASIC-SETUP.md) explains the flow. **Advanced** retains component selection, individual prerequisites, SDK, multiple connections/profiles, clients and logs; see the [full guide](docs/USER-GUIDE.md). Manager need not stay open. Switching language/mode preserves forms and does not change the SAP profile language.
@@ -54,3 +60,19 @@ Preview.4 adds explicit ADT endpoints, profile certificate trust, staged diagnos
 
 
 [Basic setup and automatic ADT discovery](docs/BASIC-SETUP.md).
+
+## Earlier local release notes
+
+## 0.1.0-preview.9 — SID and MCP output fixes
+
+RFC 0.1.1 and ADT 0.4.1 return complete JSON in text as well as structured content. Legacy ADT list/ping responses follow their schemas. Syntax diagnostics, DDIC details, class/interface components, search descriptions and BW endpoint failures are visible to text-only clients. Both tool name sets remain available.
+
+SID is required when saving connections/profiles. Basic can obtain it from a successful RFC connection, or the user can enter it. A backend SID mismatch prevents saving. Existing blank records remain readable. HTTP profiles retain the plaintext warning; TLS inspection explains that certificates do not apply to HTTP. Configured custom URLs are included first in endpoint discovery.
+
+Native MCP operation/session logs are separate from Host process logs, honor level/rotation/retention, exclude SAP payloads, and expose operation IDs. Backend release information remains unavailable when SAP does not explicitly expose it. UTF-8 and declared Turkish response encodings are decoded at the HTTP boundary.
+
+Local Online/Offline installers only; no GitHub publication. Live writes and activations are excluded from acceptance.
+
+New local release: **0.1.0-preview.9**. Basic status summary, reusable setup screens, and separate Codex / Claude Desktop / Claude Code integrations. [Release notes](docs/RELEASE-NOTES.md). Not published to GitHub.
+
+New local release: **0.1.0-preview.7** (ADT 0.4.0). Local Online/Offline installers are in `artifacts/installers`; GitHub links below refer to the previously published preview.6 release.

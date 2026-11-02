@@ -2,6 +2,7 @@
 param()
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
+$taskVersion = ([xml](Get-Content -Raw -LiteralPath (Join-Path $taskRoot 'Directory.Build.props'))).Project.PropertyGroup.Version
 $taskRegistry = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{950456B8-B9F0-443B-9CA9-A4F5FD067290}_is1'
 if (Test-Path -LiteralPath $taskRegistry) { throw 'An existing SAP MCP Manager installation is registered. Run installer smoke tests in a clean VM/user profile to preserve it.' }
 $taskExistingSettings = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'SapMcpManager/config/settings.json'
@@ -16,7 +17,7 @@ $taskScenarios = @(
 )
 foreach ($taskScenario in $taskScenarios) {
     $taskMode = $taskScenario.Mode
-    $taskInstaller = Join-Path $taskRoot ('artifacts\installers\SAP-MCP-Manager-0.1.0-preview.6-Windows-x64-' + $taskMode + '.exe')
+    $taskInstaller = Join-Path $taskRoot ('artifacts\installers\SAP-MCP-Manager-' + $taskVersion + '-Windows-x64-' + $taskMode + '.exe')
     $taskDestination = [IO.Path]::GetFullPath((Join-Path $taskArtifacts ('installer-smoke\' + $taskMode + '-' + $taskScenario.Name)))
     if (!$taskDestination.StartsWith($taskArtifacts + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid test destination' }
     $taskLog = Join-Path $taskArtifacts ('installer-smoke-' + $taskMode + '-' + $taskScenario.Name + '.log')

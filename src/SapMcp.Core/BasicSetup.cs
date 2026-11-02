@@ -1,22 +1,20 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Xml.Linq;
 
 namespace SapMcp.Core;
 
-public sealed record BasicCheck(string State, string Code)
+public sealed record BasicCheck(string State, string Code, string? Sid = null, string? Host = null, string? Release = null)
 {
     public bool Success => State=="passed";
     public static BasicCheck Passed => new("passed","OK");
     public static BasicCheck Failed(string code) => new("failed",code);
     public static BasicCheck Blocked(string code) => new("blocked",code);
 }
-public sealed record BasicValidation(BasicCheck Adt, BasicCheck Rfc, DateTimeOffset TestedAt, string Fingerprint);
-public sealed record BasicDiscoveryOptions(int Concurrency=16,int ProbeTimeoutMs=1500,int BudgetMs=15000,int DebounceMs=500,int MaxAgeSeconds=60);
-public sealed record BasicCandidate(string Url,int Priority,string Code,int? HttpStatus,bool Verified);
-public sealed record BasicDiscovery(int SchemaVersion,List<BasicCandidate> Candidates,bool BudgetExpired,bool Found,int DurationMs);
+public sealed record BasicValidation(BasicCheck Adt, BasicCheck Rfc, DateTimeOffset TestedAt, string Fingerprint, int PolicyVersion = 0);
+public sealed record BasicDiscoveryOptions(int Concurrency=32,int ProbeTimeoutMs=1500,int BudgetMs=30000,int DebounceMs=500,int MaxAgeSeconds=60,int TcpTimeoutMs=250,int TcpBudgetMs=60000);
+public sealed record BasicCandidate(string Url,int Priority,string Code,int? HttpStatus,bool Verified,int DurationMs=0);
+public sealed record BasicDiscovery(int SchemaVersion,List<BasicCandidate> Candidates,bool BudgetExpired,bool Found,int DurationMs,string DiscoveryId="",string StartedAt="");
 public sealed class BasicDiscoveryException(string code):IOException(UiText.Get("Basic.DiscoveryError",UiText.Get(code switch
 {
     "DISCOVERY_PORT_INVALID"=>"Basic.PortInvalid",
@@ -24,7 +22,7 @@ public sealed class BasicDiscoveryException(string code):IOException(UiText.Get(
     "BASIC_HTTPS_REQUIRED"=>"Basic.HttpsOnly",
     "DISCOVERY_OPTIONS_INVALID" or "DISCOVERY_INPUT_INVALID"=>"Basic.DiscoveryInputInvalid",
     "DISCOVERY_PROCESS_TIMEOUT"=>"Basic.DiscoveryProcessTimeout",
-    "DISCOVERY_PACKAGE_MISSING"=>"Basic.PrepareFirst",
+    "DISCOVERY_PACKAGE_MISSING" or "BASIC_DISCOVERY_UPGRADE_REQUIRED"=>"Basic.PrepareFirst",
     _=>"Basic.DiscoveryInvalid"
 }),code))
 {public string Code {get;}=code;}
@@ -32,6 +30,7 @@ public sealed class BasicDraft
 {
     public string ProfileId {get;set;}=Guid.NewGuid().ToString("N");
     public string SystemId {get;set;}=Guid.NewGuid().ToString("N");
+    public string Sid {get;set;}="";
     public string Host {get;set;}="";
     public string Sysnr {get;set;}="";
     public string User {get;set;}="";
@@ -39,6 +38,7 @@ public sealed class BasicDraft
     public string Client {get;set;}="100";
     public string Language {get;set;}="EN";
     public string ManualUrl {get;set;}="";
+    public string PreferredUrl {get;set;}="";
     public List<TrustedCertificate> Certificates {get;set;}=[];
 }
 
@@ -60,28 +60,48 @@ public static class BasicPolicy
             if(!int.TryParse(value,out var port)||port is <1 or >65535)throw new InvalidDataException(UiText.Get("Basic.HttpsOnly"));
             var h=ParseHost(host).Host;return $"https://{(h.Contains(':')?"["+h+"]":h)}:{port}";
         }
-        var url=AdtProfiles.NormalizeUrl(value);if(!url.StartsWith("https://",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException(UiText.Get("Basic.HttpsOnly"));return url;
+        return AdtProfiles.NormalizeUrl(value);
     }
     public static int? InstanceCandidate(string url,string host)
     {
         if(!Uri.TryCreate(url,UriKind.Absolute,out var u)||!u.Host.Trim('[',']').Equals(host,StringComparison.OrdinalIgnoreCase))return null;
         return u.Port is >=44300 and <=44399?u.Port-44300:null;
     }
-    public static string Fingerprint(AppSettings s,ConnectionProfile p)
+    public static string Fingerprint(AppSettings s,ConnectionProfile p,string? sid=null)
     {
         var secret=ProfileService.ResolveSecret(s.CredentialsFile,p.SecretRef);
         var cipher=File.Exists(secret)?Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(secret))):"missing";
-        var data=new {p.TargetKey,p.User,p.Client,p.Language,p.AdtBaseUrl,p.AdtCertificates,p.AllowInsecureTls,cipher,s.SdkDirectory,s.NodeExecutable,s.PythonExecutable,adt=s.Adt.Version,rfc=s.Rfc.Version};
+        sid ??= File.Exists(s.LandscapeFile)?LandscapeService.Load(s.LandscapeFile).FirstOrDefault(x=>x.TargetKey==p.TargetKey)?.Sid:null;
+        var data=new {policyVersion=2,sid,profileSid=p.Sid,p.TargetKey,p.User,p.Client,p.Language,p.AdtBaseUrl,p.AdtCertificates,p.AllowInsecureTls,cipher,s.SdkDirectory,s.NodeExecutable,s.PythonExecutable,adt=s.Adt.Version,rfc=s.Rfc.Version};
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data,JsonDefaults.Options))));
     }
-    public static string[] Eligible(AppSettings s,ConnectionProfile p)=>s.ActiveProfiles.GetValueOrDefault(p.TargetKey)==p.Id&&p.BasicValidation is {} v&&v.Fingerprint==Fingerprint(s,p)
+    public static string[] Eligible(AppSettings s,ConnectionProfile p)=>s.ActiveProfiles.GetValueOrDefault(p.TargetKey)==p.Id&&p.BasicValidation is {PolicyVersion:2} v&&v.Fingerprint==Fingerprint(s,p)
         ? new[]{v.Adt.Success?"adt":"",v.Rfc.Success?"rfc":""}.Where(x=>x.Length>0).ToArray():[];
     public static BasicCheck AdtResult(JsonElement report)
     {
-        if(report.TryGetProperty("success",out var success)&&success.ValueKind==JsonValueKind.True)return BasicCheck.Passed;
-        if(report.TryGetProperty("stages",out var stages))foreach(var row in stages.EnumerateArray())
-            if(row.GetProperty("status").GetString() is "failed" or "unverified")return BasicCheck.Failed(SafeCode(row.GetProperty("code").GetString()));
-        return BasicCheck.Failed("ADT_NOT_VERIFIED");
+        if(!report.TryGetProperty("stages",out var stages)||stages.ValueKind!=JsonValueKind.Array)return BasicCheck.Failed("ADT_RESPONSE_INVALID");
+        foreach(var row in stages.EnumerateArray())
+            if(row.TryGetProperty("status",out var state)&&state.GetString() is "failed" or "unverified")
+                return BasicCheck.Failed(SafeCode(row.TryGetProperty("code",out var code)?code.GetString():null));
+        foreach(var required in new[]{"authentication","discovery","readOnly"})
+            if(!stages.EnumerateArray().Any(row=>row.TryGetProperty("stage",out var name)&&name.GetString()==required&&row.TryGetProperty("status",out var status)&&status.GetString()=="passed"))return BasicCheck.Failed("ADT_NOT_VERIFIED");
+        return new("passed","OK",report.TryGetProperty("systemId",out var sid)?sid.GetString():null);
+    }
+    public static int Rank(BasicCandidate c)=>c.Verified?0:c.HttpStatus==401?1:c.Code.StartsWith("TLS_",StringComparison.Ordinal)?2:c.Code.StartsWith("AUTH",StringComparison.Ordinal)?3:c.Code.StartsWith("DNS",StringComparison.Ordinal)||c.Code.StartsWith("TCP",StringComparison.Ordinal)?4:c.Code=="NETWORK_TIMEOUT"?5:6;
+    public static string BestFailure(BasicDiscovery result)=>result.Candidates.OrderBy(Rank).ThenBy(c=>c.Priority).Select(c=>SafeCode(c.Code)).FirstOrDefault()??"ADT_NOT_FOUND";
+    public static IEnumerable<BasicCandidate> Usable(BasicDiscovery result)=>result.Candidates.Where(c=>c.Verified||c.HttpStatus is 200 or 401)
+        .OrderBy(c=>c.Verified?0:c.HttpStatus==200?1:2).ThenBy(c=>new Uri(c.Url).Scheme=="https"?0:1).ThenBy(c=>c.Priority);
+    public static string DiscoveryText(BasicDiscovery result)
+    {
+        var selected=Usable(result).FirstOrDefault();
+        var tls=result.Candidates.FirstOrDefault(c=>c.Code.StartsWith("TLS_",StringComparison.Ordinal));
+        var text=selected==null?UiText.Get(tls!=null?"Basic.AdvancedTls":"Basic.NotFound"):
+            UiText.Get(selected.Verified?"Basic.Discovered":"Basic.AuthCandidate")+" Â· "+selected.Url;
+        if(selected==null&&tls==null&&result.Candidates.OrderBy(Rank).FirstOrDefault() is {} failure)text+=" Â· "+SafeCode(failure.Code);
+        if(selected!=null&&new Uri(selected.Url).Scheme=="http")text+="\n"+UiText.Get("Basic.HttpWarning");
+        if(tls!=null)text+="\n"+UiText.Get("Basic.TlsCandidate")+" Â· "+SafeCode(tls.Code);
+        if(result.BudgetExpired)text+="\n"+UiText.Get("Basic.BudgetExpired");
+        return text;
     }
     public static string SafeCode(string? code)=>code!=null&&code.Length<=70&&code.All(c=>char.IsAsciiLetterUpper(c)||c=='_'||char.IsAsciiDigit(c))?code:"CONNECTION_FAILED";
     public static BasicCheck RfcResult(JsonElement result)
@@ -96,165 +116,93 @@ public static class BasicPolicy
     }
 }
 
-public sealed class BasicDiscoveryService
+public static class BasicInstallation
 {
-    private static readonly JsonSerializerOptions InputJson=new(JsonDefaults.Options){DefaultIgnoreCondition=JsonIgnoreCondition.WhenWritingNull};
-    internal static string SerializeRequest(BasicDraft draft)
+    public static bool HasHistory(AppSettings s) => s.BasicSetup != null || s.Adt.Installed || s.Rfc.Installed || s.Profiles.Count > 0 || s.Registrations.Count > 0
+        || File.Exists(Path.Combine(s.PackageDirectory, "adt", ".sapmcp-package.json")) || File.Exists(Path.Combine(s.PackageDirectory, "rfc", ".sapmcp-package.json"));
+    public static bool IsMaintenance(AppSettings s) => s.BasicSetup is {} state ? state.PreparedAt != null : HasHistory(s);
+    public static bool AdtOnly(AppSettings s) => s.BasicSetup?.AdtOnly ?? (HasHistory(s) && !s.Rfc.Installed && string.IsNullOrWhiteSpace(s.SdkDirectory));
+    public static string InstalledVersion(AppSettings s, string component)
     {
-        var (host,port)=BasicPolicy.ParseHost(draft.Host);
-        var manual=BasicPolicy.ManualUrl(draft.ManualUrl,draft.Host);var url=manual.Length==0?null:manual;
-        var input=new {host,explicitPort=port,manualUrl=url,certificates=draft.Certificates,options=new {concurrency=BasicPolicy.Discovery.Concurrency,probeTimeoutMs=BasicPolicy.Discovery.ProbeTimeoutMs,budgetMs=BasicPolicy.Discovery.BudgetMs}};
-        return JsonSerializer.Serialize(input,InputJson);
-    }
-    internal static BasicDiscovery ReadResponse(ProcessResult run)
-    {
-        try
+        var root = Path.Combine(s.PackageDirectory, component);
+        var installed = s.Component(component).Version;
+        var receiptPath = Path.Combine(root, ".sapmcp-package.json");
+        if (File.Exists(receiptPath))
         {
-            using var json=JsonDocument.Parse(run.Output);
-            if(run.ExitCode!=0)
-            {
-                var raw=json.RootElement.TryGetProperty("code",out var code)&&code.ValueKind==JsonValueKind.String?code.GetString():null;
-                var safe=raw is "DISCOVERY_PORT_INVALID" or "DISCOVERY_HOST_INVALID" or "BASIC_HTTPS_REQUIRED" or "DISCOVERY_OPTIONS_INVALID" or "DISCOVERY_INPUT_INVALID"?raw:"DISCOVERY_PROCESS_FAILED";
-                throw new BasicDiscoveryException(safe);
-            }
-            var result=json.RootElement.Deserialize<BasicDiscovery>(JsonDefaults.Options);
-            if(result is not {SchemaVersion:1}||result.Candidates==null||result.Candidates.Count>102)throw new InvalidDataException();
-            return result;
+            try { installed = JsonSerializer.Deserialize<PackageAsset>(File.ReadAllText(receiptPath), JsonDefaults.Options)?.Version ?? installed; }
+            catch (Exception ex) when (ex is IOException or JsonException) { return ""; }
         }
-        catch(Exception ex)when(ex is JsonException or InvalidDataException or InvalidOperationException){throw new BasicDiscoveryException("DISCOVERY_OUTPUT_INVALID");}
+        return installed;
     }
-    public async Task<BasicDiscovery> DiscoverAsync(AppSettings settings,BasicDraft draft,CancellationToken ct=default)
+    public static string Package(AppSettings s, string component, string catalogVersion)
     {
-        var (host,port)=BasicPolicy.ParseHost(draft.Host);
-        var manual=BasicPolicy.ManualUrl(draft.ManualUrl,draft.Host);var url=manual.Length==0?null:manual;
-        if(url!=null&&!url.StartsWith("https://",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException(UiText.Get("Basic.HttpsOnly"));
-        var entry=Path.Combine(settings.PackageDirectory,"adt","dist","basic-connection.js");
-        if(!File.Exists(entry)||!File.Exists(settings.NodeExecutable))throw new BasicDiscoveryException("DISCOVERY_PACKAGE_MISSING");
-        ProcessResult run;
-        try{run=await ProcessRunner.RunAsync(settings.NodeExecutable,[entry],timeout:TimeSpan.FromSeconds(20),stdin:SerializeRequest(draft),ct:ct);}
-        catch(OperationCanceledException)when(!ct.IsCancellationRequested){throw new BasicDiscoveryException("DISCOVERY_PROCESS_TIMEOUT");}
-        try
-        {
-            var result=ReadResponse(run);
-            foreach(var candidate in result.Candidates)
-            {
-                var normalized=AdtProfiles.NormalizeUrl(candidate.Url);var parsed=new Uri(normalized);
-                if(parsed.Scheme!="https"||(url!=null?normalized!=url:!parsed.Host.Trim('[',']').Equals(host,StringComparison.OrdinalIgnoreCase)))throw new InvalidDataException();
-            }
-            return result;
-        }
-        catch(Exception ex)when(ex is JsonException or InvalidDataException){throw new InvalidDataException(UiText.Get("Basic.DiscoveryInvalid"));}
+        var root = Path.Combine(s.PackageDirectory, component);
+        if (!Directory.Exists(root)) return "Missing";
+        var installed = InstalledVersion(s,component);
+        if (File.Exists(Path.Combine(root,".sapmcp-package.json")) && installed.Length==0) return "Repair";
+        var different = installed != catalogVersion;
+        if (different && Version.TryParse(installed.Split('+')[0].Split('-')[0], out var actual) && Version.TryParse(catalogVersion.Split('+')[0].Split('-')[0], out var desired) && actual > desired) different = false;
+        if (different) return "Update";
+        if (!File.Exists(Path.Combine(root, "dist", "server.js")) || (component == "adt" && !File.Exists(Path.Combine(root, "dist", "basic-connection.js")))) return "Repair";
+        return "Current";
     }
+    public static bool SharedReady(IEnumerable<Requirement> checks) => checks.Where(c => c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013")).All(c => c.State is CheckState.Ready or CheckState.Warning);
+    public static bool RfcReady(IEnumerable<Requirement> checks) => SharedReady(checks) && new[]{"sdk","python","pyrfc","vc-runtime","vc2013"}.All(id => checks.Any(c => c.Id == id && c.State == CheckState.Ready));
 }
 
 public sealed class BasicPreparationService(PackageService packages)
 {
+    internal Func<AppSettings,CancellationToken,Task<List<Requirement>>>? CheckOverride { get; init; }
+    internal Func<AppSettings,IEnumerable<string>,IProgress<string>?,CancellationToken,Task>? InstallOverride { get; init; }
+    internal Func<PackageAsset,string,CancellationToken,Task>? InstallPackageOverride { get; init; }
     public IReadOnlyList<Requirement> LastChecks {get;private set;}=[];
     public bool RfcReady {get;private set;}
     internal static void RetainValidatedSdk(AppSettings candidate,AppSettings current,bool ready)
     {if(!ready)candidate.SdkDirectory=current.SdkDirectory;}
-    public async Task<AppSettings> PrepareAsync(AppSettings current,string sdk,bool adtOnly,IProgress<string>? progress,CancellationToken ct)
+    public async Task<AppSettings> PrepareAsync(AppSettings current,string sdk,bool adtOnly,IProgress<string>? progress,CancellationToken ct,bool maintenanceOnly=false)
     {
         var s=BasicPolicy.Copy(current);s.Adt.Selected=true;s.Rfc.Selected=!adtOnly;s.SdkDirectory=adtOnly?current.SdkDirectory:sdk;
         if(!adtOnly&&string.IsNullOrWhiteSpace(sdk))throw new InvalidDataException(UiText.Get("Basic.SdkRequired"));
         if(!adtOnly&&!Path.IsPathFullyQualified(sdk))throw new InvalidDataException(UiText.Get("Basic.SdkRequired"));
-        var prerequisites=new PrerequisiteService(packages);var checks=await prerequisites.CheckAsync(s,ct);
+        var prerequisites=new PrerequisiteService(packages);
+        Task<List<Requirement>> Check() => CheckOverride?.Invoke(s,ct) ?? prerequisites.CheckAsync(s,ct);
+        Task Install(IEnumerable<string> ids) => InstallOverride?.Invoke(s,ids,progress,ct) ?? prerequisites.InstallAsync(s,ids,progress,ct);
+        var checks=await Check();
         var fatal=checks.FirstOrDefault(c=>c.State is CheckState.Blocked or CheckState.Missing&&!c.Installable&&c.Id!="sdk");
         if(fatal!=null)throw new InvalidOperationException(UiText.Get("Basic.RequirementBlocked",fatal.Name));
-        await prerequisites.InstallAsync(s,checks.Where(c=>c.Id=="node"&&c.Installable&&c.State!=CheckState.Ready).Select(c=>c.Id),progress,ct);
-        foreach(var dependency in checks.Where(c=>c.Id!="node"&&c.Installable&&c.State!=CheckState.Ready))
+        var maintenance = maintenanceOnly || BasicInstallation.IsMaintenance(current);
+        if (!maintenance && checks.Any(c=>c.Id=="node"&&c.Installable&&c.State!=CheckState.Ready))
+            await Install(["node"]);
+        foreach(var dependency in checks.Where(c=>!maintenance&&c.Id!="node"&&c.Installable&&c.State!=CheckState.Ready))
         {
-            try{await prerequisites.InstallAsync(s,[dependency.Id],progress,ct);}
+            try{await Install([dependency.Id]);}
             catch(OperationCanceledException){throw;}
             catch{progress?.Report(UiText.Get("Basic.RequirementBlocked",dependency.Name));}
         }
-        checks=await prerequisites.CheckAsync(s,ct);
+        checks=await Check();
         LastChecks=checks;
         var sharedFailure=checks.FirstOrDefault(c=>c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013")&&c.State is not (CheckState.Ready or CheckState.Warning));
-        if(sharedFailure!=null)throw new InvalidOperationException(UiText.Get("Basic.RequirementBlocked",sharedFailure.Name));
+        if(sharedFailure!=null)throw new InvalidOperationException(UiText.Get(maintenance?"Basic.RepairRequirement":"Basic.RequirementBlocked",sharedFailure.Name));
         var rfcReady=!adtOnly&&checks.Where(c=>c.Id is "sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013").All(c=>c.State==CheckState.Ready);
         RfcReady=rfcReady;RetainValidatedSdk(s,current,rfcReady);
         var catalog=packages.LoadCatalog();
         foreach(var component in new[]{"adt","rfc"}.Where(c=>c=="adt"||rfcReady))
         {
             var asset=catalog.Find(component);var root=Path.Combine(s.PackageDirectory,component);
-            if(s.Component(component).Version!=asset.Version||!File.Exists(Path.Combine(root,"dist","server.js"))||(component=="adt"&&!File.Exists(Path.Combine(root,"dist","basic-connection.js"))))
-                await packages.InstallAssetAsync(asset,root,Path.Combine(s.DataDirectory,"cache"),progress,ct);
-            s.Component(component).Installed=true;s.Component(component).Version=asset.Version;
+            var status = BasicInstallation.Package(s, component, asset.Version);
+            if (status == "Repair") throw new InvalidOperationException(UiText.Get("Basic.RepairPackage", component.ToUpperInvariant()));
+            if (status is "Missing" or "Update")
+            {
+                if(InstallPackageOverride!=null)await InstallPackageOverride(asset,root,ct);
+                else await packages.InstallAssetAsync(asset,root,Path.Combine(s.DataDirectory,"cache"),progress,ct);
+                s.Component(component).Version=asset.Version;
+            }
+            else s.Component(component).Version=BasicInstallation.InstalledVersion(s,component);
+            s.Component(component).Installed=true;
         }
         // Preserve Advanced's component selection; readiness for Basic is reported independently.
         s.Rfc.Selected=current.Rfc.Selected;s.Adt.Selected=current.Adt.Selected;
+        s.BasicSetup = new(DateTimeOffset.UtcNow, adtOnly);
         return s;
-    }
-}
-
-public sealed class BasicConnectionService(ISecretStore secrets)
-{
-    public async Task<(AppSettings? Settings,BasicCheck Adt,BasicCheck Rfc)> SaveAsync(AppSettings source,SettingsStore store,BasicDraft draft,BasicDiscovery discovery,bool rfcAvailable,CancellationToken ct=default,
-        Func<AppSettings,string,string,CancellationToken,Task<BasicCheck>>? tester=null)
-    {
-        var (host,_)=BasicPolicy.ParseHost(draft.Host);
-        var sysnr=draft.Sysnr.Trim();if(sysnr.Length!=2||!sysnr.All(char.IsAsciiDigit))throw new InvalidDataException(UiText.Get("Basic.InstanceRequired"));
-        var entry=new ManagedConnection{Id=draft.SystemId,Name=host,Host=host,Sysnr=sysnr};entry.NormalizeAndValidate();
-        var catalog=await new ManagedJsonConnectionSource().ReadCatalogAsync(source,ct,createIfMissing:true);
-        var existingSystem=catalog.Systems.SingleOrDefault(s=>s.Id==entry.Id)??catalog.Systems.SingleOrDefault(s=>s.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase));
-        if(existingSystem!=null){entry.Id=existingSystem.Id;entry.Name=existingSystem.Name;entry.Router=existingSystem.Router;entry.Sid=existingSystem.Sid;}
-        var original=source.Profiles.SingleOrDefault(p=>p.Id==draft.ProfileId);
-        var profile=original==null?new ConnectionProfile{Id=draft.ProfileId,Name=draft.User}:BasicPolicy.Copy(original);
-        profile.TargetKey=entry.TargetKey;profile.User=draft.User.Trim();profile.Client=draft.Client.Trim();profile.Language=draft.Language.Trim().ToUpperInvariant();profile.AllowInsecureTls=false;profile.AdtCertificates=draft.Certificates.ToList();
-        profile.Name=string.IsNullOrWhiteSpace(profile.Name)?profile.User:profile.Name;profile.AdtBaseUrl="";
-        if(original!=null)profile.SecretRef=Path.GetFullPath(ProfileService.ResolveSecret(source.CredentialsFile,original.SecretRef));
-        profile.Validate();if(!profile.Language.All(char.IsAsciiLetter))throw new InvalidDataException(UiText.Get("Text029"));
-        var root=Path.Combine(source.DataDirectory,"cache","basic-tests",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);
-        string? newSecret=null;
-        try
-        {
-            if(draft.Password.Length>0){newSecret=await secrets.ProtectAsync(draft.Password,Path.Combine(root,"secrets"),ct);profile.SecretRef=newSecret;}
-            if(string.IsNullOrWhiteSpace(profile.SecretRef))throw new InvalidDataException(UiText.Get("Basic.PasswordRequired"));
-            await secrets.ReadAsync(profile.SecretRef,ct);
-            var test=BasicPolicy.Copy(source);test.Profiles=[profile];test.ActiveProfiles=new(){{entry.TargetKey,profile.Id}};
-            test.LandscapeFile=Path.Combine(root,"landscape.xml");test.CredentialsFile=Path.Combine(root,"mapping.json");test.ConnectionSourceMode="managed";
-            test.Rfc.Selected=rfcAvailable;test.Adt.Selected=true;test.Rfc.LogDirectory=Path.Combine(root,"rfc");test.Adt.LogDirectory=Path.Combine(root,"adt");test.Rfc.LogLevel=LogLevel.Off;test.Adt.LogLevel=LogLevel.Off;
-            await AtomicFile.WriteAsync(test.LandscapeFile,ManagedJsonConnectionSource.ExportXml(new(){Systems=[entry]}),ct,privateData:true);
-            var testPath=Path.Combine(root,"settings.json");
-            async Task<BasicCheck> Run(string component)
-            {
-                await ProfileService.MaterializeAsync(test,ct);await new SettingsStore(testPath).SaveAsync(test,ct);
-                try
-                {
-                    if(tester!=null)return await tester(test,testPath,component,ct);
-                    await using var session=await McpSession.StartAsync(test,testPath,component,ct);
-                    var response=await session.RequestAsync("tools/call",new{name=component=="adt"?"diagnose_connection":"sap_rfc_ping_system",arguments=new{target_key=entry.TargetKey}},ct);
-                    if(component=="rfc")return BasicPolicy.RfcResult(response);
-                    if(response.TryGetProperty("structuredContent",out var data))return BasicPolicy.AdtResult(data);
-                    if(response.TryGetProperty("content",out var content))foreach(var item in content.EnumerateArray())if(item.TryGetProperty("text",out var text))
-                        try{using var json=JsonDocument.Parse(text.GetString()!);return BasicPolicy.AdtResult(json.RootElement);}catch(JsonException){}
-                    return BasicCheck.Failed("ADT_RESPONSE_INVALID");
-                }
-                catch(OperationCanceledException){throw;}
-                catch{return BasicCheck.Failed(component=="adt"?"ADT_PROCESS_FAILED":"RFC_PROCESS_FAILED");}
-            }
-            var adt=BasicCheck.Failed(discovery.Candidates.Select(c=>c.Code).FirstOrDefault(c=>c.StartsWith("TLS_",StringComparison.Ordinal)||c is "AUTHORIZATION_DENIED" or "DNS_FAILED" or "NETWORK_TIMEOUT" or "ADT_REDIRECT_REQUIRES_URL" or "ADT_DISCOVERY_INVALID" or "ADT_UNEXPECTED_CONTENT")??"ADT_NOT_FOUND");
-            foreach(var c in discovery.Candidates.Where(c=>c.Verified||c.HttpStatus==401).OrderBy(c=>c.Verified?0:1).ThenBy(c=>c.Priority))
-            {
-                var normalized=AdtProfiles.NormalizeUrl(c.Url);var u=new Uri(normalized);
-                var allowed=draft.ManualUrl.Length>0?normalized==BasicPolicy.ManualUrl(draft.ManualUrl,draft.Host):u.Host.Trim('[',']').Equals(host,StringComparison.OrdinalIgnoreCase);
-                if(u.Scheme!="https"||!allowed)throw new InvalidDataException(UiText.Get("Basic.DiscoveryInvalid"));
-                profile.AdtBaseUrl=normalized;adt=await Run("adt");if(adt.Success||adt.Code=="AUTHENTICATION_FAILED")break;
-            }
-            var rfc=adt.Code=="AUTHENTICATION_FAILED"?BasicCheck.Blocked("AUTHENTICATION_RETRY_STOPPED"):rfcAvailable?await Run("rfc"):BasicCheck.Blocked("RFC_DEPENDENCY_MISSING");
-            if(!adt.Success&&!rfc.Success)return(null,adt,rfc);
-            // Copy the newly protected secret only when committing a usable profile.
-            string? committedSecret=null;
-            try
-            {
-                if(newSecret!=null){Directory.CreateDirectory(source.SecretsDirectory);committedSecret=Path.Combine(source.SecretsDirectory,Path.GetFileName(newSecret));await AtomicFile.WriteAsync(committedSecret,await File.ReadAllTextAsync(newSecret,ct),ct,privateData:true);profile.SecretRef=committedSecret;}
-                profile.SecretRef=Path.GetRelativePath(Path.GetDirectoryName(source.CredentialsFile)!,profile.SecretRef).Replace('\\','/');
-                profile.BasicValidation=new(adt,rfc,DateTimeOffset.UtcNow,BasicPolicy.Fingerprint(source,profile));
-                var next=await new ConnectionManager(store).SaveBasicAsync(source,entry,profile,ct);return(next,adt,rfc);
-            }
-            catch{if(committedSecret!=null)File.Delete(committedSecret);throw;}
-        }
-        finally {if(Directory.Exists(root))Directory.Delete(root,true);}
     }
 }

@@ -864,8 +864,8 @@
     "tr": "Çakışan kayıtlar var. Değiştirme seçeneğini işaretleyin."
   },
   "Text217": {
-    "en": "Client settings saved. Restart the MCP servers in Codex/Claude Desktop.",
-    "tr": "İstemci ayarları kaydedildi. Codex/Claude Desktop içinde MCP’leri yeniden başlatın."
+    "en": "App settings saved. Restart MCP servers in the selected apps.",
+    "tr": "Uygulama ayarları kaydedildi. Seçili uygulamalarda MCP sunucularını yeniden başlatın."
   },
   "Text218": {
     "en": "Export generic MCP JSON settings",
@@ -1128,8 +1128,8 @@
     "tr": "Geçersiz bağlantı kaynağı modu."
   },
   "Connections.InvalidSystem": {
-    "en": "Enter a name and a valid host (without a URL or port). SID is optional, up to three letters/digits.",
-    "tr": "Ad ve geçerli sunucu girin (URL veya port olmadan). SID isteğe bağlı, en fazla üç harf/rakamdır."
+    "en": "Enter a name, a valid host and a three-letter/digit SID.",
+    "tr": "Ad, geçerli sunucu ve üç harf/rakamdan oluşan SID girin."
   },
   "Connections.InvalidNumber": {
     "en": "System number must contain exactly two digits (00–99).",
@@ -1552,8 +1552,8 @@
     "tr": "2 / Tek SAP bağlantısı"
   },
   "Basic.Step3": {
-    "en": "3 / Codex and Claude integration",
-    "tr": "3 / Codex ve Claude entegrasyonu"
+    "en": "3 / App integrations",
+    "tr": "3 / Uygulama entegrasyonları"
   },
   "Basic.SdkIntro": {
     "en": "Select your SAP NetWeaver RFC SDK folder. One action prepares the runtimes and MCP servers.",
@@ -1608,8 +1608,8 @@
     "tr": "Yönetilecek bağlantı / hesap"
   },
   "Basic.Host": {
-    "en": "Application server (DNS/IP; optional :HTTPS-port)",
-    "tr": "Uygulama sunucusu (DNS/IP; isteğe bağlı :HTTPS-port)"
+    "en": "Application server (DNS/IP)",
+    "tr": "Uygulama sunucusu (DNS/IP)"
   },
   "Basic.User": {
     "en": "SAP user",
@@ -1636,28 +1636,28 @@
     "tr": "ADT adresi / portu gir"
   },
   "Basic.ManualUrl": {
-    "en": "HTTPS base URL or HTTPS port (optional)",
-    "tr": "HTTPS kök URL veya HTTPS portu (isteğe bağlı)"
+    "en": "HTTP/HTTPS base URL or HTTPS port (optional)",
+    "tr": "HTTP/HTTPS kök URL veya HTTPS portu (isteğe bağlı)"
   },
   "Basic.DiscoveryIdle": {
-    "en": "Enter the application server to search for ADT without credentials.",
-    "tr": "Kimlik bilgisi göndermeden ADT aramak için sunucuyu girin."
+    "en": "Click Verify to start discovery. No automatic network scan runs while editing.",
+    "tr": "Keşfi başlatmak için Doğrula düğmesine basın. Alanları düzenlerken otomatik ağ taraması yapılmaz."
   },
   "Basic.Discovering": {
     "en": "Searching for ADT securely… No SAP credentials are sent.",
     "tr": "ADT güvenli olarak aranıyor… SAP kimlik bilgileri gönderilmiyor."
   },
   "Basic.Discovered": {
-    "en": "ADT discovery confirmed. Save to verify the account and RFC separately.",
-    "tr": "ADT discovery doğrulandı. Hesap ve RFC’yi ayrı doğrulamak için kaydedin."
+    "en": "ADT service found. Save to verify the account.",
+    "tr": "ADT servisi bulundu. Hesabı doğrulamak için kaydedin."
   },
   "Basic.AuthCandidate": {
-    "en": "A secure candidate requires sign-in; ADT is not verified yet.",
-    "tr": "Güvenli bir aday giriş istiyor; ADT henüz doğrulanmadı."
+    "en": "Login candidate found; ADT and account are not verified yet.",
+    "tr": "Giriş isteyen aday bulundu; ADT ve hesap henüz doğrulanmadı."
   },
   "Basic.NotFound": {
-    "en": "ADT access was not found at the tested addresses.",
-    "tr": "Denenen adreslerde ADT erişimi bulunamadı."
+    "en": "No usable ADT candidate was found within discovery scope; this does not prove the service is unavailable.",
+    "tr": "Keşif kapsamında kullanılabilir ADT adayı bulunamadı; bu, servisin kullanılamadığını kanıtlamaz."
   },
   "Basic.DiscoveryIssue": {
     "en": "Discovery encountered a network, certificate, permission or service problem. Check the address help or certificate settings.",
@@ -1672,24 +1672,24 @@
     "tr": "DNS adı veya IP adresini, gerekirse HTTPS portuyla girin. Portlu IPv6 adresini köşeli paranteze alın."
   },
   "Basic.HttpsOnly": {
-    "en": "Basic accepts HTTPS only. Use Advanced for an explicitly configured HTTP connection.",
-    "tr": "Basic yalnız HTTPS kabul eder. Açık HTTP yapılandırması için Advanced kullanın."
+    "en": "Enter a valid HTTP/HTTPS base URL or HTTPS port.",
+    "tr": "Geçerli HTTP/HTTPS kök URL veya HTTPS portu girin."
   },
   "Basic.Back": {
     "en": "Back",
     "tr": "Geri"
   },
   "Basic.Save": {
-    "en": "Save and verify",
-    "tr": "Kaydet ve doğrula"
+    "en": "Save",
+    "tr": "Kaydet"
   },
   "Basic.Help": {
     "en": "How do I find the ADT port or address?",
     "tr": "ADT portu veya adresi nasıl bulunur?"
   },
   "Basic.Changed": {
-    "en": "Connection values changed. Save to verify again.",
-    "tr": "Bağlantı değerleri değişti. Yeniden doğrulamak için kaydedin."
+    "en": "Verification is stale because form values changed. Verify again.",
+    "tr": "Form alanları değiştiği için önceki doğrulama geçersiz. Yeniden doğrulayın."
   },
   "Basic.InstanceRequired": {
     "en": "Enter the two-digit instance number. A web port alone does not confirm the RFC instance.",
@@ -1732,8 +1732,16 @@
     "tr": "Profil uyarıyla kaydedildi. Yalnız doğrulanan MCP ile devam edin; kurulum kısmen tamamlandı."
   },
   "Basic.ClientsNotice": {
-    "en": "Only verified MCP components are offered. Review and apply the Codex/Claude configuration, then restart their MCP processes. Other registrations are retained. RFC ping does not prove authorization for every function.",
-    "tr": "Yalnız doğrulanan MCP bileşenleri sunulur. Codex/Claude ayarını önizleyip uygulayın, sonra MCP süreçlerini yeniden başlatın. Diğer kayıtlar korunur. RFC ping her fonksiyona yetkiyi kanıtlamaz."
+    "en": "Select the apps that will use SAP MCP. The preview updates with your selection. Saving adds or updates the listed SAP entries and backs up changed files. Replacement permission applies only to existing entries that differ. Clearing an app selection does not remove its saved entries.",
+    "tr": "SAP MCP kullanacak uygulamaları seçin. Önizleme seçiminizle birlikte yenilenir. Kaydetme, listelenen SAP kayıtlarını ekler veya günceller; değişen dosyalar yedeklenir. Değiştirme izni yalnız içeriği farklı mevcut kayıtlar için geçerlidir. Uygulama seçimini kaldırmak kayıtlı ayarlarını silmez."
+  },
+  "Basic.ReplaceClientEntries": {
+    "en": "Allow replacement of existing SAP MCP entries when saving",
+    "tr": "Kaydederken mevcut SAP MCP kayıtlarının değiştirilmesine izin ver"
+  },
+  "Basic.ApplyClientSettings": {
+    "en": "Save SAP MCP entries to selected apps",
+    "tr": "Seçili uygulamalara SAP MCP ayarlarını kaydet"
   },
   "Basic.Retest": {
     "en": "Connection settings changed or verification is missing. Return and verify the saved profile again.",
@@ -1766,5 +1774,253 @@
   "Basic.DiscoveryProcessTimeout": {
     "en": "The local discovery process timed out; this does not prove that ADT is unavailable.",
     "tr": "Yerel keşif süresi aşıldı; bu ADT servisinin bulunmadığını kanıtlamaz."
+  },
+  "Basic.HttpWarning": {
+    "en": "Communication is unencrypted. Verify sends SAP credentials to HTTP candidates after anonymous discovery.",
+    "tr": "İletişim şifrelenmez. Doğrula işlemi anonim keşiften sonra SAP hesap bilgilerini HTTP adaylarına gönderir."
+  },
+  "Basic.PassedHttp": {
+    "en": "Verified — HTTP communication is unencrypted",
+    "tr": "Doğrulandı — HTTP iletişimi şifrelenmez"
+  },
+  "Basic.AdvancedTls": {
+    "en": "HTTPS was found but its certificate could not be verified. No usable HTTP candidate was found; use Advanced for certificate/address settings.",
+    "tr": "HTTPS bulundu ancak sertifikası doğrulanamadı. Kullanılabilir HTTP adayı bulunamadı; sertifika/adres ayarları için Advanced kullanın."
+  },
+  "Basic.TlsCandidate": {
+    "en": "A separate HTTPS candidate has a certificate problem",
+    "tr": "Ayrı bir HTTPS adayında sertifika sorunu var"
+  },
+  "Basic.BudgetExpired": {
+    "en": "Discovery time budget expired; some candidates may not have been checked.",
+    "tr": "Keşif süre bütçesi doldu; bazı adaylar incelenmemiş olabilir."
+  },
+  "Clients.New": {
+    "en": "New",
+    "tr": "Yeni"
+  },
+  "Clients.Update": {
+    "en": "Will update",
+    "tr": "Güncellenecek"
+  },
+  "Clients.Current": {
+    "en": "Up to date",
+    "tr": "Zaten güncel"
+  },
+  "Clients.Before": {
+    "en": "Existing SAP entry",
+    "tr": "Mevcut SAP kaydı"
+  },
+  "Clients.After": {
+    "en": "Planned SAP entry",
+    "tr": "Kaydedilecek SAP kaydı"
+  },
+  "Clients.Details": {
+    "en": "SAP entry details",
+    "tr": "SAP kayıt ayrıntıları"
+  },
+  "Clients.ReadOnly": {
+    "en": "The configuration file is read-only.",
+    "tr": "Ayar dosyası salt okunur."
+  },
+  "Clients.Saved": {
+    "en": "Saved / verified entries:",
+    "tr": "Kaydedilen / doğrulanan kayıtlar:"
+  },
+  "Clients.Backup": {
+    "en": "Backup: {0}",
+    "tr": "Yedek: {0}"
+  },
+  "Clients.Restart": {
+    "en": "Restart MCP servers in {0}.",
+    "tr": "{0} içinde MCP sunucularını yeniden başlatın."
+  },
+  "Clients.Partial": {
+    "en": "Some app settings could not be saved. Review the results for each app.",
+    "tr": "Bazı uygulama ayarları kaydedilemedi. Uygulama bazındaki sonuçları inceleyin."
+  },
+  "Basic.Summary": {
+    "en": "Status summary",
+    "tr": "Durum özeti"
+  },
+  "Basic.NavPackages": {
+    "en": "1. Installation and packages",
+    "tr": "1. Kurulum ve paketler"
+  },
+  "Basic.NavConnection": {
+    "en": "2. SAP connection",
+    "tr": "2. SAP bağlantısı"
+  },
+  "Basic.NavClients": {
+    "en": "3. App integrations",
+    "tr": "3. Uygulama entegrasyonları"
+  },
+  "Basic.UpdatePackages": {
+    "en": "Update MCP packages",
+    "tr": "MCP paketlerini güncelle"
+  },
+  "Basic.AdvancedRepair": {
+    "en": "Repair in Advanced",
+    "tr": "Advanced’de onar"
+  },
+  "Basic.RefreshStatus": {
+    "en": "Check local status",
+    "tr": "Yerel durumu kontrol et"
+  },
+  "Basic.NeedsAttention": {
+    "en": "Needs attention",
+    "tr": "Kontrol gerekli"
+  },
+  "Basic.NoProfile": {
+    "en": "No saved SAP connection. Open step 2.",
+    "tr": "Kayıtlı SAP bağlantısı yok. 2. adımı açın."
+  },
+  "Basic.NotRegistered": {
+    "en": "No saved registration",
+    "tr": "Kayıt yapılmamış"
+  },
+  "Basic.LocalStatus": {
+    "en": "Local installation status. SAP is not contacted; saved test results show the last verification.",
+    "tr": "Yerel kurulum durumu. SAP bağlantısı başlatılmaz; kayıtlı test sonuçları son doğrulamayı gösterir."
+  },
+  "Basic.LastValidation": {
+    "en": "Last verification: {0}",
+    "tr": "Son doğrulama: {0}"
+  },
+  "Basic.RepairRequirement": {
+    "en": "{0} is unavailable. Repair it in Advanced; Basic does not reinstall prerequisites after initial preparation.",
+    "tr": "{0} hazır değil. Advanced üzerinden onarın; Basic ilk hazırlıktan sonra önkoşulları yeniden kurmaz."
+  },
+  "Basic.RepairPackage": {
+    "en": "{0} package needs repair. Use Advanced to repair the installed version.",
+    "tr": "{0} paketi onarım gerektiriyor. Kurulu sürümü Advanced üzerinden onarın."
+  },
+  "Basic.MaintenanceNotice": {
+    "en": "First setup installs missing prerequisites only. After preparation, Basic only checks prerequisites and updates missing or older RFC/ADT MCP packages. Repair prerequisites or the same package version in Advanced.",
+    "tr": "İlk kurulumda yalnız eksik önkoşullar kurulur. Hazırlıktan sonra Basic önkoşulları kontrol eder ve yalnız eksik veya eski RFC/ADT MCP paketlerini günceller. Önkoşul veya aynı sürüm paket onarımı için Advanced kullanın."
+  },
+  "Packages.Missing": {
+    "en": "Not installed",
+    "tr": "Kurulu değil"
+  },
+  "Packages.Update": {
+    "en": "Update available",
+    "tr": "Güncelleme var"
+  },
+  "Packages.Repair": {
+    "en": "Repair in Advanced",
+    "tr": "Advanced’de onarım gerekli"
+  },
+  "Packages.Current": {
+    "en": "Up to date",
+    "tr": "Zaten güncel"
+  },
+  "Basic.Ready": {
+    "en": "Ready",
+    "tr": "Hazır"
+  },
+  "Basic.PreparationIncomplete": {
+    "en": "Initial preparation is incomplete. Continue from step 1; ready prerequisites will be preserved.",
+    "tr": "İlk hazırlık tamamlanmamış. 1. adımdan devam edin; hazır önkoşullar korunur."
+  },
+  "Sid.Required": {
+    "en": "SID is required: enter the three-letter/digit SAP system ID or verify using RFC to detect it.",
+    "tr": "SID zorunludur: üç harf/rakamdan oluşan SAP sistem kimliğini girin veya RFC ile doğrulayarak otomatik alın."
+  },
+  "Sid.Mismatch": {
+    "en": "The entered SID differs from the connected SAP system SID. Correct the SID before saving.",
+    "tr": "Girilen SID, bağlanılan SAP sisteminin SID bilgisiyle farklı. Kaydetmeden önce SID bilgisini düzeltin."
+  },
+  "Basic.SaveOnly": {
+    "en": "Save",
+    "tr": "Kaydet"
+  },
+  "Basic.Verify": {
+    "en": "Verify",
+    "tr": "Doğrula"
+  },
+  "Basic.Next": {
+    "en": "Next",
+    "tr": "İleri"
+  },
+  "Basic.ConnectionWarning": {
+    "en": "Basic does not verify the server certificate. HTTP is unencrypted; HTTPS is encrypted but the server identity is not verified. Use Advanced for certificate trust settings. Accept to continue.",
+    "tr": "Basic mod sunucu sertifikasını doğrulamaz. HTTP trafiği şifresizdir; HTTPS trafiği şifrelidir ancak sunucu kimliği doğrulanmaz. Sertifika güven ayarları için Advanced modu kullanın. Devam etmek için kabul edin."
+  },
+  "Basic.RfcDiscoveryConsent": {
+    "en": "RFC system information is available. Use these hosts and instances to look for ADT? Web ports will still be checked with anonymous HTTP requests.",
+    "tr": "RFC sistem bilgileri okunabiliyor. ADT keşfi bu host ve instance bilgileriyle yapılsın mı? Web portları anonim HTTP istekleriyle kontrol edilecektir."
+  },
+  "Basic.AutomaticConsent": {
+    "en": "ADT will be located automatically. The application will scan common ports on the entered host, check open ports anonymously, then verify ADT candidates with your account. TCP scanning targets about 30 seconds; HTTP checks take additional time.",
+    "tr": "ADT adresi otomatik bulunacak. Uygulama girilen host üzerindeki yaygın portları tarayacak, açık portları anonim kontrol edecek ve ardından ADT adaylarını hesabınızla doğrulayacak. TCP taraması yaklaşık 30 saniyeyi hedefler; HTTP kontrolleri ek süre alır."
+  },
+  "Basic.ExtendedConsent": {
+    "en": "No ADT candidate was found. Scan all TCP ports 1–65535 on the entered host? Target: 30 seconds, maximum: 60 seconds plus HTTP checks. The scan may be incomplete on slow networks.",
+    "tr": "ADT adayı bulunamadı. Girilen host üzerindeki 1–65535 TCP portlarının tamamı taransın mı? Hedef 30 saniye, üst sınır 60 saniye ve ek HTTP kontrol süresidir. Yavaş ağlarda tarama eksik kalabilir."
+  },
+  "Basic.RfcChecking": {
+    "en": "Checking RFC connection…",
+    "tr": "RFC bağlantısı kontrol ediliyor…"
+  },
+  "Basic.RfcAuthorityChecking": {
+    "en": "Checking RFC discovery permission…",
+    "tr": "RFC keşif yetkisi kontrol ediliyor…"
+  },
+  "Basic.RfcReading": {
+    "en": "Reading RFC system information… ({0} instances found)",
+    "tr": "RFC ile sistem bilgileri okunuyor… ({0} instance bulundu)"
+  },
+  "Basic.RfcNoAuthority": {
+    "en": "Your account is not authorized for RFC discovery. RFC ping remains available.",
+    "tr": "RFC ile mevcut tarama yetkiniz bulunmamaktadır. Başarılı RFC ping sonucu korunuyor."
+  },
+  "Basic.RfcAllowlistDenied": {
+    "en": "The local RFC function allowlist does not permit TH_SERVER_LIST. Automatic discovery is available.",
+    "tr": "Yerel RFC fonksiyon izin listesi TH_SERVER_LIST çağrısına izin vermiyor. Otomatik keşif kullanılabilir."
+  },
+  "Basic.RfcDiscoveryUnavailable": {
+    "en": "RFC server information could not be read. Automatic discovery is available.",
+    "tr": "RFC sunucu bilgileri okunamadı. Otomatik keşif kullanılabilir."
+  },
+  "Basic.TcpProgress": {
+    "en": "Searching for ADT… (TCP scan: {0}/{1})",
+    "tr": "Kullanılabilir ADT ucu aranıyor… (TCP taraması: {0}/{1})"
+  },
+  "Basic.HttpProgress": {
+    "en": "Testing open ports with HTTP/HTTPS: {0}/{1}",
+    "tr": "Açık portlar HTTP/HTTPS ile test ediliyor: {0}/{1}"
+  },
+  "Basic.ScanIncomplete": {
+    "en": "The scan reached its time limit. Results are partial; retry or enter the ADT address manually.",
+    "tr": "Tarama süre sınırına ulaştı. Sonuçlar kısmi; yeniden deneyebilir veya ADT adresini elle girebilirsiniz."
+  },
+  "Basic.Authenticating": {
+    "en": "Candidate found: {0} — verifying account…",
+    "tr": "Aday bulundu: {0} — kimlik doğrulanıyor…"
+  },
+  "Basic.ValidationSuccess": {
+    "en": "Verification successful — ADT: {0}",
+    "tr": "Doğrulama başarılı — ADT: {0}"
+  },
+  "Basic.ManualFallback": {
+    "en": "ADT could not be verified. Enter an address manually, or continue with verified RFC only.",
+    "tr": "ADT doğrulanamadı. Adresi elle girebilir veya yalnız doğrulanmış RFC ile ilerleyebilirsiniz."
+  },
+  "Basic.SavedWithoutTest": {
+    "en": "Configuration saved without network tests. Verify before installing MCP entries.",
+    "tr": "Konfigürasyon ağ testi yapılmadan kaydedildi. MCP kayıtlarını kurmadan önce doğrulayın."
+  },
+  "Basic.NeitherAvailable": {
+    "en": "Neither ADT nor RFC was verified. You can save the configuration only, or go back.",
+    "tr": "ADT ve RFC doğrulanamadı. Yalnızca konfigürasyonu kaydedebilir veya geri dönebilirsiniz."
+  },
+  "Basic.PassedUnverifiedTls": {
+    "en": "Passed — server certificate not verified",
+    "tr": "Başarılı — sunucu sertifikası doğrulanmadı"
+  },
+  "Basic.Accept": {
+    "en": "I accept",
+    "tr": "Kabul ediyorum"
   }
 }

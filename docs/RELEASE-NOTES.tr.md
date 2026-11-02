@@ -1,4 +1,39 @@
-# v0.1.0-preview.6 — Basic ADT keşif düzeltmesi
+# Sürüm notları
+
+## 0.1.0-preview.10 — 2026-11-02
+
+Basic artık Kaydet ve Doğrula işlemlerini ayırır; alan düzenlenirken keşif çalışmaz. SID zorunludur. Açık kabul sonrasında HTTP/HTTPS sertifika yüklemeden kullanılabilir. RFC ping ve sunucu listesi kontrolü, RFC destekli adaylar, onaylı akıllı/tam TCP taraması ve son ADT kimlik doğrulaması ayrı aşamalardır. Yetkisiz RFC keşfi başarılı ping sonucunu bozmaz. RFC adayları sonuç vermezse onayla taramaya geçilir; servis kapalı varsayılmaz. Her aday giriş reddinden sonra da denenir; ilk tam başarıda durulur.
+
+Tam TCP taraması 30 saniyeyi hedefler, 60 saniyede kısmi sonuçla durur; HTTP prob süresi ayrıdır. ADT 0.4.2 keşif protokolü 2 gereklidir. Advanced, Host ve ortak production policy davranışı korunur. Online/Offline EXE ve SHA256 dosyaları GitHub ön sürümünde yayımlanır. Ayrıntılar [Basic kılavuzunda](BASIC-SETUP.tr.md).
+
+
+## 0.1.0-preview.9 — SID ve MCP çıktı düzeltmeleri
+
+RFC 0.1.1 ve ADT 0.4.1 tam JSON sonucunu yapılandırılmış çıktı yanında metin olarak da döndürür. Eski ADT liste/ping yanıtları şemalarına uyar. Syntax mesajları, DDIC ayrıntıları, sınıf/arayüz bileşenleri, arama açıklamaları ve BW endpoint hataları metin kullanan istemcilerde görünür. Her iki araç adı seti korunur.
+
+Bağlantı/profil kaydında SID zorunludur. Basic başarılı RFC bağlantısından otomatik alabilir veya kullanıcı girebilir. Backend SID uyuşmazlığı kaydı durdurur; eski boş kayıtlar okunabilir. HTTP uyarısı korunur; sertifika incelemesi HTTP için TLS uygulanmadığını açıklar. Kayıtlı özel adres keşifte önce denenir.
+
+MCP işlem/oturum logları Host süreç loglarından ayrıdır; seviye, rotasyon ve saklama politikasına uyar, SAP verilerini içermez ve operation ID sunar. SAP sürümü backend tarafından açıkça sunulmuyorsa nedeni belirtilir. UTF-8 ve bildirilen Türkçe kodlamalar HTTP sınırında çözülür.
+
+Online/Offline EXE yerel teslim edilir; GitHub yayını yapılmaz. Canlı yazma ve aktivasyon kabul kapsamı dışındadır.
+
+## 0.1.0-preview.8 — 2026-10-28 (yerel sürüm)
+
+- Basic, mevcut kurulumda durum özetiyle açılır. Kurulum/paketler, SAP bağlantısı ve uygulama entegrasyonları doğrudan açılabilir; kayıtlı bağlantı geri yüklenir, parola alanı boş tutulur. Açılışta kurulum veya SAP testi yapılmaz.
+- İlk hazırlık yalnız eksik önkoşulları kurar. Sonraki Basic kullanımları önkoşulları kontrol eder; eksikler ve aynı sürüm paket onarımları Advanced üzerinden giderilir. RFC/ADT MCP paketleri yalnız kullanıcı isteğiyle eksik veya eskiyse güncellenir. ADT-only tercihi korunur.
+- Codex, Claude Desktop ve Claude Code ayrı hedeflerdir. Claude Code kullanıcı kapsamındaki `.claude.json` kaydını kullanır; `CLAUDE_CONFIG_DIR` desteklenir. Proje ve diğer uygulama ayarları korunur.
+- Önizleme yalnız SAP kayıtlarını Yeni / Güncellenecek / Zaten güncel olarak gösterir. Seçim değişince yenilenir; aynı kayıt yeniden yazılmaz. Değiştirme izni, yedek yolu ve uygulama bazında başarı/hata sonuçları görünürdür.
+- Önceki Basic etiketleri düzeltildi. Mevcut bağlantılar, DPAPI şifreleri, RFC/ADT payload sürümleri ve Advanced onarım seçenekleri korunur.
+
+Yerel Online/Offline EXE ve SHA256 dosyaları hazırlanır. GitHub yayını yapılmaz. Test sonuçları ve temiz Windows/canlı SAP kabul sınırları teslim raporunda belirtilir.
+
+
+## 0.1.0-preview.7 — 2026-10-28 (yerel sürüm)
+
+Basic artık kimlik bilgisi göndermeden HTTP ve HTTPS adayları arar. HTTPS 443/44300–44399 yanında HTTP 80/80NN/8080/44380 desteklenir; güvenilir HTTPS önceliklidir. HTTP iletişiminin şifrelenmediği görünürdür. Yalnız sertifika sorunu olan HTTPS bulunursa Advanced gerekir; doğrulama atlanmaz. Seçilen tek adreste hesap, ADT discovery ve salt okunur compatibility doğrulanır.
+
+ADT 0.4.0, BOM/satır sonlu DPAPI şifre dosyalarını okur; gerçek parolanın boşlukları korunur. Keşif ve doğrulama durumları ayrılır, form değişince önceki sonuç güncelliğini kaybeder. Kimlikli, zaman damgalı güvenli keşif kayıtları kalıcıdır. RFC ve çalışma zamanı paketleri korunur. Canlı kabul ve yerel doğrulama sonuçları teslim raporundadır; temiz Windows/diğer makine kabulü ayrıca gerekir. GitHub yayını yapılmadı.
+
 
 [English](RELEASE-NOTES.md)
 

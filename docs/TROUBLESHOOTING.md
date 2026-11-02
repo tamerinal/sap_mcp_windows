@@ -1,5 +1,20 @@
 # Troubleshooting
 
+## 0.1.0-preview.10 — 2026-11-02
+
+Basic separates Save from Verify and never discovers while editing. SID is required. With explicit acceptance, HTTP/HTTPS works without uploaded certificates. RFC ping, server-list permission, RFC-assisted candidates, consented smart/full TCP scanning and final ADT authentication are separate stages. Denied RFC discovery preserves a successful ping. Failed RFC candidates offer a consented scan instead of claiming the service is inactive. Candidates continue after login rejection and stop at the first complete success.
+
+Full TCP scanning targets 30 seconds and stops with partial results at 60 seconds; HTTP probing has a separate budget. ADT 0.4.2 discovery protocol 2 is required. Advanced, Host and shared production policy behavior are preserved. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease. See the [Basic guide](BASIC-SETUP.md).
+
+Older release notes below are historical; current Basic behavior is defined here and in the Basic guide.
+
+## 0.1.0-preview.7 — 2026-10-28 (local release)
+
+Basic discovers HTTP and HTTPS without sending credentials. HTTPS 443/44300–44399 and HTTP 80/80NN/8080/44380 are covered; trusted HTTPS wins. HTTP is visibly unencrypted. Certificate-only HTTPS failures require Advanced; verification is never bypassed. One selected endpoint receives account, ADT discovery and read-only compatibility verification.
+
+ADT 0.4.0 normalizes BOM/line endings in encrypted DPAPI files without trimming the real password. Discovery and account results are separate; edits invalidate prior results. Discovery IDs, timestamps and safe diagnostics persist. RFC/runtime assets are retained. See the delivered verification report for actual local/live results; clean Windows and other-machine acceptance remain separate. Not published to GitHub.
+
+
 [Türkçe](TROUBLESHOOTING.tr.md) · [Guide](USER-GUIDE.md)
 
 | Symptom | Action |
@@ -79,50 +94,46 @@ Export the masked support report from the diagnosis dialog. It contains only app
 Local synthetic HTTP/TLS tests cover profile isolation, chains, self-signed, SAN/date errors, redirects, proxies, authentication and false-positive content. Manager/Host/MCP consistency is checked against a local fixture without live SAP. Native keyboard/accessibility, clean Windows/GUI-free installation and authorized customer/live SAP acceptance remain pending until actually performed. Automatic OCSP/CRL/AIA retrieval, SSO/mTLS and SAP-side service/certificate changes are outside this delivery. Windows/Node trust rules are not identical to browser/Eclipse trust stores; a browser success alone is not proof of MCP trust.
 
 
-# Basic and Advanced setup
+# Basic setup — 0.1.0-preview.10
 
-[Home](../README.md) · [Türkçe](BASIC-SETUP.tr.md)
+Basic configures SAP RFC and ADT independently. Existing package preparation, maintenance, profiles, DPAPI secrets and client previews are preserved. Advanced retains its certificate tools and connection policy.
 
-New installations open Basic. Existing configurations open Advanced; your choice is remembered. Use the top mode selector to switch. Existing Advanced pages retain their layout and behavior. Unsaved form values survive mode/language changes; no account is saved just by switching mode. Basic and Advanced share the connection catalog, profiles, DPAPI files and active account per system.
+## Prepare and save
 
-## 1. SDK and automatic preparation
+Prepare the runtime/MCP packages first. Choose an RFC SDK directory, or continue with ADT only. Updating Manager also requires updating its ADT package to 0.4.2 (Basic discovery protocol 2). An older helper is rejected with `BASIC_DISCOVERY_UPGRADE_REQUIRED` before it is started.
 
-Select the SAP NetWeaver RFC SDK folder, then **Prepare installation**. The application checks prerequisites, installs missing managed runtimes and current MCP packages, validates the SDK and performs local MCP initialization/tools-list checks. There is no second MCP installation button. Existing compatible packages are reused. Windows may request UAC for Visual C++ and a restart. SDK files must be supplied by you; they are never bundled.
+Enter host, two-digit instance, three-character alphanumeric SID, client, user, password and SAP language. SID is required before verification; a detected SID mismatch prevents committing. An existing profile's blank password preserves its DPAPI secret. Saving does not change the password in SAP.
 
-If you do not have an SDK, select **Continue with ADT only, without an SDK**. ADT can proceed while RFC is shown as unavailable. Missing RFC dependencies or invalid SDK cannot become RFC success. Node/DPAPI/storage failures still block preparation. Paths, mapping and log settings use application defaults on new installations; existing customized settings remain available in Advanced.
+**Save** only stores local configuration and its protected password reference. It never starts network tests or discovery. The saved profile requires verification before MCP entries can be installed. Opening the app, selecting a profile and editing fields do not start network scans.
 
-## 2. One SAP connection
+## Verify with consent
 
-Choose an existing account or create one. Enter the application server (DNS/IPv4/IPv6, optional HTTPS port), user, password, client, SAP language and two-digit instance number. A blank password preserves the chosen account's saved secret. A new account requires a password. Basic stores it using the existing CurrentUser DPAPI format, not plaintext. It does not change your SAP password.
+**Verify** starts the cancelable workflow. Basic does not require certificate files. HTTP is unencrypted; HTTPS encrypts traffic but Basic does not verify the server certificate. A permanent warning and explicit acceptance precede network operations. Acceptance lasts for the current profile/host/instance in this wizard session. Use Advanced for certificate trust configuration.
 
-After the server or manual address changes, a 500 ms debounce starts an unauthenticated HTTPS search. Priority: explicit port, then 443/44300/44301/44302, then remaining 44300–44399 ports. Defaults are centralized: at most 16 concurrent probes, 1.5 seconds per probe and 15 seconds total, including DNS/TLS/HTTP. Slow or uncommon services can fall outside this bounded search; failure does not prove ADT is absent. No HTTP fallback, authorization headers, SAP cookies or redirect following is used. Changing server cancels prior work and invalidates old results.
+RFC ping runs first when its prerequisites are available. A successful ping is retained even if `TH_SERVER_LIST` is denied. SAP authorization errors and a local function allowlist restriction are reported separately. If server information is available, a dialog offers RFC-assisted discovery across every returned application host/instance. RFC supplies candidate hosts/instances, not the actual ICM service ports.
 
-Only a 200 response with the expected ADT discovery structure is a confirmed discovery. 401 is an authentication-required candidate, not success. HTML, arbitrary XML, 403 and redirects are separate outcomes. A confirmed discovery cancels remaining probes. Enter a manual HTTPS URL or port under **Enter an ADT address / port** when needed; that address takes precedence and is checked alone. Reverse proxy prefixes are supported; do not enter the deeper discovery service URL.
+If RFC discovery is unavailable, declined or finds no usable candidate, the application requests separate automatic-scan consent. RFC candidate failure does not prove the ADT service is inactive.
 
-**How do I find the ADT port or address?** Ask Basis for the workstation-accessible HTTPS base URL/port, VPN/proxy requirements and verified public CA chain. An authorized administrator can inspect **SMICM → Goto → Services** in SAP GUI. The Web Dispatcher address can differ from the application server; explicitly enter that external URL if used. RFC instance number alone does not determine the web address. The field help includes a copyable Basis request. See the full [ADT/TLS guide](ADT-CONNECTIONS.md).
+The smart scan checks instance-derived ports, 80/443, 8080/8443, 8000–8099, 44300–44399 and Java ports. If no ADT candidate is found, another dialog offers ports 1–65535 on the entered host only. Raw TCP connects use 250 ms and adaptive concurrency 512–1024, reduced under resource pressure. The full TCP scan targets 30 seconds and stops at 60 seconds. Slow networks can leave ports untested; incomplete results are explicitly reported.
 
-TLS chain, dates and DNS/IP name must validate. On a certificate problem, **Profile certificates** lets you inspect a public PEM/DER file and explicitly confirm its identity/fingerprint for this draft/profile. It never trusts a certificate just because it was received over the network; trust is not global and does not fix wrong names or dates. Basic does not allow TLS bypass. Existing Advanced certificate tools remain available.
+Open ports are probed using both HTTP and HTTPS. Each HTTP phase has a separate 30-second budget, up to 32 requests in flight and a 1.5-second request timeout. TCP and HTTP progress are separate; the entire verification is not guaranteed to finish in 30 seconds.
 
-Press **Save and verify**. Secure candidates are authenticated sequentially, never in parallel. The first explicit rejected login stops remaining candidate and RFC login attempts; correct credentials before retrying. Manager tests the real ADT MCP transport including discovery and a read-only compatibility request; anonymous access does not prove the supplied account. RFC is separately tested with the existing RFC_PING tool. If ADT fails for service/network/TLS reasons, RFC can still be tested. Ping success is not authorization for every RFC function.
+## Candidate authentication and results
 
-An entered instance is used as-is. A same-server 443NN port can supply a tentative instance only; RFC ping must confirm connectivity. If no unique candidate exists, enter the two-digit instance; Basic never silently assumes 00. A Web Dispatcher port does not infer the application-server instance.
+Only discovery responses 200/401 can lead to ADT candidate validation. An open port, 404 or 503 is not ADT evidence. HTML or invalid XML never establishes successful ADT access. Redirects are not followed automatically.
 
-- Both verified: profile saved and full connection success shown.
-- One verified: profile saved with separate results and a partial-completion warning; only the working MCP is offered to clients.
-- Neither verified: stay on the connection step; previous profile/active mapping is preserved. Fix the settings and retry. Draft test files/secrets are cleaned up.
+TCP and HTTP discovery carry no account, password or cookies. RFC uses credentials at its initial connection step. ADT credentials are sent only after anonymous discovery finishes. Candidates are tried sequentially, including after login rejection, and stop at the first complete success. Valid discovery content ranks before 401 candidates; HTTPS and discovery priority break ties.
 
-Tests use isolated temporary mappings and do not switch other clients' accounts. Successful save updates the shared active profile for that target. Other accounts/systems remain. Existing SAP GUI sources require an explicit, previewed conversion to a managed catalog before Basic editing; supported entries are preserved, source XML stays unchanged, unsupported/include/SNC/message-server entries stop conversion. Choose Advanced if conversion is unsuitable.
+Authentication, discovery and read-only compatibility must all pass. Basic accepts a usable connection with a visible unverified-certificate warning without changing the shared ADT policy's secure-verification result. Anonymous access alone does not prove the supplied credentials.
 
-## 3. Codex / Claude Desktop
+The found address is shown in an editable field. If verification fails, enter an HTTP/HTTPS address manually, including a Web Dispatcher/proxy path if required. A trailing `/sap/bc/adt` is removed once. Manual verification probes the exact normalized address without port scanning.
 
-Review and apply the existing client integration. Only the independently verified components are included; unrelated registrations and backups/conflict handling are preserved. Existing unselected registrations are not automatically deleted. Connection changes invalidate the old verification. Restart the clients' MCP processes after installation/package changes. Clients start the existing Host on demand; no persistent Windows service is added and Manager need not stay open.
+ADT and RFC results are independent. Only verified components are offered to Codex, Claude Desktop and Claude Code. RFC-only and ADT-only continuation are supported. If neither works, save configuration only or go back. Existing usable records are preserved on failed validation. Previous validation becomes ineligible when connection details or required packages change; older validation-policy records require a new explicit verification.
 
-This preview is unsigned. Clean Windows and live SAP acceptance remain pending; local synthetic tests do not establish that every SAP installation is compatible. See release validation for actual outcomes and remaining limits.
+During verification, Save, Next, navigation and client installation are disabled. Cancel stops subprocesses and discards late results. Temporary credentials and mappings are removed. No password enters discovery input, progress events or logs.
 
-## Preview.5 host-only discovery error (fixed in Preview.6)
+## Release checks
 
-Preview.5 could stop before any network request when the server was entered without a port. Manager sent an optional port as JSON `null`; the ADT discovery process incorrectly rejected it as `DISCOVERY_PORT_INVALID`. A generic message made this look like a network/certificate problem. RFC uses a separate path and could still pass. This failure did not establish whether ADT was reachable.
+Local fixtures cover HTTP, self-signed HTTPS, authorization branches, consent rejection, cancellation, all-port scanning and client eligibility. Live SAP acceptance is separately reported; a fixture pass does not establish live connectivity. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease.
 
-Upgrade Manager to Preview.6, then use **Prepare installation** in Basic or install/repair ADT in Advanced to install the updated ADT package. Restart client MCP processes. Existing profiles, DPAPI passwords and RFC packages are preserved. Manager now omits absent optional fields; the updated ADT package also accepts legacy null fields. Input/process errors show a specific safe code instead of claiming a remote network failure.
-
-Retry the saved connection. For a known endpoint, **Enter an ADT address / port** takes priority over scanning. Ask Basis for the actual workstation-accessible HTTPS base URL if needed; the RFC instance number does not establish a web port. An IP address may not match the certificate's DNS name: use the approved matching DNS address and profile CA trust when required. Do not disable TLS validation. This fix does not prove a live system is reachable; VPN, ports, TLS and permissions still require validation. See [issue #6](https://github.com/tamerinal/sap_mcp_windows/issues/6).
+The shared `ping_system` keeps its strict trust verdict: it can return `ADT_CONNECTION_UNVERIFIED` for Basic profiles. This does not mean Basic connectivity failed. Basic Verify checks the three required stages; ordinary read-only ADT tools can use the same profile. Configure certificate verification in Advanced for a secure ping verdict.

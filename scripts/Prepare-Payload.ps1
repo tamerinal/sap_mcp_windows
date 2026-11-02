@@ -125,12 +125,13 @@ foreach ($taskPair in @(@{id='rfc';source=$RfcSource},@{id='adt';source=$AdtSour
     $taskCommit = (& git -C $taskPair.source rev-parse HEAD).Trim()
     $taskDirty = [bool](& git -C $taskPair.source status --porcelain)
     $taskVersion = $taskMetadata.version + '+' + $taskCommit.Substring(0,7) + $(if ($taskDirty) { '.snapshot' } else { '' })
-    @{ repository = $(if ($taskPair.id -eq 'rfc') {'tamerinal/SAP_RFC_MCP'} else {'tamerinal/sap_adt_mcp'}); commit = $taskCommit; includesLocalChanges = $taskDirty; version = $taskVersion; distributionAdaptations = $taskAdaptations; adaptationReason = 'Remove machine-specific fallback paths; managed host provides explicit environment configuration.' } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskOutput 'build-info.json') -Encoding utf8NoBOM
+    $taskSourceManifest = @(& git -C $taskPair.source ls-files --cached --others --exclude-standard | Where-Object { $_ -like "src/*" -or $_ -like "python/*" -or $_ -in @("package.json","package-lock.json","tsconfig.json") } | ForEach-Object { @{file=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskPair.source $_) -Algorithm SHA256).Hash.ToLowerInvariant()} })
+    @{ nativeLogPolicyVersion=1; connectionPolicyVersion=1; basicDiscoveryVersion=$(if ($taskPair.id -eq 'adt') {2} else {0}); sourceManifest=$taskSourceManifest; repository = $(if ($taskPair.id -eq 'rfc') {'tamerinal/SAP_RFC_MCP'} else {'tamerinal/sap_adt_mcp'}); commit = $taskCommit; includesLocalChanges = $taskDirty; version = $taskVersion; distributionAdaptations = $taskAdaptations; adaptationReason = 'Remove machine-specific fallback paths; managed host provides explicit environment configuration.' } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskOutput 'build-info.json') -Encoding utf8NoBOM
     $taskFileName = 'sap-' + $taskPair.id + '-' + $taskVersion + '.zip'
     $taskArchive = Join-Path $taskPackages $taskFileName
     if (Test-Path -LiteralPath $taskArchive) { Remove-Item -LiteralPath $taskArchive }
     [System.IO.Compression.ZipFile]::CreateFromDirectory($taskOutput, $taskArchive, [System.IO.Compression.CompressionLevel]::Optimal, $false)
-    $taskAssets.Add(@{id=$taskPair.id;version=$taskVersion;fileName=$taskFileName;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $taskArchive).Hash.ToLowerInvariant();url='';format='zip';stripPrefix='';source='Private MCP source snapshot';capabilities=@{nativeLogPolicy='false';diagnose='false';stdio='true'}})
+    $taskAssets.Add(@{id=$taskPair.id;version=$taskVersion;fileName=$taskFileName;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $taskArchive).Hash.ToLowerInvariant();url='';format='zip';stripPrefix='';source='Private MCP source snapshot';capabilities=@{nativeLogPolicy='true';connectionPolicyVersion='1';basicDiscoveryVersion=$(if ($taskPair.id -eq 'adt') {'2'} else {'0'});diagnose='false';stdio='true'}})
 }
 
 $taskPyRfcDirectory = Join-Path $PyRfcSitePackages 'pyrfc'

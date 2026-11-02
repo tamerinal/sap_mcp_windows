@@ -16,16 +16,21 @@ public partial class MainWindow
     private readonly List<Control> _basicSteps=[];
     private int _basicStep;
     private bool _basicPrepared;
+    private bool _basicRestored;
+    private bool _basicMaintenance;
+    private TextBlock? _basicSummary;
+    private IReadOnlyList<Requirement> _basicChecks=[];
     private bool _basicRfcReady;
     private BasicDraft _basicDraft=new();
     private CancellationTokenSource? _discoveryCancel;
     private long _discoveryGeneration;
     private BasicDiscovery? _discovery;
-    private DateTimeOffset _discoveredAt;
-    private Task? _discoveryTask;
-    private TextBox? _basicHost,_basicInstance,_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicUrl;
+    private TextBox? _basicSid,_basicHost,_basicInstance,_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicUrl;
     private TextBlock? _basicDiscoveryStatus,_basicResult;
-    private Button? _basicCertificateButton;
+    private Button? _basicNextButton;
+    private StackPanel? _basicManualPanel;
+    private string _basicConsentKey="";
+    private bool _basicValidationRunning;
     private bool _basicFilling;
     private bool _basicInstanceWasDerived;
     private ComboBox? _basicProfilePicker;
@@ -46,7 +51,7 @@ public partial class MainWindow
                 if(mode==_settings.UiMode)return;
                 CancelBasicDiscovery();
                 if(mode=="basic") {_advancedControls=Body.Children.ToList();_advancedRefresh=_refreshConnectionLanguage;}
-                _settings.UiMode=mode;await PersistAsync();DisplayMode();
+                _settings.UiMode=mode;await PersistAsync();DisplayMode();if(mode=="basic"&&!_basicRestored)await RestoreBasicAsync();
             });
         };
     }
@@ -60,6 +65,8 @@ public partial class MainWindow
             foreach(var expander in _basicRoot.GetLogicalDescendants().OfType<Expander>())if(expander.Header is string header)expander.Header=UiText.Redisplay(header);
             RefreshBasicProfiles();
         }
+        if(_discovery!=null&&_basicDiscoveryStatus!=null)_basicDiscoveryStatus.Text=BasicPolicy.DiscoveryText(_discovery);
+        RefreshBasicSummary();_refreshBasicClients?.Invoke();UpdateBasicNext();
         if(_basicLastResult is {} r&&_basicResult!=null)
         {
             _basicResult.Text=UiText.Get("Basic.AdtResult")+" "+Outcome(r.Adt)+"\n"+UiText.Get("Basic.RfcResult")+" "+Outcome(r.Rfc);
@@ -79,31 +86,45 @@ public partial class MainWindow
     private void RefreshBasicTitle()
     {
         this.FindControl<TextBlock>("PageTitle")!.Text=UiText.Get("Basic.Title");
-        this.FindControl<TextBlock>("PageSubtitle")!.Text=UiText.Get("Basic.Step"+(_basicStep+1));
+        this.FindControl<TextBlock>("PageSubtitle")!.Text=UiText.Get(_basicStep==3?"Basic.Summary":"Basic.Step"+(_basicStep+1));
     }
     private void SetBasicStep(int step)
     {
         _basicStep=step;for(var i=0;i<_basicSteps.Count;i++)_basicSteps[i].IsVisible=i==step;RefreshBasicTitle();
+        if(step==2)_refreshBasicClients?.Invoke();
+        if(step==3)RefreshBasicSummary();
     }
     private StackPanel BuildBasic()
     {
         var root=new StackPanel{Spacing=18};
+        root.Children.Add(Row(
+            Action(UiText.Get("Basic.Summary"),()=>NavigateBasicAsync(3)),
+            Action(UiText.Get("Basic.NavPackages"),()=>NavigateBasicAsync(0)),
+            Action(UiText.Get("Basic.NavConnection"),()=>NavigateBasicAsync(1)),
+            Action(UiText.Get("Basic.NavClients"),()=>NavigateBasicAsync(2))));
         var sdkForm=new StackPanel{Spacing=12,Name="BasicSdkStep"};
         sdkForm.Children.Add(Text(UiText.Get("Basic.SdkIntro")));
         var sdk=Field(sdkForm,UiText.Get("Basic.SdkLabel"),_settings.SdkDirectory);sdk.Name="BasicSdkDirectory";
-        var adtOnly=new CheckBox{Content=UiText.Get("Basic.AdtOnly"),Name="BasicAdtOnly"};sdkForm.Children.Add(adtOnly);
-        sdkForm.Children.Add(Row(Action(UiText.Get("Basic.Browse"),async()=>{var folder=await PickFolderAsync(UiText.Get("Basic.SdkLabel"));if(folder!=null)sdk.Text=folder;}),Action(UiText.Get("Basic.Prepare"),async()=>
+        var adtOnly=new CheckBox{Content=UiText.Get("Basic.AdtOnly"),Name="BasicAdtOnly",IsChecked=BasicInstallation.AdtOnly(_settings)};sdkForm.Children.Add(adtOnly);
+        sdkForm.Children.Add(Row(Action(UiText.Get("Basic.Browse"),async()=>{var folder=await PickFolderAsync(UiText.Get("Basic.SdkLabel"));if(folder!=null)sdk.Text=folder;}),Action(UiText.Get(BasicInstallation.IsMaintenance(_settings)?"Basic.UpdatePackages":"Basic.Prepare"),async()=>
         {
             var firstPreparation=!_basicPrepared;
             var preparation=new BasicPreparationService(_packages);
-            _settings=await preparation.PrepareAsync(_settings,Read(sdk),adtOnly.IsChecked==true,Progress,Token);
-            await PersistAsync();_basicRfcReady=preparation.RfcReady&&_settings.Rfc.Installed;
-            await VerifyBasicPackagesAsync();_basicPrepared=true;
+            if(_settings.BasicSetup==null&&!BasicInstallation.IsMaintenance(_settings))
+            { _settings.BasicSetup=new(null,adtOnly.IsChecked==true);await PersistAsync(); }
+            var previous=_settings;
+            _settings=await preparation.PrepareAsync(_settings,Read(sdk),adtOnly.IsChecked==true,Progress,Token,_basicMaintenance);
+            _basicRfcReady=preparation.RfcReady&&_settings.Rfc.Installed;
+            try { await VerifyBasicPackagesAsync(); }
+            catch { _settings.BasicSetup=previous.BasicSetup;throw; }
+            _basicPrepared=true;_basicMaintenance=true;_basicChecks=preparation.LastChecks;await PersistAsync();
+            if(_basicRoot!=null)foreach(var button in _basicRoot.GetLogicalDescendants().OfType<Button>().Where(b=>b.Content is string text&&text==UiText.Get("Basic.Prepare")))button.Content=UiText.Get("Basic.UpdatePackages");
             if(!await EnsureBasicSourceAsync())return;
             await LoadConnectionsAsync(repairManaged:true);if(firstPreparation)FillBasicProfile(_settings.BasicProfileId??(_settings.Profiles.Count==1?_settings.Profiles[0].Id:null));SetBasicStep(1);
             SetStatus(UiText.Get(_basicRfcReady?"Basic.Prepared":"Basic.PreparedAdt")+(_basicRfcReady?"":" "+string.Join(", ",preparation.LastChecks.Where(c=>c.State!=CheckState.Ready&&c.Id is "sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013").Select(c=>c.Name))));
         },true)));
-        sdkForm.Children.Add(Notice(UiText.Get("Basic.PrepareNotice")));
+        sdkForm.Children.Add(Notice(UiText.Get("Basic.MaintenanceNotice")));
+        sdkForm.Children.Add(Action(UiText.Get("Basic.AdvancedRepair"),OpenBasicRepairAsync));
         root.Children.Add(sdkForm);_basicSteps.Add(sdkForm);
 
         var form=new StackPanel{Spacing=10,Name="BasicConnectionStep"};
@@ -112,10 +133,11 @@ public partial class MainWindow
         {
             if(_basicFilling||profiles.SelectedIndex<0)return;
             var id=profiles.SelectedIndex==0?null:_basicProfileIds[profiles.SelectedIndex-1];
-            if(BasicFields()!=_basicLoadedFields&&!await ConfirmAsync(UiText.Get("Basic.SelectProfile"),UiText.Get("Connections.Unsaved"))){RefreshBasicProfiles();return;}
+            if(BasicFields()!=_basicLoadedFields&&!await ConfirmAsync(UiText.Get("Basic.SelectProfile"),UiText.Get("Connections.UnsavedBody"))){RefreshBasicProfiles();return;}
             FillBasicProfile(id);
         };
         form.Children.Add(Text(UiText.Get("Basic.SelectProfile")));form.Children.Add(profiles);
+        _basicSid=Field(form,"SID","");_basicSid.Name="BasicSid";
         _basicHost=Field(form,UiText.Get("Basic.Host"),"");_basicHost.Name="BasicHost";
         _basicUser=Field(form,UiText.Get("Basic.User"),"");_basicUser.Name="BasicUser";
         _basicPassword=Field(form,UiText.Get("Basic.Password"),"",true);_basicPassword.Name="BasicPassword";
@@ -123,36 +145,109 @@ public partial class MainWindow
         _basicLanguage=Field(form,UiText.Get("Basic.Language"),UiText.Language=="tr"?"TR":"EN");_basicLanguage.Name="BasicLanguage";
         _basicInstance=Field(form,UiText.Get("Basic.Instance"),"");_basicInstance.Name="BasicInstance";
         var manual=new StackPanel{Spacing=8};_basicUrl=Field(manual,UiText.Get("Basic.ManualUrl"),"");_basicUrl.Name="BasicAdtUrl";
-        form.Children.Add(new Expander{Header=UiText.Get("Basic.Manual"),Content=manual});
+        _basicManualPanel=manual;manual.IsVisible=false;form.Children.Add(manual);
+        form.Children.Add(Notice(UiText.Get("Basic.ConnectionWarning")));
         _basicDiscoveryStatus=Text(UiText.Get("Basic.DiscoveryIdle"));_basicDiscoveryStatus.Name="BasicDiscoveryStatus";form.Children.Add(_basicDiscoveryStatus);
         _basicResult=Text("");_basicResult.Name="BasicResult";form.Children.Add(_basicResult);
-        _basicCertificateButton=Action(UiText.Get("Adt.Certificates"),ImportBasicTrustAsync);_basicCertificateButton.IsVisible=false;
-        form.Children.Add(Row(Action(UiText.Get("Basic.Back"),()=>{CancelBasicDiscovery();SetBasicStep(0);return Task.CompletedTask;}),Action(UiText.Get("Basic.Help"),ShowAdtUrlHelpAsync),_basicCertificateButton,Action(UiText.Get("Basic.Save"),SaveBasicConnectionAsync,true)));
-        _basicHost.TextChanged+=(_,_)=>BasicEndpointChanged();_basicUrl.TextChanged+=(_,_)=>BasicEndpointChanged();
-        _basicInstance.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty&&!_basicFilling)_basicInstanceWasDerived=false;};
-        foreach(var box in new[]{_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicInstance})box.TextChanged+=(_,_)=>{if(!_basicFilling&&_basicResult!=null)_basicResult.Text=UiText.Get("Basic.Changed");};
+        var save=Action(UiText.Get("Basic.SaveOnly"),SaveBasicConnectionAsync);save.Name="BasicSaveConnection";
+        var verify=Action(UiText.Get("Basic.Verify"),ValidateBasicConnectionAsync,true);verify.Name="BasicVerifyConnection";
+        _basicNextButton=Action(UiText.Get("Basic.Next"),()=>NavigateBasicAsync(2));_basicNextButton.Name="BasicNext";_basicNextButton.IsEnabled=false;
+        form.Children.Add(Row(Action(UiText.Get("Basic.Back"),()=>NavigateBasicAsync(0)),save,verify,_basicNextButton));
+        _basicSid.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty&&!_basicFilling)InvalidateBasicResult();};
+        _basicHost.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty)BasicEndpointChanged();};
+        _basicUrl.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty)BasicEndpointChanged();};
+        _basicInstance.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty&&!_basicFilling){_basicInstanceWasDerived=false;InvalidateBasicResult();_basicConsentKey="";}};
+        foreach(var box in new[]{_basicUser,_basicPassword,_basicClient,_basicLanguage})box.PropertyChanged+=(_,e)=>{if(e.Property==TextBox.TextProperty&&!_basicFilling)InvalidateBasicResult();};
         RefreshBasicProfiles();_basicLoadedFields=BasicFields();
         root.Children.Add(form);_basicSteps.Add(form);
         var clients=new StackPanel{Spacing=12,Name="BasicClientsStep"};
         clients.Children.Add(new TextBlock{Name="BasicClientResult",TextWrapping=Avalonia.Media.TextWrapping.Wrap});
         clients.Children.Add(Notice(UiText.Get("Basic.ClientsNotice")));
-        var codex=new CheckBox{Content="Codex",IsChecked=_settings.CodexEnabled};var claude=new CheckBox{Content="Claude Desktop",IsChecked=_settings.ClaudeEnabled};clients.Children.Add(Row(codex,claude));
-        var preview=new TextBox{IsReadOnly=true,AcceptsReturn=true,TextWrapping=Avalonia.Media.TextWrapping.Wrap,MinHeight=160};clients.Children.Add(preview);
-        List<ClientPreview> previews=[];var replace=new CheckBox{Content=UiText.Get("Text210")};clients.Children.Add(replace);
-        clients.Children.Add(Row(Action(UiText.Get("Basic.Back"),()=>{SetBasicStep(1);return Task.CompletedTask;}),Action(UiText.Get("Text211"),()=>
+        clients.Children.Add(BuildClientIntegration(true));
+        clients.Children.Add(Action(UiText.Get("Basic.Back"),()=>NavigateBasicAsync(1)));
+        root.Children.Add(clients);_basicSteps.Add(clients);
+        var summary=new StackPanel{Spacing=12,Name="BasicSummaryStep"};
+        _basicSummary=Text("");_basicSummary.Name="BasicSummaryText";summary.Children.Add(_basicSummary);
+        summary.Children.Add(Row(Action(UiText.Get("Basic.RefreshStatus"),async()=>await InspectBasicAsync()),Action(UiText.Get("Basic.AdvancedRepair"),OpenBasicRepairAsync)));
+        root.Children.Add(summary);_basicSteps.Add(summary);return root;
+    }
+
+    private async Task NavigateBasicAsync(int step)
+    {
+        if(_basicValidationRunning)return;
+        if(step==2&&(_basicLastResult==null&&_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId)?.BasicValidation==null||BasicFields()!=_basicLoadedFields||!BasicCanContinue()))
+        {if(_basicResult!=null)_basicResult.Text=UiText.Get("Basic.Retest");return;}
+        if(_basicStep==1&&step!=1&&BasicFields()!=_basicLoadedFields)
         {
-            var p=_settings.Profiles.Single(p=>p.Id==_settings.BasicProfileId);var components=BasicPolicy.Eligible(_settings,p);if(components.Length==0)throw new InvalidOperationException(UiText.Get("Basic.Retest"));
-            previews=[];if(codex.IsChecked==true)previews.Add(ClientIntegration.Preview("Codex",ClientIntegration.CodexPath,_settings,_store.FilePath,components));if(claude.IsChecked==true)previews.Add(ClientIntegration.Preview("Claude Desktop",ClientIntegration.ClaudePath,_settings,_store.FilePath,components));
-            preview.Text=string.Join("\n\n",previews.Select(p=>p.Client+"\n"+(p.Conflicts.Count>0?UiText.Get("Text212")+" "+string.Join(", ",p.Conflicts)+"\n":"")+p.After));return Task.CompletedTask;
-        }),Action(UiText.Get("Text214"),async()=>
+            if(!await ConfirmAsync(UiText.Get("Basic.Title"),UiText.Get("Connections.UnsavedBody")))return;
+            FillBasicProfile(_basicDraft.ProfileId,false);
+        }
+        CancelBasicDiscovery();SetBasicStep(step);
+    }
+    private async Task OpenBasicRepairAsync()
+    {
+        if(_basicStep==1&&BasicFields()!=_basicLoadedFields)
+        {if(!await ConfirmAsync(UiText.Get("Basic.Title"),UiText.Get("Connections.UnsavedBody")))return;FillBasicProfile(_basicDraft.ProfileId,false);}
+        CancelBasicDiscovery();_settings.UiMode="advanced";await PersistAsync();DisplayMode();ShowPage(1);
+    }
+    private async Task RestoreBasicAsync()
+    {
+        _basicRestored=true;
+        if(_basicRoot==null)return;
+        var history=BasicInstallation.HasHistory(_settings);_basicMaintenance=BasicInstallation.IsMaintenance(_settings);
+        FillBasicProfile(_settings.BasicProfileId??(_settings.Profiles.Count==1?_settings.Profiles[0].Id:null),false);
+        var profile=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
+        if(profile!=null&&_settings.BasicProfileId==null)_settings.BasicProfileId=profile.Id;
+        if(profile?.BasicValidation is {} validation)
         {
-            if(previews.Count==0)throw new InvalidOperationException(UiText.Get("Text215"));
-            var profile=_settings.Profiles.Single(p=>p.Id==_settings.BasicProfileId);var valid=BasicPolicy.Eligible(_settings,profile).Select(ClientIntegration.ServerName).ToHashSet();
-            if(previews.Any(p=>p.Names.Any(n=>!valid.Contains(n))))throw new InvalidOperationException(UiText.Get("Basic.Retest"));
-            foreach(var p in previews){await ClientIntegration.ApplyAsync(p,replace.IsChecked==true,Token);var names=_settings.Registrations.Where(r=>r.Client==p.Client&&r.ConfigPath==p.Path).SelectMany(r=>r.ServerNames).Concat(p.Names).Distinct().ToList();_settings.Registrations.RemoveAll(r=>r.Client==p.Client&&r.ConfigPath==p.Path);_settings.Registrations.Add(new(p.Client,p.Path,names));}
-            _settings.CodexEnabled=codex.IsChecked==true;_settings.ClaudeEnabled=claude.IsChecked==true;await PersistAsync();previews=[];SetStatus(UiText.Get("Text217"));
-        },true)));
-        root.Children.Add(clients);_basicSteps.Add(clients);return root;
+            _basicResult!.Text=UiText.Get("Basic.LastValidation",validation.TestedAt.ToLocalTime().ToString("g"))+"\n"+UiText.Get("Basic.AdtResult")+" "+Outcome(validation.Adt)+"\n"+UiText.Get("Basic.RfcResult")+" "+Outcome(validation.Rfc);
+            _basicRoot.GetLogicalDescendants().OfType<TextBlock>().Single(t=>t.Name=="BasicClientResult").Text=_basicResult.Text;
+        }
+        SetBasicStep(history?3:0);
+        if(history)await InspectBasicAsync();else RefreshBasicSummary();
+    }
+    private async Task InspectBasicAsync()
+    {
+        var candidate=BasicPolicy.Copy(_settings);candidate.Adt.Selected=true;candidate.Rfc.Selected=!BasicInstallation.AdtOnly(_settings);
+        _basicChecks=await new PrerequisiteService(_packages).CheckAsync(candidate,Token);
+        foreach(var component in new[]{"adt","rfc"})
+        {
+            _settings.Component(component).Installed=File.Exists(Path.Combine(_settings.PackageDirectory,component,"dist","server.js"));
+            if(_settings.Component(component).Installed)_settings.Component(component).Version=BasicInstallation.InstalledVersion(_settings,component);
+        }
+        var adtRoot=Path.Combine(_settings.PackageDirectory,"adt","dist");
+        _basicPrepared=BasicInstallation.SharedReady(_basicChecks)&&File.Exists(Path.Combine(adtRoot,"server.js"))&&File.Exists(Path.Combine(adtRoot,"basic-connection.js"));
+        _basicRfcReady=!BasicInstallation.AdtOnly(_settings)&&BasicInstallation.RfcReady(_basicChecks)&&File.Exists(Path.Combine(_settings.PackageDirectory,"rfc","dist","server.js"));
+        RefreshBasicSummary();_refreshBasicClients?.Invoke();UpdateBasicNext();
+    }
+    private void RefreshBasicSummary()
+    {
+        if(_basicSummary==null)return;
+        var lines=new List<string>{UiText.Get("Basic.LocalStatus")};
+        if(_settings.BasicSetup is {PreparedAt:null})lines.Add(UiText.Get("Basic.PreparationIncomplete"));
+        lines.AddRange(_basicChecks.Select(c=>c.Name+" Â· "+UiText.Get(c.State==CheckState.Ready?"Basic.Ready":"Basic.NeedsAttention")));
+        try
+        {
+            var catalog=_packages.LoadCatalog();
+            foreach(var component in new[]{"adt","rfc"})
+                lines.Add(component.ToUpperInvariant()+" Â· "+_settings.Component(component).Version+" Â· "+UiText.Get("Packages."+BasicInstallation.Package(_settings,component,catalog.Find(component).Version)));
+        }
+        catch(Exception ex)when(ex is IOException or InvalidDataException or System.Text.Json.JsonException){lines.Add(UiText.Get("Basic.NeedsAttention"));}
+        var profile=_settings.Profiles.SingleOrDefault(p=>p.Id==_settings.BasicProfileId);
+        lines.Add(profile==null?UiText.Get("Basic.NoProfile"):profile.ToString());
+        if(profile?.BasicValidation is {} v)lines.Add(UiText.Get("Basic.LastValidation",v.TestedAt.ToLocalTime().ToString("g"))+" Â· ADT: "+Outcome(v.Adt)+" Â· RFC: "+Outcome(v.Rfc)+(BasicPolicy.Eligible(_settings,profile).Length==0?"\n"+UiText.Get("Basic.Retest"):""));
+        foreach(var (client,path) in new[]{("Codex",ClientIntegration.CodexPath),("Claude Desktop",ClientIntegration.ClaudePath),("Claude Code",ClientIntegration.ClaudeCodePath)})
+        {
+            var registration=_settings.Registrations.FirstOrDefault(r=>r.Client==client&&r.ConfigPath==path);
+            if(registration==null){lines.Add(client+" Â· "+UiText.Get("Basic.NotRegistered"));continue;}
+            try
+            {
+                var preview=ClientIntegration.Preview(client,path,_settings,_store.FilePath,registration.ServerNames.Select(n=>n=="sap_rfc_call"?"rfc":"adt"));
+                lines.Add(client+" Â· "+UiText.Get(preview.Entries.All(e=>e.State==ClientEntryState.Current)?"Clients.Current":"Basic.NeedsAttention"));
+            }
+            catch(Exception ex)when(ex is IOException or System.Text.Json.JsonException or InvalidDataException or UnauthorizedAccessException){lines.Add(client+" Â· "+UiText.Get("Basic.NeedsAttention"));}
+        }
+        _basicSummary.Text=string.Join("\n\n",lines);
     }
 
     private async Task<bool> EnsureBasicSourceAsync()
@@ -161,7 +256,7 @@ public partial class MainWindow
         if(!await ConfirmAsync(UiText.Get("Basic.ConvertTitle"),UiText.Get("Basic.ConvertBody")+"\n\n"+string.Join("\n",_systems.Select(s=>s.ToString()))))return false;
         _settings=await new ConnectionManager(_store).ConvertForBasicAsync(_settings,Token);return true;
     }
-    private string BasicFields()=>string.Join("\u001f",new[]{_basicHost,_basicInstance,_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicUrl}.Select(x=>x?.Text??""));
+    private string BasicFields()=>string.Join("\u001f",new[]{_basicSid,_basicHost,_basicInstance,_basicUser,_basicPassword,_basicClient,_basicLanguage,_basicUrl}.Select(x=>x?.Text??""));
     private void RefreshBasicProfiles()
     {
         if(_basicProfilePicker==null)return;var filling=_basicFilling;_basicFilling=true;
@@ -181,92 +276,115 @@ public partial class MainWindow
         }
         finally{Directory.Delete(root,true);}
     }
-    private void FillBasicProfile(string? id)
+    private void FillBasicProfile(string? id, bool discover=true)
     {
-        CancelBasicDiscovery();_basicFilling=true;
+        CancelBasicDiscovery();_basicConsentKey="";_basicFilling=true;
         _basicInstanceWasDerived=false;
         var p=_settings.Profiles.SingleOrDefault(p=>p.Id==id);var system=p==null?null:_systems.SingleOrDefault(s=>s.TargetKey.Equals(p.TargetKey,StringComparison.OrdinalIgnoreCase));
-        _basicDraft=new(){ProfileId=p?.Id??Guid.NewGuid().ToString("N"),SystemId=system?.Id??Guid.NewGuid().ToString("N"),Certificates=p?.AdtCertificates.ToList()??[]};
-        _basicHost!.Text=system?.Host??"";_basicInstance!.Text=system?.Sysnr??"";_basicUser!.Text=p?.User??"";_basicPassword!.Text="";_basicClient!.Text=p?.Client??"100";_basicLanguage!.Text=p?.Language??(UiText.Language=="tr"?"TR":"EN");_basicUrl!.Text=p?.AdtBaseUrl??"";
-        _basicLastResult=null;_basicResult!.Text="";_basicFilling=false;_basicLoadedFields=BasicFields();RefreshBasicProfiles();if(_basicPrepared)QueueBasicDiscovery();
+        _basicDraft=new(){ProfileId=p?.Id??Guid.NewGuid().ToString("N"),SystemId=system?.Id??Guid.NewGuid().ToString("N"),Certificates=p?.AdtCertificates.ToList()??[],PreferredUrl=p?.AdtBaseUrl??""};
+        _basicSid!.Text=system?.Sid??"";_basicHost!.Text=system?.Host??"";_basicInstance!.Text=system?.Sysnr??"";_basicUser!.Text=p?.User??"";_basicPassword!.Text="";_basicClient!.Text=p?.Client??"100";_basicLanguage!.Text=p?.Language??(UiText.Language=="tr"?"TR":"EN");_basicUrl!.Text=p?.AdtBaseUrl??"";_basicManualPanel!.IsVisible=!string.IsNullOrWhiteSpace(p?.AdtBaseUrl);
+        _basicLastResult=null;_basicResult!.Text="";_basicFilling=false;_basicLoadedFields=BasicFields();RefreshBasicProfiles();UpdateBasicNext();
     }
     private BasicDraft CaptureBasicDraft()
     {
-        _basicDraft.Host=Read(_basicHost!);_basicDraft.Sysnr=Read(_basicInstance!);_basicDraft.User=Read(_basicUser!);_basicDraft.Password=_basicPassword!.Text??"";_basicDraft.Client=Read(_basicClient!);_basicDraft.Language=Read(_basicLanguage!);_basicDraft.ManualUrl=Read(_basicUrl!);return BasicPolicy.Copy(_basicDraft);
+        _basicDraft.Sid=Read(_basicSid!);_basicDraft.Host=Read(_basicHost!);_basicDraft.Sysnr=Read(_basicInstance!);_basicDraft.User=Read(_basicUser!);_basicDraft.Password=_basicPassword!.Text??"";_basicDraft.Client=Read(_basicClient!);_basicDraft.Language=Read(_basicLanguage!);_basicDraft.ManualUrl=Read(_basicUrl!);
+        var original=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
+        _basicDraft.PreferredUrl=original!=null&&original.TargetKey.Equals(BasicPolicy.ParseHost(_basicDraft.Host).Host+":"+_basicDraft.Sysnr,StringComparison.OrdinalIgnoreCase)&&original.BasicValidation?.Adt.Success==true?original.AdtBaseUrl:"";
+        return BasicPolicy.Copy(_basicDraft);
     }
     private void CancelBasicDiscovery(){_discoveryGeneration++;_discoveryCancel?.Cancel();_discoveryCancel?.Dispose();_discoveryCancel=null;_discovery=null;}
-    private void QueueBasicDiscovery()
+    private void InvalidateBasicResult()
     {
-        if(_basicFilling||!_basicPrepared)return;CancelBasicDiscovery();var generation=_discoveryGeneration;_discoveryCancel=new();var token=_discoveryCancel.Token;
-        _discoveryTask=DiscoverBasicInBackgroundAsync(generation,token);
+        if(_basicFilling)return;
+        CancelBasicDiscovery();_basicLastResult=null;
+        if(_basicResult!=null)_basicResult.Text=UiText.Get("Basic.Changed");
+        if(_basicNextButton!=null)_basicNextButton.IsEnabled=false;
+        _refreshBasicClients?.Invoke();
     }
     private void BasicEndpointChanged()
     {
         if(_basicFilling)return;
+        _basicConsentKey="";InvalidateBasicResult();
         if(_basicInstanceWasDerived){_basicInstance!.Text="";_basicInstanceWasDerived=false;}
-        QueueBasicDiscovery();
     }
-    private void SetInferredInstance(int value){_basicInstance!.Text=value.ToString("00");_basicInstanceWasDerived=true;}
-    private async Task DiscoverBasicInBackgroundAsync(long generation,CancellationToken token)
+    private void SetInferredInstance(int value){_basicFilling=true;try{_basicInstance!.Text=value.ToString("00");_basicInstanceWasDerived=true;}finally{_basicFilling=false;}}
+    private bool BasicCanContinue()
     {
-        try
-        {
-            _basicDiscoveryStatus!.Text=UiText.Get("Basic.Discovering");await Task.Delay(BasicPolicy.Discovery.DebounceMs,token);
-            var draft=CaptureBasicDraft();draft.Password=""; // Password never enters the discovery subprocess.
-            var result=await new BasicDiscoveryService().DiscoverAsync(_settings,draft,token);
-            if(generation!=_discoveryGeneration||token.IsCancellationRequested)return;
-            _discovery=result;_discoveredAt=DateTimeOffset.UtcNow;
-            _basicCertificateButton!.IsVisible=_basicDraft.Certificates.Count>0||result.Candidates.Any(c=>c.Code.StartsWith("TLS_",StringComparison.Ordinal));
-            var useful=result.Candidates.FirstOrDefault(c=>c.Verified)??result.Candidates.FirstOrDefault(c=>c.HttpStatus==401);
-            var error=result.Candidates.Select(c=>c.Code).FirstOrDefault(c=>c.StartsWith("TLS_",StringComparison.Ordinal)||c is "AUTHORIZATION_DENIED" or "NETWORK_TIMEOUT" or "DNS_FAILED");
-            _basicDiscoveryStatus!.Text=UiText.Get(useful?.Verified==true?"Basic.Discovered":useful!=null?"Basic.AuthCandidate":error!=null?"Basic.DiscoveryIssue":"Basic.NotFound")+(error==null?"":" · "+BasicPolicy.SafeCode(error));
+        var p=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
+        return !_basicValidationRunning&&_basicPrepared&&p!=null&&BasicPolicy.Eligible(_settings,p).Length>0;
+    }
+    private void UpdateBasicNext(){if(_basicNextButton!=null)_basicNextButton.IsEnabled=BasicFields()==_basicLoadedFields&&BasicCanContinue();}
+    private async Task<bool> ConfirmBasicSaveTargetAsync(BasicDraft draft)
+    {
+        var active=_settings.Profiles.SingleOrDefault(p=>p.Id==draft.ProfileId);
+        if(active!=null){
+            var target=BasicPolicy.ParseHost(draft.Host).Host+":"+draft.Sysnr;
+            if(!active.TargetKey.Equals(target,StringComparison.OrdinalIgnoreCase)){
+                var affected=_settings.Profiles.Where(p=>p.TargetKey.Equals(active.TargetKey,StringComparison.OrdinalIgnoreCase)).ToArray();
+                if(!await ConfirmAsync(UiText.Get("Connections.MoveTitle"),UiText.Get("Connections.MoveBody",active.TargetKey,target,affected.Length,string.Join("\n",affected.Select(p=>p.ToString())))))return false;
+            }
+            if(_settings.ActiveProfiles.TryGetValue(active.TargetKey,out var current)&&current!=active.Id&&!await ConfirmAsync(UiText.Get("Basic.SaveOnly"),UiText.Get("Basic.ActivateNotice")))return false;
         }
-        catch(OperationCanceledException){}
-        catch(BasicDiscoveryException ex){if(generation==_discoveryGeneration)_basicDiscoveryStatus!.Text=ex.Message;}
-        catch(InvalidDataException ex){if(generation==_discoveryGeneration)_basicDiscoveryStatus!.Text=Redaction.Text(ex.Message);}
-        catch{if(generation==_discoveryGeneration)_basicDiscoveryStatus!.Text=UiText.Get("Basic.DiscoveryIssue");}
+        return true;
     }
     private async Task SaveBasicConnectionAsync()
     {
-        if(!_basicPrepared)throw new InvalidOperationException(UiText.Get("Basic.PrepareFirst"));
-        if(_discoveryTask!=null)await _discoveryTask;
-        if(_discovery==null||DateTimeOffset.UtcNow-_discoveredAt>TimeSpan.FromSeconds(BasicPolicy.Discovery.MaxAgeSeconds))
-        {QueueBasicDiscovery();if(_discoveryTask!=null)await _discoveryTask;}
-        var draft=CaptureBasicDraft();
-        if(draft.Sysnr.Length==0)
-        {
-            var host=BasicPolicy.ParseHost(draft.Host).Host;var values=(_discovery?.Candidates??[]).Where(c=>c.Verified||c.HttpStatus==401).Select(c=>BasicPolicy.InstanceCandidate(c.Url,host)).Where(x=>x!=null).Distinct().ToArray();
-            if(values.Length==1){SetInferredInstance(values[0]!.Value);draft.Sysnr=Read(_basicInstance!);}
-            else{_basicResult!.Text=UiText.Get("Basic.InstanceRequired");_basicInstance!.Focus();return;}
-        }
-        var active=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
-        if(active!=null)
-        {
-            var target=BasicPolicy.ParseHost(draft.Host).Host+":"+draft.Sysnr;
-            if(!active.TargetKey.Equals(target,StringComparison.OrdinalIgnoreCase))
-            {
-                var affected=_settings.Profiles.Where(p=>p.TargetKey.Equals(active.TargetKey,StringComparison.OrdinalIgnoreCase)).ToArray();
-                if(!await ConfirmAsync(UiText.Get("Connections.MoveTitle"),UiText.Get("Connections.MoveBody",active.TargetKey,target,affected.Length,string.Join("\n",affected.Select(p=>p.ToString())))))return;
-            }
-        }
-        if(active!=null&&_settings.ActiveProfiles.TryGetValue(active.TargetKey,out var current)&&current!=active.Id&&!await ConfirmAsync(UiText.Get("Basic.Save"),UiText.Get("Basic.ActivateNotice")))return;
-        var result=await new BasicConnectionService(_secrets).SaveAsync(_settings,_store,draft,_discovery??new(1,[],false,false,0),_basicRfcReady,Token);
-        _basicLastResult=(result.Adt,result.Rfc);
-        _basicResult!.Text=UiText.Get("Basic.AdtResult")+" "+Outcome(result.Adt)+"\n"+UiText.Get("Basic.RfcResult")+" "+Outcome(result.Rfc);
-        if(result.Settings==null){SetStatus(UiText.Get("Basic.BothFailed"));return;}
-        _settings=result.Settings;_basicPassword!.Text="";_basicDraft.Password="";await LoadConnectionsAsync(repairManaged:false);
-        _basicLoadedFields=BasicFields();RefreshBasicProfiles();
-        SetStatus(UiText.Get(result.Adt.Success&&result.Rfc.Success?"Basic.SavedBoth":"Basic.SavedPartial"));
-        _basicRoot!.GetLogicalDescendants().OfType<TextBlock>().Single(t=>t.Name=="BasicClientResult").Text=_basicResult.Text;
-        SetBasicStep(2);
+        if(!await EnsureBasicSourceAsync())return;
+        var draft=CaptureBasicDraft();if(!await ConfirmBasicSaveTargetAsync(draft))return;
+        CancelBasicDiscovery();_basicLastResult=null;
+        _settings=await new BasicConnectionService(_secrets).SaveDraftAsync(_settings,_store,draft,Token);
+        await RefreshSavedBasicAsync();
+        _basicResult!.Text=UiText.Get("Basic.SavedWithoutTest");SetStatus(_basicResult.Text);UpdateBasicNext();
     }
-    private static string Outcome(BasicCheck check)=>UiText.Get(check.Success?"Basic.Passed":"Basic.Failed")+(check.Success?"":" · "+check.Code);
-    private async Task ImportBasicTrustAsync()
+    private async Task RefreshSavedBasicAsync()
     {
-        var file=await PickFileAsync(UiText.Get("Adt.ImportCertificate"),"*");if(file==null)return;
-        var certs=await AdtProfiles.ReadCertificatesAsync(file,Token);
-        if(!await ConfirmAsync(UiText.Get("Adt.ConfirmTrust"),UiText.Get("Adt.ConfirmTrustBody")+"\n\n"+string.Join("\n\n",certs.Select(c=>c.Display))))return;
-        var stored=await AdtProfiles.StoreCertificatesAsync(_settings,new(){Id=_basicDraft.ProfileId},certs,Token);
-        _basicDraft.Certificates=_basicDraft.Certificates.Concat(stored).DistinctBy(c=>c.Sha256).ToList();QueueBasicDiscovery();
+        _basicFilling=true;try{_basicPassword!.Text="";_basicDraft.Password="";}finally{_basicFilling=false;}
+        await LoadConnectionsAsync(repairManaged:false);_basicLoadedFields=BasicFields();RefreshBasicProfiles();_refreshBasicClients?.Invoke();
+    }
+    private async Task ValidateBasicConnectionAsync()
+    {
+        if(!_basicPrepared)throw new InvalidOperationException(UiText.Get("Basic.PrepareFirst"));
+        if(!await EnsureBasicSourceAsync())return;
+        var draft=CaptureBasicDraft();if(!await ConfirmBasicSaveTargetAsync(draft))return;
+        CancelBasicDiscovery();_discoveryCancel=CancellationTokenSource.CreateLinkedTokenSource(Token);var ct=_discoveryCancel.Token;var generation=_discoveryGeneration;
+        _basicValidationRunning=true;_basicLastResult=null;UpdateBasicNext();
+        var consentKey=draft.ProfileId+"|"+draft.Host.Trim().ToLowerInvariant()+"|"+draft.Sysnr;
+        async Task<bool> Confirm(BasicPrompt prompt,CancellationToken token){
+            token.ThrowIfCancellationRequested();
+            if(prompt==BasicPrompt.ConnectionWarning&&_basicConsentKey==consentKey)return true;
+            var key=prompt switch{BasicPrompt.ConnectionWarning=>"Basic.ConnectionWarning",BasicPrompt.RfcDiscovery=>"Basic.RfcDiscoveryConsent",BasicPrompt.AutomaticScan=>"Basic.AutomaticConsent",_=>"Basic.ExtendedConsent"};
+            var accepted=await ConfirmBasicNetworkAsync(UiText.Get(key),prompt==BasicPrompt.ConnectionWarning,token);token.ThrowIfCancellationRequested();
+            if(accepted&&prompt==BasicPrompt.ConnectionWarning)_basicConsentKey=consentKey;return accepted;
+        }
+        try {
+            var progress=new Progress<string>(message=>{if(generation==_discoveryGeneration&&!ct.IsCancellationRequested)_basicDiscoveryStatus!.Text=message;});
+            var result=await new BasicConnectionService(_secrets).ValidateAsync(_settings,_store,draft,_basicRfcReady,Confirm,progress,ct);
+            if(generation!=_discoveryGeneration||ct.IsCancellationRequested)return;
+            _discovery=result.Discovery;_basicLastResult=(result.Adt,result.Rfc);
+            _basicResult!.Text=UiText.Get("Basic.AdtResult")+" "+Outcome(result.Adt)+(result.Url.Length>0?" Â· "+result.Url:"")+"\n"+UiText.Get("Basic.RfcResult")+" "+Outcome(result.Rfc);
+            if(result.Discovery.BudgetExpired)_basicResult.Text+="\n"+UiText.Get("Basic.ScanIncomplete");
+            _basicManualPanel!.IsVisible=true;
+            if(result.Settings!=null){
+                _settings=result.Settings;
+                if(result.Url.Length>0){_basicFilling=true;try{_basicUrl!.Text=result.Url;}finally{_basicFilling=false;}}
+                await RefreshSavedBasicAsync();
+            }else SetStatus(UiText.Get("Basic.NeitherAvailable"));
+            _basicRoot!.GetLogicalDescendants().OfType<TextBlock>().Single(t=>t.Name=="BasicClientResult").Text=_basicResult.Text;
+        }finally{_basicValidationRunning=false;UpdateBasicNext();}
+    }
+    private async Task<bool> ConfirmBasicNetworkAsync(string description,bool warning,CancellationToken ct)
+    {
+        var dialog=new Window{Title=UiText.Get("Basic.Verify"),Width=520,MaxHeight=650,SizeToContent=SizeToContent.Height,WindowStartupLocation=WindowStartupLocation.CenterOwner,CanResize=false};
+        var yes=new Button{Content=UiText.Get(warning?"Basic.Accept":"Text242")};var no=new Button{Content=UiText.Get("Text243")};
+        yes.Click+=(_,_)=>dialog.Close(true);no.Click+=(_,_)=>dialog.Close(false);
+        dialog.Content=new ScrollViewer{Content=new StackPanel{Margin=new(24),Spacing=20,Children={Text(description),Row(no,yes)}}};
+        using var cancel=ct.Register(()=>Avalonia.Threading.Dispatcher.UIThread.Post(()=>dialog.Close(false)));
+        ct.ThrowIfCancellationRequested();return await dialog.ShowDialog<bool>(this);
+    }
+    private static string Outcome(BasicCheck check)
+    {
+        var text=UiText.Get(check.Success?(check.Code=="OK_HTTP_PLAINTEXT"?"Basic.PassedHttp":check.Code=="OK_TLS_UNVERIFIED"?"Basic.PassedUnverifiedTls":"Basic.Passed"):"Basic.Failed")+(check.Success?"":" Â· "+check.Code);
+        if(check.Sid!=null)text+=" Â· SID: "+check.Sid;if(check.Host!=null)text+=" Â· "+check.Host;if(check.Release!=null)text+=" Â· "+check.Release;
+        return text;
     }
 }

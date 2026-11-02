@@ -28,7 +28,7 @@ internal static class Program
             {
                 var service = new PrerequisiteService(new PackageService(Path.Combine(AppContext.BaseDirectory, "payload")));
                 var checks = await service.CheckAsync(settings);
-                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.6", checks }, JsonDefaults.Options));
+                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.10", checks }, JsonDefaults.Options));
                 return checks.Any(c => c.State is CheckState.Blocked or CheckState.Missing or CheckState.Waiting) ? 2 : 0;
             }
             var component = Value("--component");
@@ -65,8 +65,8 @@ internal static class Program
         using var child = Process.Start(start) ?? throw new IOException(UiText.Get("Text244"));
         using var stop = new CancellationTokenSource();
         var outputGate = new SemaphoreSlim(1, 1);
-        var operations = new RollingLog(options.LogDirectory, options.LogLevel, options.MaxFileBytes, options.MaxFiles, options.RetentionDays, "operations.jsonl");
-        var sessions = new RollingLog(options.LogDirectory, options.LogLevel, options.MaxFileBytes, options.MaxFiles, options.RetentionDays, "sessions.jsonl");
+        var operations = new RollingLog(options.LogDirectory, options.LogLevel, options.MaxFileBytes, options.MaxFiles, options.RetentionDays, "host-events.jsonl");
+        var sessions = new RollingLog(options.LogDirectory, options.LogLevel, options.MaxFileBytes, options.MaxFiles, options.RetentionDays, "host-sessions.jsonl");
         var pending = new ConcurrentDictionary<string, (string Method, string? Tool, string? Target, Stopwatch Clock)>();
 
         async Task Log(RollingLog log, LogLevel level, string name, object? detail = null)

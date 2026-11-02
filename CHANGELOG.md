@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.1.0-preview.10 — 2026-11-02
+
+Basic separates Save from Verify and never discovers while editing. SID is required. With explicit acceptance, HTTP/HTTPS works without uploaded certificates. RFC ping, server-list permission, RFC-assisted candidates, consented smart/full TCP scanning and final ADT authentication are separate stages. Denied RFC discovery preserves a successful ping. Failed RFC candidates offer a consented scan instead of claiming the service is inactive. Candidates continue after login rejection and stop at the first complete success.
+
+Full TCP scanning targets 30 seconds and stops with partial results at 60 seconds; HTTP probing has a separate budget. ADT 0.4.2 discovery protocol 2 is required. Advanced, Host and shared production policy behavior are preserved. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease. See the [Basic guide](docs/BASIC-SETUP.md).
+
+
+## 0.1.0-preview.9 — SID and MCP output fixes
+
+RFC 0.1.1 and ADT 0.4.1 return complete JSON in text as well as structured content. Legacy ADT list/ping responses follow their schemas. Syntax diagnostics, DDIC details, class/interface components, search descriptions and BW endpoint failures are visible to text-only clients. Both tool name sets remain available.
+
+SID is required when saving connections/profiles. Basic can obtain it from a successful RFC connection, or the user can enter it. A backend SID mismatch prevents saving. Existing blank records remain readable. HTTP profiles retain the plaintext warning; TLS inspection explains that certificates do not apply to HTTP. Configured custom URLs are included first in endpoint discovery.
+
+Native MCP operation/session logs are separate from Host process logs, honor level/rotation/retention, exclude SAP payloads, and expose operation IDs. Backend release information remains unavailable when SAP does not explicitly expose it. UTF-8 and declared Turkish response encodings are decoded at the HTTP boundary.
+
+Local Online/Offline installers only; no GitHub publication. Live writes and activations are excluded from acceptance.
+
+## 0.1.0-preview.8 — 2026-10-28 (local release)
+
+- Existing Basic installations open a status summary. Installation/packages, SAP connection, and app integrations remain directly accessible. Saved profiles are restored with an empty password field. Startup does not install software or contact SAP.
+- Initial preparation installs missing prerequisites only. Subsequent Basic use checks prerequisites and directs prerequisite or same-version package repairs to Advanced. Missing/older RFC and ADT MCP packages update only on request. ADT-only preference persists.
+- Codex, Claude Desktop, and Claude Code are independent targets. Claude Code uses user-scoped `.claude.json`, honoring `CLAUDE_CONFIG_DIR` and preserving project and unrelated settings.
+- SAP-only previews distinguish New / Will update / Up to date and refresh when selections change. Unchanged registrations are not rewritten. Replacement permission, backups, and per-app results are explicit.
+- Basic control labels are corrected. Existing connections, DPAPI secrets, RFC/ADT payload versions, and Advanced repair options remain available.
+
+Local Online/Offline installers and SHA256 files are delivered without publishing to GitHub. Verification results and clean-Windows/live-SAP acceptance limits are recorded in the delivery report.
+
+
+## 0.1.0-preview.7 — 2026-10-28 (local release)
+
+Basic discovers HTTP and HTTPS without sending credentials. HTTPS 443/44300–44399 and HTTP 80/80NN/8080/44380 are covered; trusted HTTPS wins. HTTP is visibly unencrypted. Certificate-only HTTPS failures require Advanced; verification is never bypassed. One selected endpoint receives account, ADT discovery and read-only compatibility verification.
+
+ADT 0.4.0 normalizes BOM/line endings in encrypted DPAPI files without trimming the real password. Discovery and account results are separate; edits invalidate prior results. Discovery IDs, timestamps and safe diagnostics persist. RFC/runtime assets are retained. See the delivered verification report for actual local/live results; clean Windows and other-machine acceptance remain separate. Not published to GitHub.
+
+
 ## 0.1.0-preview.6 — 2026-10-28
 
 Fix Basic host-only ADT discovery: omit absent optional port fields and accept legacy null fields in the updated ADT package. Show safe input/process error codes. Add exact Manager-to-Node and local HTTPS regressions; update bilingual help. RFC package unchanged. Clean Windows and live affected-machine acceptance remain pending.

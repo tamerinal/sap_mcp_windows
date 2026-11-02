@@ -175,6 +175,7 @@ public class ConnectionManager(SettingsStore store)
             var catalog = await new ManagedJsonConnectionSource().ReadCatalogAsync(current, ct);
             entry = JsonSerializer.Deserialize<ManagedConnection>(JsonSerializer.Serialize(entry, JsonDefaults.Options), JsonDefaults.Options)!;
             entry.NormalizeAndValidate();
+            if(entry.Sid.Length!=3)throw new InvalidDataException(UiText.Get("Sid.Required"));
             var old = catalog.Systems.SingleOrDefault(s => s.Id == entry.Id);
             if (old != null && !old.TargetKey.Equals(entry.TargetKey, StringComparison.Ordinal))
             {
@@ -244,6 +245,7 @@ public class ConnectionManager(SettingsStore store)
         {
             RequireManaged(current);var next=Copy(current);var catalog=await new ManagedJsonConnectionSource().ReadCatalogAsync(current,ct,createIfMissing:true);
             entry=JsonSerializer.Deserialize<ManagedConnection>(JsonSerializer.Serialize(entry,JsonDefaults.Options),JsonDefaults.Options)!;entry.NormalizeAndValidate();
+            if(entry.Sid.Length!=3)throw new InvalidDataException(UiText.Get("Sid.Required"));
             var old=catalog.Systems.SingleOrDefault(s=>s.Id==entry.Id);
             if(old!=null&&!old.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase))
             {

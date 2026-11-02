@@ -64,7 +64,10 @@ public static class LaunchConfiguration
             var c = s.Component(name.ToLowerInvariant()); var p = "SAP_" + name + "_";
             Set(p + "LANDSCAPE_FILE", s.LandscapeFile); Set(p + "CREDENTIALS_FILE", s.CredentialsFile);
             Set(p + "POWERSHELL", s.PowerShellExecutable);
-            Set(p + "OPERATION_LOG_ENABLED", "false"); Set(p + "TRACE_LOG_ENABLED", "false");
+            var nativePolicy=false;
+            try { using var info=JsonDocument.Parse(File.ReadAllText(Path.Combine(s.PackageDirectory,name.ToLowerInvariant(),"build-info.json"))); nativePolicy=info.RootElement.TryGetProperty("nativeLogPolicyVersion",out var policy)&&policy.GetInt32()==1; } catch(Exception ex) when(ex is IOException or JsonException) { }
+            Set(p + "OPERATION_LOG_ENABLED", nativePolicy && c.LogLevel!=LogLevel.Off ? "true" : "false"); Set(p + "TRACE_LOG_ENABLED", nativePolicy && c.LogLevel==LogLevel.Trace ? "true" : "false");
+            Set(p + "TRACE_LOG_DIR",Path.Combine(c.LogDirectory,"traces"));
             Set(p + "OPERATION_LOG_FILE", Path.Combine(c.LogDirectory, "operations.jsonl"));
             Set(p + "SESSION_LOG_FILE", Path.Combine(c.LogDirectory, "sessions.jsonl"));
             Set(p + "LOG_LEVEL", c.LogLevel.ToString());

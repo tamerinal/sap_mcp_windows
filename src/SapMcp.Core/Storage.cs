@@ -152,6 +152,7 @@ public sealed class ProfileService(ISecretStore secrets)
     {
         if (!string.IsNullOrWhiteSpace(profile.AdtBaseUrl)) profile.AdtBaseUrl = AdtProfiles.NormalizeUrl(profile.AdtBaseUrl);
         profile.Validate();
+        if(File.Exists(settings.LandscapeFile)&&LandscapeService.Load(settings.LandscapeFile).Any(s=>s.TargetKey.Equals(profile.TargetKey,StringComparison.OrdinalIgnoreCase)&&s.Sid.Length!=3))throw new InvalidDataException(UiText.Get("Sid.Required"));
         if (!string.IsNullOrEmpty(password))
         {
             var file = await secrets.ProtectAsync(password, settings.SecretsDirectory, ct);

@@ -1,5 +1,20 @@
 # Sorun giderme
 
+## 0.1.0-preview.10 — 2026-11-02
+
+Basic artık Kaydet ve Doğrula işlemlerini ayırır; alan düzenlenirken keşif çalışmaz. SID zorunludur. Açık kabul sonrasında HTTP/HTTPS sertifika yüklemeden kullanılabilir. RFC ping ve sunucu listesi kontrolü, RFC destekli adaylar, onaylı akıllı/tam TCP taraması ve son ADT kimlik doğrulaması ayrı aşamalardır. Yetkisiz RFC keşfi başarılı ping sonucunu bozmaz. RFC adayları sonuç vermezse onayla taramaya geçilir; servis kapalı varsayılmaz. Her aday giriş reddinden sonra da denenir; ilk tam başarıda durulur.
+
+Tam TCP taraması 30 saniyeyi hedefler, 60 saniyede kısmi sonuçla durur; HTTP prob süresi ayrıdır. ADT 0.4.2 keşif protokolü 2 gereklidir. Advanced, Host ve ortak production policy davranışı korunur. Online/Offline EXE ve SHA256 dosyaları GitHub ön sürümünde yayımlanır. Ayrıntılar [Basic kılavuzunda](BASIC-SETUP.tr.md).
+
+Aşağıdaki eski sürüm notları tarihsel bilgidir; güncel Basic davranışı bu bölümde ve Basic kılavuzunda açıklanır.
+
+## 0.1.0-preview.7 — 2026-10-28 (yerel sürüm)
+
+Basic artık kimlik bilgisi göndermeden HTTP ve HTTPS adayları arar. HTTPS 443/44300–44399 yanında HTTP 80/80NN/8080/44380 desteklenir; güvenilir HTTPS önceliklidir. HTTP iletişiminin şifrelenmediği görünürdür. Yalnız sertifika sorunu olan HTTPS bulunursa Advanced gerekir; doğrulama atlanmaz. Seçilen tek adreste hesap, ADT discovery ve salt okunur compatibility doğrulanır.
+
+ADT 0.4.0, BOM/satır sonlu DPAPI şifre dosyalarını okur; gerçek parolanın boşlukları korunur. Keşif ve doğrulama durumları ayrılır, form değişince önceki sonuç güncelliğini kaybeder. Kimlikli, zaman damgalı güvenli keşif kayıtları kalıcıdır. RFC ve çalışma zamanı paketleri korunur. Canlı kabul ve yerel doğrulama sonuçları teslim raporundadır; temiz Windows/diğer makine kabulü ayrıca gerekir. GitHub yayını yapılmadı.
+
+
 [English](TROUBLESHOOTING.md) · [Kılavuz](USER-GUIDE.tr.md)
 
 | Belirti | İşlem |
@@ -79,50 +94,46 @@ Tanılama ekranından maskelenmiş destek raporu çıkarın. Yalnız izinli aşa
 Yerel kurgusal HTTP/TLS testleri profil yalıtımı, zincir, self-signed, SAN/tarih, redirect, proxy, kimlik ve yanıltıcı içerik senaryolarını kapsar. Manager/Host/MCP tutarlılığı canlı SAP olmadan yerel sunucuda sınanır. Native klavye/erişilebilirlik, temiz Windows/GUI’siz kurulum ve yetkili müşteri/canlı SAP kabulü yapılana kadar bekler. Otomatik OCSP/CRL/AIA, SSO/mTLS ve SAP tarafında servis/sertifika değiştirme bu teslimde yoktur. Windows/Node güven kuralları tarayıcı/Eclipse ile aynı değildir; yalnız tarayıcıda açılması MCP güvenini kanıtlamaz.
 
 
-# Basic ve Advanced kurulum
+# Basic kurulum — 0.1.0-preview.10
 
-[Ana sayfa](../README.tr.md) · [English](BASIC-SETUP.md)
+Basic, SAP RFC ve ADT bağlantılarını bağımsız yapılandırır. Mevcut paket hazırlığı, bakım, profiller, DPAPI şifreleri ve istemci önizlemesi korunur. Advanced sertifika araçları ve bağlantı policy'si değişmez.
 
-Yeni kurulum Basic, mevcut yapılandırma Advanced ile açılır; seçiminiz hatırlanır. Üst bölümden mod değiştirilir. Advanced’in mevcut ekranları ve davranışı korunur. Açık form değerleri mod/dil değişiminde kaybolmaz; mod değiştirmek hesap kaydetmez. İki mod aynı bağlantı kataloğunu, profilleri, DPAPI dosyalarını ve sistem başına ortak aktif hesabı kullanır.
+## Hazırla ve kaydet
 
-## 1. SDK ve otomatik hazırlık
+Önce çalışma zamanlarını ve MCP paketlerini hazırlayın. RFC SDK klasörü seçin veya yalnız ADT ile devam edin. Manager güncellemesiyle birlikte ADT paketi 0.4.2'ye (Basic keşif protokolü 2) güncellenmelidir. Eski yardımcı süreç başlatılmadan `BASIC_DISCOVERY_UPGRADE_REQUIRED` ile durdurulur.
 
-SAP NetWeaver RFC SDK klasörünü seçip **Kurulumu hazırla** düğmesine basın. Ön koşullar kontrol edilir, eksik yönetilen çalışma zamanları/güncel MCP paketleri kurulur, SDK doğrulanır ve yerel MCP başlangıcı/araç listesi sınanır. İkinci bir MCP kur düğmesi yoktur. Uyumlu paketler tekrar kurulmaz. Visual C++ için Windows UAC onayı ve yeniden başlatma gerekebilir. SDK kullanıcı tarafından sağlanır; kuruluma eklenmez.
+Host, iki haneli instance, üç karakterli alfanümerik SID, client, kullanıcı, şifre ve SAP dilini girin. SID doğrulamadan önce zorunludur; bulunan SID uyuşmazlığı kaydı engeller. Mevcut profilde boş şifre kayıtlı DPAPI referansını korur. Kaydetmek SAP sistemindeki parolayı değiştirmez.
 
-SDK yoksa **SDK olmadan yalnız ADT ile devam et** seçin. ADT ilerleyebilir; RFC kullanılamaz gösterilir. Eksik RFC bağımlılığı veya bozuk SDK başarıya dönüşmez. Node/DPAPI/disk sorunları hazırlığı durdurur. Yeni kurulumda dosya/mapping/log yolları varsayılandır; mevcut özel ayarlar korunur ve Advanced’te yönetilir.
+**Kaydet** yalnız yerel konfigürasyonu ve korumalı şifre referansını saklar. Ağ testi veya keşif başlatmaz. MCP kayıtlarını kurmadan önce profil doğrulanmalıdır. Uygulamayı açmak, profil seçmek veya alan düzenlemek ağ taraması başlatmaz.
 
-## 2. Tek SAP bağlantısı
+## Onay vererek doğrula
 
-Mevcut hesabı seçin veya yeni bağlantı oluşturun. Uygulama sunucusu (DNS/IPv4/IPv6, isteğe bağlı HTTPS portu), kullanıcı, şifre, client, SAP dili ve iki haneli instance numarası girin. Seçilen mevcut hesapta boş şifre kayıtlı şifreyi korur; yeni hesap şifre gerektirir. Şifre mevcut CurrentUser DPAPI deposunda korunur, düz metin kaydedilmez. SAP sistemindeki gerçek parolayı değiştirmez.
+**Doğrula** iptal edilebilir akışı başlatır. Basic sertifika dosyası istemez. HTTP şifresizdir; HTTPS trafiği şifreler ancak Basic sunucu sertifikasını doğrulamaz. Ağ işlemlerinden önce kalıcı uyarı ve açık kabul sunulur. Kabul, sihirbaz oturumundaki aynı profil/host/instance için geçerlidir. Sertifika güvenini Advanced üzerinden ayarlayın.
 
-Sunucu/manuel adres değişiminden 500 ms sonra şifresiz HTTPS keşfi başlar. Sıra: açık port, 443/44300/44301/44302, kalan 44300–44399 portları. Merkezi varsayılanlar en fazla 16 paralel kontrol, kontrol başına 1,5 saniye ve DNS/TLS/HTTP dahil toplam 15 saniyedir. Yavaş veya farklı porttaki servis bu sınırlı aramada bulunamayabilir; bu ADT’nin olmadığını kanıtlamaz. HTTP’ye geçilmez, SAP kimliği/çerez gönderilmez, redirect izlenmez. Sunucu değişince önceki işlem iptal edilir ve eski sonuç kullanılmaz.
+Bağımlılıkları uygunsa önce RFC ping çalışır. `TH_SERVER_LIST` yetkisi reddedilse de başarılı ping sonucu korunur. SAP yetki hatası ile yerel fonksiyon izin listesi engeli ayrı gösterilir. Sunucu bilgileri okunabiliyorsa, dönen tüm uygulama host/instance'larında RFC destekli keşif sorulur. RFC aday host/instance sağlar; gerçek ICM servis portlarını sağlamaz.
 
-Yalnız beklenen ADT discovery yapısını taşıyan 200 yanıtı discovery doğrulamasıdır. 401 giriş isteyen adaydır, başarı değildir. HTML, rastgele XML, 403 ve yönlendirmeler ayrıdır. Geçerli discovery bulunduğunda kalan kontroller iptal edilir. **ADT adresi / portu gir** bölümüne manuel HTTPS URL veya port girilebilir; açık adres önceliklidir ve tek başına kontrol edilir. Ters proxy öneki desteklenir; discovery alt servis URL’sini girmeyin.
+RFC keşfi kullanılamazsa, reddedilirse veya kullanılabilir aday bulamazsa otomatik tarama için ayrı onay istenir. RFC adaylarının başarısız olması ADT servisinin kapalı olduğunu kanıtlamaz.
 
-**ADT portu veya adresi nasıl bulunur?** Basis ekibinden bilgisayarınızdan erişilebilir HTTPS kök adresi/portu, VPN/proxy gereksinimleri ve doğrulanmış public CA zincirini isteyin. Yetkili yönetici SAP GUI’de **SMICM → Goto → Services** ile etkin servisleri okuyabilir. Web Dispatcher adresi uygulama sunucusundan farklı olabilir; bu dış adresi açıkça girin. RFC instance numarası web adresini tek başına belirlemez. Alan yardımında kopyalanabilir Basis talebi bulunur. Ayrıntılar [ADT/TLS kılavuzunda](ADT-CONNECTIONS.tr.md).
+Akıllı tarama instance portlarını, 80/443, 8080/8443, 8000–8099, 44300–44399 ve Java portlarını kontrol eder. ADT adayı bulunamazsa yalnız girilen host üzerindeki 1–65535 portlarını taramak için ayrıca onay istenir. Ham TCP bağlantıları 250 ms ve 512–1024 uyarlanan eşzamanlılık kullanır; kaynak yetersizliğinde eşzamanlılık azaltılır. Tam TCP taramasının hedefi 30, üst sınırı 60 saniyedir. Yavaş ağlarda taranmamış portlar kalabilir; kısmi sonuç açıkça bildirilir.
 
-TLS zinciri, tarih ve DNS/IP adı doğrulanmalıdır. Sertifika sorununda **Profil sertifikaları** ile public PEM/DER dosyasını inceleyip kimlik/parmak izini açıkça onaylayarak bu taslağa/profile ekleyebilirsiniz. Ağdan geldiği için otomatik güven verilmez; güven global değildir, yanlış ad veya süre sorununu çözmez. Basic TLS doğrulamasını atlamaz. Advanced sertifika araçları korunur.
+Açık portlarda HTTP ve HTTPS denenir. Her HTTP aşamasının ayrı 30 saniye bütçesi, en fazla 32 paralel isteği ve istek başına 1,5 saniye timeout'u vardır. TCP ve HTTP ilerlemesi ayrıdır; tüm doğrulamanın 30 saniyede tamamlanması garanti edilmez.
 
-**Kaydet ve doğrula** ile güvenli adaylar sırayla test edilir; şifreli testler paralel yapılmaz. İlk açık giriş reddinde kalan portlar ve RFC üzerinden otomatik giriş durur; şifreyi düzeltip yeniden deneyin. Gerçek ADT MCP üzerinden discovery ve salt okunur compatibility kontrolü yapılır; anonim servis erişimi hesabı doğrulamaz. RFC mevcut RFC_PING aracıyla ayrıca test edilir. ADT servis/ağ/TLS nedeniyle başarısızsa RFC bağımsız denenebilir. Ping tüm RFC fonksiyonlarına yetki anlamına gelmez.
+## Aday doğrulaması ve sonuç
 
-Girilen instance kullanılır. Aynı sunucudaki 443NN yalnız geçici adaydır; RFC ping bağlantıyı doğrulamalıdır. Tek aday yoksa iki haneli numara istenir; sessizce 00 atanmaz. Web Dispatcher portundan uygulama sunucusu instance’ı çıkarılmaz.
+Yalnız discovery 200/401 yanıtları ADT aday doğrulamasına girebilir. Açık port, 404 veya 503 ADT kanıtı değildir. HTML veya geçersiz XML başarılı ADT erişimi sayılmaz. Yönlendirmeler otomatik izlenmez.
 
-- İkisi doğrulanırsa profil ve tam başarı kaydedilir.
-- Biri doğrulanırsa ayrı sonuçlarla uyarılı kısmi kayıt yapılır; istemci adımına yalnız çalışan MCP sunulur.
-- İkisi de doğrulanamazsa bağlantı ekranında kalınır; önceki profil/aktif mapping korunur. Düzeltip yeniden deneyin. Geçici test dosyaları/şifreleri temizlenir.
+TCP ve HTTP keşfine hesap, şifre veya çerez gönderilmez. RFC ilk bağlantı adımında kimlik bilgilerini kullanır. ADT şifresi anonim keşif bittikten sonra gönderilir. Giriş reddi dahil başarısızlıklarda sonraki aday denenir; ilk tam başarıda durulur. Geçerli discovery içeriği 401 adaylarından önce gelir; eşitlikte HTTPS ve keşif önceliği kullanılır.
 
-Testler geçici mapping kullanır, diğer istemcilerin aktif hesabını değiştirmez. Başarılı kaydetme ilgili sistemin ortak aktif profilini günceller; diğer hesap/sistemler korunur. SAP GUI kaynağından Basic düzenlemeye geçiş önizleme ve açık onay gerektirir: desteklenen sistemler yönetilen kataloğa korunarak alınır, kaynak XML değişmez. Desteklenmeyen/include/SNC/message-server kayıtları dönüşümü durdurur; uygun değilse Advanced kullanın.
+Kimlik doğrulama, discovery ve salt okunur compatibility aşamalarının tümü geçmelidir. Basic, sertifika kontrolü kapalı bağlantıyı görünür uyarıyla kullanılabilir kabul eder; ortak ADT policy'sinin güvenli doğrulama sonucu değiştirilmez. Anonim erişim, girilen hesabı doğrulamaz.
 
-## 3. Codex / Claude Desktop
+Bulunan adres düzenlenebilir alanda gösterilir. Doğrulanamazsa gerekirse Web Dispatcher/proxy yolunu da içeren HTTP/HTTPS adresini elle girin. Sondaki `/sap/bc/adt` bir kez kırpılır. Manuel doğrulama port taramadan yalnız normalize edilen adresi kontrol eder.
 
-Mevcut istemci önizleme/uygulama adımı kullanılır. Yalnız ayrı ayrı doğrulanan MCP’ler eklenir; diğer kayıtlar, yedekler ve çakışma kontrolü korunur. Mevcut seçilmeyen kayıtlar otomatik silinmez. Bağlantı ayarı değişince önceki doğrulama geçersizleşir. Kurulum/paket değişiminden sonra istemci MCP süreçlerini yeniden başlatın. İstemci mevcut Host’u ihtiyaç halinde başlatır; Windows servisi eklenmez ve Manager açık kalmak zorunda değildir.
+ADT ve RFC ayrı raporlanır. Codex, Claude Desktop ve Claude Code'a yalnız doğrulanan bileşenler sunulur. Yalnız RFC veya yalnız ADT ile ilerlenebilir. İkisi de çalışmazsa yalnız konfigürasyonu kaydedin veya geri dönün. Başarısız doğrulama mevcut kullanılabilir kaydı silmez. Bağlantı ayrıntıları veya gerekli paketler değişince doğrulama geçersizleşir; eski doğrulama-policy kayıtları yeniden açık doğrulama ister.
 
-Bu önizleme imzasızdır. Temiz Windows ve canlı SAP kabulü bekler; yerel kurgusal testler her SAP ortamını doğrulamaz. Gerçek sonuçlar ve sınırlar sürüm doğrulama raporundadır.
+Doğrulamada Kaydet, İleri, gezinme ve istemci kurulumu pasiftir. İptal alt süreçleri durdurur ve gecikmiş sonuçları eler. Geçici şifre ve mapping dosyaları temizlenir. Şifre keşif girdisine, ilerlemeye veya loglara girmez.
 
-## Preview.5 portsuz keşif hatası (Preview.6 ile düzeltildi)
+## Sürüm kontrolleri
 
-Preview.5, sunucu portsuz girildiğinde ağa istek göndermeden durabiliyordu. Manager isteğe bağlı portu JSON `null` olarak gönderiyor, ADT keşif süreci bunu yanlışlıkla `DISCOVERY_PORT_INVALID` ile reddediyordu. Genel mesaj bunu ağ/sertifika sorunu gibi gösteriyordu. RFC ayrı yoldan çalıştığı için başarılı olabiliyordu. Bu hata, ADT'nin erişilebilir olup olmadığını göstermiyordu.
+Yerel fixture'lar HTTP, self-signed HTTPS, yetki dalları, onay reddi, iptal, tüm portların taranması ve istemci uygunluğunu kapsar. Canlı SAP kabulü ayrıca raporlanır; fixture başarısı canlı bağlantı kanıtı değildir. Online/Offline EXE ve SHA256 dosyaları GitHub ön sürümünde yayımlanır.
 
-Manager'ı Preview.6'ya yükseltin; ardından Basic'te **Kurulumu hazırla** veya Advanced'te ADT kur/onar ile güncel ADT paketini kurun. İstemcilerde MCP süreçlerini yeniden başlatın. Mevcut profiller, DPAPI şifreleri ve RFC paketleri korunur. Manager boş isteğe bağlı alanları artık göndermez; yeni ADT paketi eski null alanlarını da kabul eder. Girdi/süreç hataları uzak ağ hatası gibi gösterilmek yerine güvenli ve özel hata koduyla sunulur.
-
-Kayıtlı bağlantıyı tekrar doğrulayın. Bilinen adres için **ADT adresi / portu gir** taramadan önceliklidir. Gerekirse Basis'ten bu bilgisayardan erişilebilen gerçek HTTPS base URL'sini isteyin; RFC instance numarası web portunu kesinleştirmez. IP adresi sertifikanın DNS adıyla eşleşmeyebilir: gerektiğinde onaylı ve eşleşen DNS adresini ve profil CA güvenini kullanın. TLS doğrulamasını kapatmayın. Bu düzeltme canlı sistem erişimini kanıtlamaz; VPN, port, TLS ve yetkiler ayrıca doğrulanmalıdır. [#6 takip kaydı](https://github.com/tamerinal/sap_mcp_windows/issues/6).
+Ortak `ping_system` katı güven kontrolünü korur: Basic profillerinde `ADT_CONNECTION_UNVERIFIED` döndürebilir. Bu, Basic bağlantısının başarısız olduğu anlamına gelmez. Basic Doğrula sonucu gerekli üç aşamayı kontrol eder; normal salt okunur ADT araçları aynı profille çalışabilir. Güvenli ping sonucu için Advanced sertifika doğrulamasını yapılandırın.

@@ -23,6 +23,7 @@ public sealed class AppSettings
     public string? UiLanguage { get; set; }
     public string? UiMode { get; set; }
     public string? BasicProfileId { get; set; }
+    public BasicSetupState? BasicSetup { get; set; }
     public string AppliedSetupId { get; set; } = "";
     public string DataDirectory { get; set; } = "";
     public string LandscapeFile { get; set; } = "";
@@ -48,6 +49,7 @@ public sealed class AppSettings
     }
     public bool CodexEnabled { get; set; } = true;
     public bool ClaudeEnabled { get; set; } = true;
+    public bool ClaudeCodeEnabled { get; set; }
     public List<ClientRegistration> Registrations { get; set; } = [];
 
     public static AppSettings CreateDefault(string? root = null)
@@ -102,6 +104,8 @@ public sealed class AppSettings
     }
 }
 
+public sealed record BasicSetupState(DateTimeOffset? PreparedAt, bool AdtOnly);
+
 public sealed class ComponentSettings
 {
     public bool Selected { get; set; } = true;
@@ -121,6 +125,7 @@ public sealed class ConnectionProfile
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Name { get; set; } = "";
     public string TargetKey { get; set; } = "";
+    public string Sid { get; set; } = "";
     public string User { get; set; } = "";
     public string Client { get; set; } = "100";
     public string Language { get; set; } = "TR";

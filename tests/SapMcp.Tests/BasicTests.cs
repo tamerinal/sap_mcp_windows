@@ -47,7 +47,7 @@ public sealed class BasicTests
     [Fact] public void ManualPortAndInstanceAreNotGuessedFromOtherHosts()
     {
         Assert.Equal("https://[::1]:8443",BasicPolicy.ManualUrl("8443","[::1]"));
-        Assert.Throws<InvalidDataException>(()=>BasicPolicy.ManualUrl("http://host","host"));
+        Assert.Equal("http://host",BasicPolicy.ManualUrl("http://host","host"));
         Assert.Equal(4,BasicPolicy.InstanceCandidate("https://host:44304","host"));Assert.Null(BasicPolicy.InstanceCandidate("https://dispatcher:44304","host"));Assert.Null(BasicPolicy.InstanceCandidate("https://host:8443","host"));
     }
     [Theory]
@@ -59,25 +59,25 @@ public sealed class BasicTests
     public async Task AdtAndRfcSaveOnlyIndependentSuccesses(bool adtSuccess,bool rfcAvailable,string rfcState,string rfcCode,bool saved)
     {
         using var t=new TestDirectory();var store=Store(t);var source=await new ConnectionManager(store).SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");
-        var old=await File.ReadAllBytesAsync(source.CredentialsFile);var draft=new BasicDraft{Host="test.example.invalid",Sysnr="04",User="DEMO",Password="  şifre  "};
+        var old=await File.ReadAllBytesAsync(source.CredentialsFile);var draft=new BasicDraft{Sid="TST",Host="test.example.invalid",Sysnr="04",User="DEMO",Password="  şifre  "};
         var discovery=new BasicDiscovery(1,[new("https://test.example.invalid:44304",0,"AUTHENTICATION_REQUIRED",401,false)],false,false,1);var calls=new List<string>();
         var result=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(source,store,draft,discovery,rfcAvailable,tester:(_,_,component,_)=>{calls.Add(component);return Task.FromResult(component=="adt"?(adtSuccess?BasicCheck.Passed:BasicCheck.Failed("ADT_DISCOVERY_INVALID")):new BasicCheck(rfcState,rfcCode));});
         Assert.Equal(saved,result.Settings!=null);Assert.Equal(adtSuccess,result.Adt.Success);Assert.Equal(rfcAvailable&&rfcState=="passed",result.Rfc.Success);
-        Assert.Equal(rfcAvailable?new[]{"adt","rfc"}:new[]{"adt"},calls);
+        Assert.Equal(rfcAvailable?new[]{"rfc","adt"}:new[]{"adt"},calls);
         Assert.Empty(source.Profiles);Assert.Empty(source.ActiveProfiles);Assert.Empty(Directory.GetDirectories(Path.Combine(t.Root,"cache","basic-tests")));
         if(saved){var s=await store.LoadAsync();var p=Assert.Single(s.Profiles);Assert.Equal("  şifre  ",await new DpapiSecretStore().ReadAsync(ProfileService.ResolveSecret(s.CredentialsFile,p.SecretRef)));Assert.Equal((adtSuccess?1:0)+(rfcAvailable&&rfcState=="passed"?1:0),BasicPolicy.Eligible(s,p).Length);p.User="CHANGED";Assert.Empty(BasicPolicy.Eligible(s,p));}
         else{Assert.Equal(old,await File.ReadAllBytesAsync(source.CredentialsFile));Assert.Empty((await store.LoadAsync()).Profiles);Assert.False(Directory.Exists(source.SecretsDirectory));}
     }
-    [Fact] public async Task AuthenticationFailureStopsOtherPortsAndRfc()
+    [Fact] public async Task AuthenticationFailureContinuesOtherPortsAndKeepsIndependentRfc()
     {
         using var t=new TestDirectory();var store=Store(t);var source=await new ConnectionManager(store).SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");var calls=0;
-        var r=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(source,store,new(){Host="example.invalid",Sysnr="00",User="DEMO",Password="test"},new(1,[new("https://example.invalid",0,"AUTHENTICATION_REQUIRED",401,false),new("https://example.invalid:44300",1,"AUTHENTICATION_REQUIRED",401,false)],false,false,0),true,tester:(_,_,_,_)=>{calls++;return Task.FromResult(BasicCheck.Failed("AUTHENTICATION_FAILED"));});
-        Assert.Equal(1,calls);Assert.Null(r.Settings);Assert.Equal("AUTHENTICATION_RETRY_STOPPED",r.Rfc.Code);
+        var r=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(source,store,new(){Sid="TST",Host="example.invalid",Sysnr="00",User="DEMO",Password="test"},new(1,[new("https://example.invalid",0,"AUTHENTICATION_REQUIRED",401,false),new("https://example.invalid:44300",1,"AUTHENTICATION_REQUIRED",401,false)],false,false,0),true,tester:(_,_,_,_)=>{calls++;return Task.FromResult(BasicCheck.Failed("AUTHENTICATION_FAILED"));});
+        Assert.Equal(3,calls);Assert.Null(r.Settings);Assert.Equal("AUTHENTICATION_FAILED",r.Rfc.Code);
     }
     [Fact] public async Task UnsafeDiscoveryTargetCannotReceiveCredentials()
     {
         using var t=new TestDirectory();var store=Store(t);var source=await new ConnectionManager(store).SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");var called=false;
-        await Assert.ThrowsAsync<InvalidDataException>(()=>new BasicConnectionService(new DpapiSecretStore()).SaveAsync(source,store,new(){Host="expected.invalid",Sysnr="00",User="DEMO",Password="test"},new(1,[new("https://unexpected.invalid",0,"AUTHENTICATION_REQUIRED",401,false)],false,false,0),true,tester:(_,_,_,_)=>{called=true;return Task.FromResult(BasicCheck.Passed);}));Assert.False(called);Assert.Empty((await store.LoadAsync()).Profiles);
+        await Assert.ThrowsAsync<InvalidDataException>(()=>new BasicConnectionService(new DpapiSecretStore()).SaveAsync(source,store,new(){Sid="TST",Host="expected.invalid",Sysnr="00",User="DEMO",Password="test"},new(1,[new("https://unexpected.invalid",0,"AUTHENTICATION_REQUIRED",401,false)],false,false,0),true,tester:(_,_,_,_)=>{called=true;return Task.FromResult(BasicCheck.Passed);}));Assert.False(called);Assert.Empty((await store.LoadAsync()).Profiles);
     }
     [Fact] public async Task GuiConversionPreservesXmlProfilesAndRejectsUnsupportedEntries()
     {
@@ -91,7 +91,7 @@ public sealed class BasicTests
     [Fact] public async Task GuiConversionCannotSilentlyReplaceAnExistingRouteForTheSameTarget()
     {
         using var t=new TestDirectory();var store=Store(t);var manager=new ConnectionManager(store);var s=await manager.SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");
-        s=await manager.SaveSystemAsync(s,new(){Name="Existing",Host="sap.example.invalid",Sysnr="00",Router="/H/router-a.invalid/S/3299"});
+        s=await manager.SaveSystemAsync(s,new(){Name="Existing", Sid="TST",Host="sap.example.invalid",Sysnr="00",Router="/H/router-a.invalid/S/3299"});
         var catalog=await File.ReadAllBytesAsync(ConnectionManager.CatalogPath(s));var gui=Path.Combine(t.Root,"gui.xml");
         await File.WriteAllTextAsync(gui,"<Landscape><Routers><Router uuid='r' router='/H/router-b.invalid/S/3299'/></Routers><Services><Service type='SAPGUI' uuid='other' name='GUI' server='sap.example.invalid:3200' routerid='r'/></Services></Landscape>");
         s=await manager.SelectSourceAsync(s,"sapGui",gui);var before=await File.ReadAllBytesAsync(store.FilePath);
@@ -101,7 +101,37 @@ public sealed class BasicTests
     {
         using var t=new TestDirectory();var store=Store(t);var s=await new ConnectionManager(store).SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");var before=await File.ReadAllBytesAsync(store.FilePath);
         var p=new ConnectionProfile{Name="new",TargetKey="new.invalid:00",User="DEMO",SecretRef="reference.dpapi",BasicValidation=new(BasicCheck.Passed,BasicCheck.Passed,DateTimeOffset.UtcNow,"fingerprint")};
-        await Assert.ThrowsAsync<IOException>(()=>new BrokenManager(store).SaveBasicAsync(s,new(){Name="new",Host="new.invalid",Sysnr="00"},p));Assert.Equal(before,await File.ReadAllBytesAsync(store.FilePath));Assert.Empty((await new ManagedJsonConnectionSource().ReadCatalogAsync(s)).Systems);Assert.Empty((await store.LoadAsync()).Profiles);
+        await Assert.ThrowsAsync<IOException>(()=>new BrokenManager(store).SaveBasicAsync(s,new(){Name="new", Sid="TST",Host="new.invalid",Sysnr="00"},p));Assert.Equal(before,await File.ReadAllBytesAsync(store.FilePath));Assert.Empty((await new ManagedJsonConnectionSource().ReadCatalogAsync(s)).Systems);Assert.Empty((await store.LoadAsync()).Profiles);
+    }
+    [Fact] public void HttpsCandidatesOutrankHttpAndHttpWarningIsVisible()
+    {
+        var http=new BasicCandidate("http://fixture.invalid:8080",0,"ADT_DISCOVERY_VERIFIED",200,true);
+        var https=new BasicCandidate("https://fixture.invalid:44300",5,"AUTHENTICATION_REQUIRED",401,false);
+        var result=new BasicDiscovery(1,[http,https],false,true,100);
+        Assert.Equal(http,BasicPolicy.Usable(result).First());
+        UiText.SetLanguage("en");
+        Assert.Contains("unencrypted",BasicPolicy.DiscoveryText(result with {Candidates=[http]}));
+        Assert.Contains("Advanced",BasicPolicy.DiscoveryText(result with {Candidates=[new("https://fixture.invalid",0,"TLS_UNTRUSTED",null,false)]}));
+        Assert.Contains("NETWORK_TIMEOUT",BasicPolicy.DiscoveryText(result with {Candidates=[new("https://fixture.invalid",0,"NETWORK_TIMEOUT",null,false)]}));
+    }
+    [Fact] public void DiscoveryInstanceAndPreferredAddressDoNotIncludeAccountData()
+    {
+        var request=BasicDiscoveryService.SerializeRequest(new(){Host="fixture.invalid",Sysnr="04",PreferredUrl="http://fixture.invalid:8080",User="PRIVATE",Password="PRIVATE"});
+        using var data=JsonDocument.Parse(request);
+        Assert.Equal("04",data.RootElement.GetProperty("sysnr").GetString());
+        Assert.Equal("http://fixture.invalid:8080",data.RootElement.GetProperty("preferredUrl").GetString());Assert.DoesNotContain("PRIVATE",request);
+    }
+    [Fact] public async Task HttpSuccessPersistsPlaintextStatusAndFailedRediscoveryPreservesAddress()
+    {
+        using var t=new TestDirectory();var store=Store(t);var source=await new ConnectionManager(store).SelectSourceAsync(AppSettings.CreateDefault(t.Root),"managed");
+        var draft=new BasicDraft{Sid="TST",Host="fixture.invalid",Sysnr="04",User="DEMO",Password="test"};
+        var discovery=new BasicDiscovery(1,[new("http://fixture.invalid:8080",0,"AUTHENTICATION_REQUIRED",401,false)],false,false,1);
+        var first=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(source,store,draft,discovery,false,tester:(_,_,_,_)=>Task.FromResult(BasicCheck.Passed));
+        Assert.Equal("OK_HTTP_PLAINTEXT",first.Adt.Code);Assert.True(first.Adt.Success);var p=Assert.Single(first.Settings!.Profiles);Assert.Equal("http://fixture.invalid:8080",p.AdtBaseUrl);
+        draft.ProfileId=p.Id;draft.Password="";
+        var second=await new BasicConnectionService(new DpapiSecretStore()).SaveAsync(first.Settings,store,draft,new(1,[],false,false,0),true,tester:(_,_,_,_)=>Task.FromResult(BasicCheck.Passed));
+        Assert.False(second.Adt.Success);Assert.Equal(p.AdtBaseUrl,Assert.Single(second.Settings!.Profiles).AdtBaseUrl);
+        var log=await File.ReadAllTextAsync(Path.Combine(t.Root,"logs","manager","manager.jsonl"));Assert.DoesNotContain("DEMO",log);Assert.Contains("basic.validation",log);
     }
     [Fact] public void HtmlTextOrEmptySuccessfulMcpEnvelopeCannotBecomeRfcSuccess()
     {

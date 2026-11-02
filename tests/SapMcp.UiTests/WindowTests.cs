@@ -26,7 +26,7 @@ public sealed class WindowTests
     public async Task BasicDefaultsAndBothModeFormsSurviveLocaleAndModeSwitches()
     {
         using var temp=new UiTemporary();var config=Path.Combine(temp.Root,"config","settings.json");var store=new SettingsStore(config);var seed=await store.LoadAsync();
-        var manager=new ConnectionManager(store);seed=await manager.SelectSourceAsync(seed,"managed");await manager.SaveSystemAsync(seed,new(){Name="Fictional",Host="fictional.example.invalid",Sysnr="00"});
+        var manager=new ConnectionManager(store);seed=await manager.SelectSourceAsync(seed,"managed");await manager.SaveSystemAsync(seed,new(){Name="Fictional", Sid="TST",Host="fictional.example.invalid",Sysnr="00"});
         var window=new MainWindow(config);window.Show();
         try
         {
@@ -34,6 +34,11 @@ public sealed class WindowTests
             Assert.Equal(0,window.FindControl<ComboBox>("ModePicker")!.SelectedIndex);Assert.False(window.FindControl<StackPanel>("Navigation")!.IsVisible);
             var sdk=Named<TextBox>(window,"BasicSdkDirectory");sdk.Text="Fictional SDK path";
             var host=Named<TextBox>(window,"BasicHost");host.Text="fictional.example.invalid";
+            typeof(MainWindow).GetField("_basicLastResult",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.SetValue(window,(BasicCheck.Passed,BasicCheck.Passed));
+            host.Text="changed.example.invalid";host.Text="fictional.example.invalid";
+            await Task.Delay(40);Dispatcher.UIThread.RunJobs();
+            Assert.Null(typeof(MainWindow).GetField("_basicLastResult",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.GetValue(window));
+            Assert.Equal(UiText.Get("Basic.Changed"),Named<TextBlock>(window,"BasicResult").Text);
             var password=Named<TextBox>(window,"BasicPassword");password.Text="  unsaved şifre  ";
             var switcher=window.FindControl<ComboBox>("ModePicker")!;
             switcher.SelectedIndex=1;await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
@@ -46,7 +51,7 @@ public sealed class WindowTests
             {
                 window.Width=width;Application.Current!.RequestedThemeVariant=theme;window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex=locale=="tr"?1:0;
                 await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
-                for(var step=0;step<3;step++)
+                for(var step=0;step<4;step++)
                 {
                     typeof(MainWindow).GetMethod("SetBasicStep",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.Invoke(window,[step]);
                     await Task.Delay(25);Dispatcher.UIThread.RunJobs();
@@ -62,6 +67,92 @@ public sealed class WindowTests
         }
         finally{window.Close();}
     }
+    [AvaloniaFact]
+    public async Task PreparedAndLegacySetupReopenSummaryWithoutRunningInstallOrDiscovery()
+    {
+        using var temp=new UiTemporary();var config=Path.Combine(temp.Root,"config","settings.json");var store=new SettingsStore(config);
+        var seed=await store.LoadAsync();seed.UiLanguage="en";seed.BasicSetup=new(DateTimeOffset.UtcNow,true);
+        seed=await new ConnectionManager(store).SelectSourceAsync(seed,"managed");
+        seed=await new ConnectionManager(store).SaveSystemAsync(seed,new(){Name="Saved system", Sid="TST",Host="saved.example.invalid",Sysnr="00"});
+        var profile=new ConnectionProfile{Name="Saved account",TargetKey="saved.example.invalid:00",User="SAVED_USER",SecretRef=await new DpapiSecretStore().ProtectAsync("fictional-password",seed.SecretsDirectory)};
+        seed.Profiles.Add(profile);seed.BasicProfileId=profile.Id;seed.ActiveProfiles[profile.TargetKey]=profile.Id;await store.SaveAsync(seed);
+        for(var reopen=0;reopen<2;reopen++)
+        {
+            if(reopen==1)
+            {
+                var legacy=await store.LoadAsync();legacy.BasicSetup=null;legacy.Adt.Installed=true;legacy.Rfc.Installed=false;
+                await store.SaveAsync(legacy);
+            }
+            var window=new MainWindow(config);window.Show();
+            try
+            {
+                await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                Assert.True(Named<StackPanel>(window,"BasicSummaryStep").IsVisible);
+                Assert.Equal("saved.example.invalid",Named<TextBox>(window,"BasicHost").Text);Assert.Equal("SAVED_USER",Named<TextBox>(window,"BasicUser").Text);
+                Assert.Equal("",Named<TextBox>(window,"BasicPassword").Text);Assert.True(Named<CheckBox>(window,"BasicAdtOnly").IsChecked);
+                Assert.Empty(Directory.EnumerateFiles(seed.PackageDirectory,"*",SearchOption.AllDirectories));Assert.False(Directory.Exists(Path.Combine(seed.DataDirectory,"runtimes")));
+                Assert.Null(typeof(MainWindow).GetField("_discoveryCancel",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.GetValue(window));
+                Click(Caption(window,UiText.Get("Basic.NavConnection")));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                Assert.True(Named<StackPanel>(window,"BasicConnectionStep").IsVisible);
+                Named<TextBox>(window,"BasicUser").Text="UNSAVED";
+                Click(Caption(window,UiText.Get("Basic.NavClients")));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                Assert.Empty(window.OwnedWindows);
+                Assert.True(Named<StackPanel>(window,"BasicConnectionStep").IsVisible);Assert.Equal("UNSAVED",Named<TextBox>(window,"BasicUser").Text);
+                Named<TextBox>(window,"BasicUser").Text="SAVED_USER";
+                Click(Caption(window,UiText.Get("Basic.NavClients")));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+                Assert.True(Named<StackPanel>(window,"BasicConnectionStep").IsVisible);Assert.False(Named<Button>(window,"BasicNext").IsEnabled);Assert.False(Named<Button>(window,"BasicSaveClients").IsEnabled);
+                Assert.False(Named<CheckBox>(window,"BasicClaudeCode").IsChecked);
+            }
+            finally{window.Close();}
+        }
+    }
+    [AvaloniaFact]
+    public async Task ClientSelectionRegeneratesPreviewAndCannotSaveStaleTargets()
+    {
+        using var temp=new UiTemporary();var config=Path.Combine(temp.Root,"config","settings.json");var store=new SettingsStore(config);
+        var seed=await store.LoadAsync();seed.UiMode="advanced";seed.UiLanguage="en";seed.Adt.Installed=true;seed.Rfc.Installed=false;
+        await store.SaveAsync(seed);var window=new MainWindow(config);window.Show();
+        try
+        {
+            await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[4]);
+            // Use temporary targets. No test writes to the user's client configuration.
+            var boxes=window.GetLogicalDescendants().OfType<TextBox>().Where(b=>!b.IsReadOnly).ToArray();
+            Assert.Equal(3,boxes.Length);for(var i=0;i<boxes.Length;i++)boxes[i].Text=Path.Combine(temp.Root,"client-"+i+(i==0?".toml":".json"));
+            Named<CheckBox>(window,"AdvancedCodex").IsChecked=false;Named<CheckBox>(window,"AdvancedClaudeDesktop").IsChecked=false;
+            Assert.False(Named<Button>(window,"AdvancedSaveClients").IsEnabled);
+            Named<CheckBox>(window,"AdvancedClaudeCode").IsChecked=true;
+            Assert.True(Named<Button>(window,"AdvancedSaveClients").IsEnabled);Assert.Contains("Claude Code",Named<TextBlock>(window,"AdvancedClientPreview").Text);
+            Assert.DoesNotContain("Claude Desktop",Named<TextBlock>(window,"AdvancedClientPreview").Text);
+            Click(Named<Button>(window,"AdvancedSaveClients"));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.True(File.Exists(boxes[2].Text));Assert.False(File.Exists(boxes[0].Text));Assert.False(File.Exists(boxes[1].Text));
+            Assert.Equal("Claude Code",Assert.Single((await store.LoadAsync()).Registrations).Client);
+            Named<CheckBox>(window,"AdvancedClaudeCode").IsChecked=false;Assert.False(Named<Button>(window,"AdvancedSaveClients").IsEnabled);
+        }
+        finally{window.Close();}
+    }
+    [AvaloniaFact]
+    public async Task BasicSaveDoesNotDiscoverAndVerificationRequiresCancelableConsent()
+    {
+        using var temp=new UiTemporary();var config=Path.Combine(temp.Root,"config","settings.json");var store=new SettingsStore(config);
+        var seed=await store.LoadAsync();seed.UiMode="basic";seed.UiLanguage="en";seed=await new ConnectionManager(store).SelectSourceAsync(seed,"managed");await store.SaveAsync(seed);
+        var window=new MainWindow(config);window.Show();
+        try{
+            await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Click(Caption(window,UiText.Get("Basic.NavConnection")));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Named<TextBox>(window,"BasicSid").Text="TST";Named<TextBox>(window,"BasicHost").Text="fictional.example.invalid";Named<TextBox>(window,"BasicInstance").Text="02";Named<TextBox>(window,"BasicUser").Text="DEMO";Named<TextBox>(window,"BasicPassword").Text="local-test-password";
+            Assert.False(Named<Button>(window,"BasicNext").IsEnabled);
+            Click(Named<Button>(window,"BasicSaveConnection"));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.Empty(window.OwnedWindows);var saved=await store.LoadAsync();Assert.Null(Assert.Single(saved.Profiles).BasicValidation);Assert.False(Directory.Exists(seed.PackageDirectory));Assert.False(Named<Button>(window,"BasicNext").IsEnabled);
+            typeof(MainWindow).GetField("_basicPrepared",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.SetValue(window,true);
+            Click(Named<Button>(window,"BasicVerifyConnection"));await Until(()=>window.OwnedWindows.Any());
+            Assert.False(Named<Button>(window,"BasicSaveConnection").IsEffectivelyEnabled);Assert.False(Named<Button>(window,"BasicNext").IsEffectivelyEnabled);
+            Click(Caption(window.OwnedWindows.Single(),UiText.Get("Text243")));await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
+            Assert.Empty(window.OwnedWindows);Assert.Null(Assert.Single((await store.LoadAsync()).Profiles).BasicValidation);
+            Click(Named<Button>(window,"BasicVerifyConnection"));await Until(()=>window.OwnedWindows.Any());
+            Click(window.FindControl<Button>("CancelAction")!);await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);Assert.Empty(window.OwnedWindows);
+        }finally{window.Close();}
+    }
     private sealed class UiTemporary:IDisposable
     {public string Root{get;}=Path.Combine(Path.GetTempPath(),"Basic UI "+Guid.NewGuid().ToString("N"));public void Dispose(){if(Directory.Exists(Root))Directory.Delete(Root,true);}}
     [AvaloniaFact]
@@ -72,7 +163,7 @@ public sealed class WindowTests
         var settings = AppSettings.CreateDefault(root); settings.UiLanguage = "en";
         await store.SaveAsync(settings); var manager = new ConnectionManager(store);
         settings = await manager.SelectSourceAsync(settings, "managed");
-        settings = await manager.SaveSystemAsync(settings, new() { Name = "Fictional", Host = "fictional.example.invalid", Sysnr = "00" });
+        settings = await manager.SaveSystemAsync(settings, new() { Name = "Fictional", Sid="TST", Host = "fictional.example.invalid", Sysnr = "00" });
         var profile = new ConnectionProfile { Name = "Account", TargetKey = "fictional.example.invalid:00", User = "DEMO" };
         await new ProfileService(new DpapiSecretStore()).SaveAsync(settings, profile, "fictional-test-password", true); await store.SaveAsync(settings);
         var window = new MainWindow(store.FilePath); window.Show();
@@ -136,6 +227,7 @@ public sealed class WindowTests
             Named<TextBox>(dialog, "ConnectionName").Text = "Demo & Development";
             Named<TextBox>(dialog, "ConnectionHost").Text = "sap.example";
             Named<TextBox>(dialog, "ConnectionNumber").Text = "04";
+            Named<TextBox>(dialog,"ConnectionSid").Text="TST";
             Click(Named<Button>(dialog, "SaveConnection")); await Until(() => !window.OwnedWindows.Any());
             Assert.Equal("sap.example:04", LandscapeService.Load((await store.LoadAsync()).LandscapeFile).Single().TargetKey);
             TextBox Field(string label) => window.GetLogicalDescendants().OfType<TextBox>().Single(b => Avalonia.Automation.AutomationProperties.GetName(b) == label);
@@ -284,7 +376,7 @@ public sealed class WindowTests
                 window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = locale == "tr" ? 1 : 0;
                 await Task.Delay(100); Dispatcher.UIThread.RunJobs();
                 window.FindControl<Button>("HelpButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                await Task.Delay(100); Dispatcher.UIThread.RunJobs();
+                await Until(()=>window.OwnedWindows.Any());
                 var help = window.OwnedWindows.Single();
                 var content = Assert.IsType<TextBox>(help.Content);
                 var guide = Path.Combine(AppContext.BaseDirectory, "docs", locale == "tr" ? "USER-GUIDE.tr.md" : "USER-GUIDE.md");
