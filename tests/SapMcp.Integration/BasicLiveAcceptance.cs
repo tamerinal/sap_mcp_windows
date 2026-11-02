@@ -27,7 +27,7 @@ internal static class BasicLiveAcceptance
             var draft=new BasicDraft{Sid=system.Sid,ProfileId=p.Id,SystemId=system.Id,Host=system.Host,Sysnr=system.Sysnr,User=p.User,Client=p.Client,Language=p.Language};
             var consents=new List<string>();
             try {
-                var result=await new BasicConnectionService(new DpapiSecretStore()).ValidateAsync(settings,store,draft,rfcReady,(prompt,_)=>{
+                var result=await new BasicConnectionService(new DpapiSecretStore()).ValidateAsync(settings,store,draft,ct=>new RfcReadinessService(packages).CheckAsync(settings,rfcReady,ct),(prompt,_)=>{
                     consents.Add(prompt.ToString());return Task.FromResult(prompt!=BasicPrompt.ExtendedScan); // No live full sweep in acceptance.
                 },new Progress<string>(message=>{if(message.StartsWith("RFC",StringComparison.Ordinal))Console.WriteLine(system.Sid+": "+message);}));
                 var discovery=result.Discovery;var expected=row.GetProperty("expectedCandidateUrl").GetString()!;
@@ -38,7 +38,7 @@ internal static class BasicLiveAcceptance
                     var negativeDiscovery=await new BasicDiscoveryService().DiscoverAsync(settings,negativeDraft);negativeExcluded=!BasicPolicy.Usable(negativeDiscovery).Any()&&negativeDiscovery.Candidates.Any(c=>c.HttpStatus==503);
                 }
                 var passed=result.Adt.Success&&result.Settings?.Profiles.Single().AllowInsecureTls==true&&found&&negativeExcluded!=false;
-                results.Add(new{name=system.Sid,passed,found,negativeExcluded,selectedUrl=result.Url,adt=result.Adt,rfc=result.Rfc,consents,tlsVerification=false,manualUrlUsed=false,preferredUrlUsed=false,liveFullSweep=false,source="packaged Manager/Host/ADT"});
+                results.Add(new{name=system.Sid,passed,found,negativeExcluded,selectedUrl=result.Url,adt=result.Adt,rfc=result.Rfc,readinessCode=result.Readiness?.Code,consents,tlsVerification=false,manualUrlUsed=false,preferredUrlUsed=false,liveFullSweep=false,source="packaged Manager/Host/ADT"});
                 Console.WriteLine($"{(passed?"PASS":"FAIL")} Basic live {system.Sid}: ADT={result.Adt.Code}; RFC={result.Rfc.Code}; expected candidate={found}");
                 failed|=!passed;if(result.Settings!=null)settings=result.Settings;
             }catch(Exception ex){failed=true;results.Add(new{name=system.Sid,passed=false,errorType=ex.GetType().Name});Console.WriteLine($"FAIL Basic live {system.Sid}: {ex.GetType().Name}");}

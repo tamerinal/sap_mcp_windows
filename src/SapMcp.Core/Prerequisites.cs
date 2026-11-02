@@ -50,6 +50,10 @@ public sealed class PrerequisiteService(PackageService packages)
                 result.Add(new(id, name, "x64", present ? CheckState.Ready : CheckState.Missing, UiText.Get("Text068"), catalog?.Assets.Any(a => a.Id == id) == true));
             }
             result.Add(await ValidateSdkAsync(s, ct));
+            var nativeParents=new[]{"python","pyrfc","vc-runtime","vc2013","sdk"};
+            result.Add(nativeParents.All(id=>result.Any(c=>c.Id==id&&c.State==CheckState.Ready))
+                ? await RfcNativeValidation.CheckAsync(s,ct)
+                : new("rfc-native",UiText.Get("Rfc.NativeName"),"",CheckState.Waiting,UiText.Get("Rfc.NativeSkipped")));
         }
         return result;
     }

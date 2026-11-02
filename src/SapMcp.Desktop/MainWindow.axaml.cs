@@ -200,7 +200,7 @@ public partial class MainWindow : Window
             Text(UiText.Get("Text130"), "muted"))));
     }
 
-    private async Task RefreshChecksAsync() { SetStatus(UiText.Get("Text131")); _checks = await new PrerequisiteService(_packages).CheckAsync(_settings, Token); SetStatus(UiText.Get("ChecksComplete", _checks.Count(c => c.State == CheckState.Ready), _checks.Count)); }
+    private async Task RefreshChecksAsync() { InvalidateBasicReadiness(); SetStatus(UiText.Get("Text131")); _checks = await new PrerequisiteService(_packages).CheckAsync(_settings, Token); SetStatus(UiText.Get("ChecksComplete", _checks.Count(c => c.State == CheckState.Ready), _checks.Count)); }
 
     private void Requirements()
     {
@@ -265,7 +265,7 @@ public partial class MainWindow : Window
         form.Children.Add(Row(Action(UiText.Get("Text155"), async () => { var selected = await PickFolderAsync(UiText.Get("Text156")); if (selected != null) path.Text = selected; }),
             Action(UiText.Get("Text157"), async () =>
             {
-                _settings.SdkDirectory = Read(path); _settings.Validate();
+                _settings.SdkDirectory = Read(path); _settings.Validate(); InvalidateBasicReadiness();
                 var result = await PrerequisiteService.ValidateSdkAsync(_settings, Token);
                 await PersistAsync(); await AuditAsync("sdk.checked", new { state = result.State.ToString() });
                 SetStatus(result.Detail); ShowPage(2);

@@ -1,10 +1,18 @@
-# Basic setup — 0.1.0-preview.10
+# Basic setup — 0.1.0-preview.11
+
+## 0.1.0-preview.11 — Fresh RFC readiness and ADT 0.4.3
+
+Basic Verify recalculates RFC readiness from current settings after connection consent. Fixing the SDK or prerequisites in Advanced no longer requires restarting Manager. Python, PyRFC, Visual C++ runtimes, SDK, native import and RFC package blockers are reported separately. Explicit ADT-only mode remains `RFC_DISABLED_BY_MODE`.
+
+A PyRFC file on disk does not prove native loading. A separate Python process imports `pyrfc.Connection` without preloading ICU or connecting to SAP. Native failure and timeout remain separate from missing dependencies and SAP ping outcomes. SDK settings affect child processes only, never persistent environment variables. Client registration requires both successful RFC verification and current readiness.
+
+The package includes ADT 0.4.3: TLS warnings do not invalidate an otherwise successful connection; ping and repository tools share acceptance criteria. Origin-scoped certificate fingerprint pins are supported by the ADT package; no trust is granted automatically from the network. Reverify existing profiles. Online/Offline installers and SHA256 files are provided in the preview.11 prerelease.
 
 Basic configures SAP RFC and ADT independently. Existing package preparation, maintenance, profiles, DPAPI secrets and client previews are preserved. Advanced retains its certificate tools and connection policy.
 
 ## Prepare and save
 
-Prepare the runtime/MCP packages first. Choose an RFC SDK directory, or continue with ADT only. Updating Manager also requires updating its ADT package to 0.4.2 (Basic discovery protocol 2). An older helper is rejected with `BASIC_DISCOVERY_UPGRADE_REQUIRED` before it is started.
+Prepare the runtime/MCP packages first. Choose an RFC SDK directory, or continue with ADT only. Updating Manager also requires updating its ADT package to 0.4.3 (Basic discovery protocol 2). An older helper is rejected with `BASIC_DISCOVERY_UPGRADE_REQUIRED` before it is started.
 
 Enter host, two-digit instance, three-character alphanumeric SID, client, user, password and SAP language. SID is required before verification; a detected SID mismatch prevents committing. An existing profile's blank password preserves its DPAPI secret. Saving does not change the password in SAP.
 
@@ -40,4 +48,3 @@ During verification, Save, Next, navigation and client installation are disabled
 
 Local fixtures cover HTTP, self-signed HTTPS, authorization branches, consent rejection, cancellation, all-port scanning and client eligibility. Live SAP acceptance is separately reported; a fixture pass does not establish live connectivity. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease.
 
-The shared `ping_system` keeps its strict trust verdict: it can return `ADT_CONNECTION_UNVERIFIED` for Basic profiles. This does not mean Basic connectivity failed. Basic Verify checks the three required stages; ordinary read-only ADT tools can use the same profile. Configure certificate verification in Advanced for a secure ping verdict.

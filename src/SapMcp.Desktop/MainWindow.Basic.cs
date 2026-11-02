@@ -21,6 +21,7 @@ public partial class MainWindow
     private TextBlock? _basicSummary;
     private IReadOnlyList<Requirement> _basicChecks=[];
     private bool _basicRfcReady;
+    private RfcReadinessResult? _basicReadiness;
     private BasicDraft _basicDraft=new();
     private CancellationTokenSource? _discoveryCancel;
     private long _discoveryGeneration;
@@ -51,7 +52,7 @@ public partial class MainWindow
                 if(mode==_settings.UiMode)return;
                 CancelBasicDiscovery();
                 if(mode=="basic") {_advancedControls=Body.Children.ToList();_advancedRefresh=_refreshConnectionLanguage;}
-                _settings.UiMode=mode;await PersistAsync();DisplayMode();if(mode=="basic"&&!_basicRestored)await RestoreBasicAsync();
+                _settings.UiMode=mode;await PersistAsync();DisplayMode();if(mode=="basic"){if(!_basicRestored)await RestoreBasicAsync();else await InspectBasicAsync();}else InvalidateBasicReadiness();
             });
         };
     }
@@ -206,10 +207,13 @@ public partial class MainWindow
         SetBasicStep(history?3:0);
         if(history)await InspectBasicAsync();else RefreshBasicSummary();
     }
+    private void InvalidateBasicReadiness(){_basicReadiness=null;_basicRfcReady=false;_refreshBasicClients?.Invoke();}
     private async Task InspectBasicAsync()
     {
         var candidate=BasicPolicy.Copy(_settings);candidate.Adt.Selected=true;candidate.Rfc.Selected=!BasicInstallation.AdtOnly(_settings);
-        _basicChecks=await new PrerequisiteService(_packages).CheckAsync(candidate,Token);
+        var enabled=!BasicInstallation.AdtOnly(_settings);
+        _basicReadiness=await new RfcReadinessService(_packages).CheckAsync(candidate,enabled,Token);
+        _basicChecks=enabled?_basicReadiness.Checks:await new PrerequisiteService(_packages).CheckAsync(candidate,Token);
         foreach(var component in new[]{"adt","rfc"})
         {
             _settings.Component(component).Installed=File.Exists(Path.Combine(_settings.PackageDirectory,component,"dist","server.js"));
@@ -217,7 +221,7 @@ public partial class MainWindow
         }
         var adtRoot=Path.Combine(_settings.PackageDirectory,"adt","dist");
         _basicPrepared=BasicInstallation.SharedReady(_basicChecks)&&File.Exists(Path.Combine(adtRoot,"server.js"))&&File.Exists(Path.Combine(adtRoot,"basic-connection.js"));
-        _basicRfcReady=!BasicInstallation.AdtOnly(_settings)&&BasicInstallation.RfcReady(_basicChecks)&&File.Exists(Path.Combine(_settings.PackageDirectory,"rfc","dist","server.js"));
+        _basicRfcReady=_basicReadiness.Ready;
         RefreshBasicSummary();_refreshBasicClients?.Invoke();UpdateBasicNext();
     }
     private void RefreshBasicSummary()
@@ -358,11 +362,16 @@ public partial class MainWindow
         }
         try {
             var progress=new Progress<string>(message=>{if(generation==_discoveryGeneration&&!ct.IsCancellationRequested)_basicDiscoveryStatus!.Text=message;});
-            var result=await new BasicConnectionService(_secrets).ValidateAsync(_settings,_store,draft,_basicRfcReady,Confirm,progress,ct);
+            async Task<RfcReadinessResult> Ready(CancellationToken token){
+                var ready=await new RfcReadinessService(_packages).CheckAsync(_settings,!BasicInstallation.AdtOnly(_settings),token);
+                _basicReadiness=ready;_basicRfcReady=ready.Ready;_basicChecks=ready.Checks;return ready;
+            }
+            var result=await new BasicConnectionService(_secrets).ValidateAsync(_settings,_store,draft,Ready,Confirm,progress,ct);
             if(generation!=_discoveryGeneration||ct.IsCancellationRequested)return;
             _discovery=result.Discovery;_basicLastResult=(result.Adt,result.Rfc);
             _basicResult!.Text=UiText.Get("Basic.AdtResult")+" "+Outcome(result.Adt)+(result.Url.Length>0?" Â· "+result.Url:"")+"\n"+UiText.Get("Basic.RfcResult")+" "+Outcome(result.Rfc);
             if(result.Discovery.BudgetExpired)_basicResult.Text+="\n"+UiText.Get("Basic.ScanIncomplete");
+            if(result.Readiness is{Ready:false} blocked)_basicResult.Text+="\n"+UiText.Get("Rfc.ReadinessResult",blocked.Summary);
             _basicManualPanel!.IsVisible=true;
             if(result.Settings!=null){
                 _settings=result.Settings;

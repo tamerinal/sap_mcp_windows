@@ -134,11 +134,12 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
                 Ensure(BasicPolicy.Eligible(s,s.Profiles.Single(p=>p.Id==selected.Id)).SequenceEqual(new[]{"adt"}),"Unverified RFC offered to clients");
                 Ensure(s.Profiles.Count==2,"Basic removed another existing profile");
             });
-            await step("Shared ping_system retains its strict TLS verification verdict in Basic",async()=>
+            await step("Updated ADT ping_system accepts Basic TLS warnings after successful authentication",async()=>
             {
                 await using var session=await McpSession.StartAsync(s,store.FilePath,"adt");
                 var result=await session.RequestAsync("tools/call",new{name="ping_system",arguments=new{target_key=selected.TargetKey}});
-                Ensure(result.TryGetProperty("isError",out var failed)&&failed.ValueKind==JsonValueKind.True&&result.GetRawText().Contains("ADT_CONNECTION_UNVERIFIED"),"Shared strict ping policy unexpectedly changed");
+                Ensure(!result.TryGetProperty("isError",out var failed)||failed.ValueKind!=JsonValueKind.True,"Updated ADT warning-aware ping failed");
+                Ensure(result.GetRawText().Contains("disabled"),"TLS verification state is missing from the ping result");
             });
             await step("Basic unverified TLS profile runs an authenticated read-only MCP search",async()=>
             {

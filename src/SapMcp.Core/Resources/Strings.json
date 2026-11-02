@@ -2022,5 +2022,33 @@
   "Basic.Accept": {
     "en": "I accept",
     "tr": "Kabul ediyorum"
+  },
+  "Rfc.CheckMissing": {
+    "en": "Required check is missing.",
+    "tr": "Gerekli kontrol bulunamadı."
+  },
+  "Rfc.PackageCheck": {
+    "en": "RFC server and Python worker files.",
+    "tr": "RFC sunucu ve Python worker dosyaları."
+  },
+  "Rfc.NativeName": {
+    "en": "PyRFC native import",
+    "tr": "PyRFC native yükleme"
+  },
+  "Rfc.NativeReady": {
+    "en": "Native import succeeded; no SAP connection was attempted.",
+    "tr": "Native yükleme başarılı; SAP bağlantısı denenmedi."
+  },
+  "Rfc.NativeSkipped": {
+    "en": "Complete Python, SDK and runtime checks first.",
+    "tr": "Önce Python, SDK ve çalışma zamanı kontrollerini tamamlayın."
+  },
+  "Rfc.ReadinessResult": {
+    "en": "RFC readiness: {0}",
+    "tr": "RFC hazırlık durumu: {0}"
+  },
+  "Adt.PinAdvice": {
+    "en": "Verify the server certificate independently and check the SHA-256 pin for the exact HTTPS origin. A pin mismatch never falls back to insecure TLS.",
+    "tr": "Sunucu sertifikasını bağımsız olarak doğrulayın ve tam HTTPS origin için SHA-256 kaydını kontrol edin. Parmak izi uyuşmazlığında doğrulamasız TLS’e geçilmez."
   }
 }

@@ -114,6 +114,13 @@ if (args.Length > 3 && Directory.Exists(args[3]))
         var run = await ProcessRunner.RunAsync(settings.HostExecutable, ["--diagnose", "--json", "--config", store.FilePath], environment, TimeSpan.FromSeconds(60));
         using var json = JsonDocument.Parse(run.Output);
         Ensure(json.RootElement.GetProperty("checks").EnumerateArray().Any(c => c.GetProperty("id").GetString() == "sdk" && c.GetProperty("state").GetString() == "Ready"), "SDK did not initialize without inherited SDK PATH");
+        Ensure(json.RootElement.GetProperty("checks").EnumerateArray().Any(c=>c.GetProperty("id").GetString()=="rfc-native"&&c.GetProperty("state").GetString()=="Ready"),"Direct native import failed in the isolated Host environment");
+    });
+    await Step("Fresh RFC readiness imports native PyRFC without ICU preloading and without a SAP destination", async () =>
+    {
+        var native=await RfcNativeValidation.CheckAsync(settings);Ensure(native.State==CheckState.Ready,native.Detail);
+        var readiness=await new RfcReadinessService(packages).CheckAsync(settings);Ensure(readiness.Ready,readiness.Summary);
+        Ensure(readiness.Checks.Any(c=>c.Id=="rfc-package"&&c.State==CheckState.Ready),"RFC package readiness missing");
     });
     await Step("Missing ICU is blocked by Host and Manager before native initialization", async () =>
     {

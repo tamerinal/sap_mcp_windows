@@ -1,10 +1,18 @@
-# Basic kurulum — 0.1.0-preview.10
+# Basic kurulum — 0.1.0-preview.11
+
+## 0.1.0-preview.11 — RFC hazırlık durumu ve ADT 0.4.3
+
+Basic Doğrula, uyarı kabul edildikten sonra RFC hazırlığını güncel ayarlardan yeniden hesaplar. SDK veya bağımlılıklar Advanced'te düzeltildiğinde uygulamayı yeniden başlatmak gerekmez. Python, PyRFC, Visual C++ runtime'ları, SDK, native import ve RFC paket dosyalarının engel durumları ayrı gösterilir. Açık yalnız-ADT tercihi `RFC_DISABLED_BY_MODE` olarak korunur.
+
+PyRFC dosyasının diskte bulunması native yükleme başarısı sayılmaz. Ayrı Python süreci, ICU'yu önceden yüklemeden ve SAP bağlantısı yapmadan `pyrfc.Connection` import eder. Native hata ve timeout, eksik bağımlılıktan ve SAP ping sonucundan ayrılır. SDK yolu yalnız alt süreçlere aktarılır; kalıcı ortam değişkenleri değiştirilmez. İstemci kaydı başarılı RFC doğrulaması ve güncel hazırlık sonucunu birlikte gerektirir.
+
+Paket ADT 0.4.3 içerir: TLS uyarıları başarılı bağlantıyı bozmaz; ping ve repository araçları aynı kabul kuralını kullanır. Origin'e bağlı sertifika parmak izi desteği ADT paketindedir; sertifikaya ağdan otomatik güven verilmez. Eski doğrulamaları yeniden çalıştırın. Online/Offline kurulumlar ve SHA256 dosyaları preview.11 ön sürümünde sunulur.
 
 Basic, SAP RFC ve ADT bağlantılarını bağımsız yapılandırır. Mevcut paket hazırlığı, bakım, profiller, DPAPI şifreleri ve istemci önizlemesi korunur. Advanced sertifika araçları ve bağlantı policy'si değişmez.
 
 ## Hazırla ve kaydet
 
-Önce çalışma zamanlarını ve MCP paketlerini hazırlayın. RFC SDK klasörü seçin veya yalnız ADT ile devam edin. Manager güncellemesiyle birlikte ADT paketi 0.4.2'ye (Basic keşif protokolü 2) güncellenmelidir. Eski yardımcı süreç başlatılmadan `BASIC_DISCOVERY_UPGRADE_REQUIRED` ile durdurulur.
+Önce çalışma zamanlarını ve MCP paketlerini hazırlayın. RFC SDK klasörü seçin veya yalnız ADT ile devam edin. Manager güncellemesiyle birlikte ADT paketi 0.4.3'e (Basic keşif protokolü 2) güncellenmelidir. Eski yardımcı süreç başlatılmadan `BASIC_DISCOVERY_UPGRADE_REQUIRED` ile durdurulur.
 
 Host, iki haneli instance, üç karakterli alfanümerik SID, client, kullanıcı, şifre ve SAP dilini girin. SID doğrulamadan önce zorunludur; bulunan SID uyuşmazlığı kaydı engeller. Mevcut profilde boş şifre kayıtlı DPAPI referansını korur. Kaydetmek SAP sistemindeki parolayı değiştirmez.
 
@@ -40,4 +48,3 @@ Doğrulamada Kaydet, İleri, gezinme ve istemci kurulumu pasiftir. İptal alt s�
 
 Yerel fixture'lar HTTP, self-signed HTTPS, yetki dalları, onay reddi, iptal, tüm portların taranması ve istemci uygunluğunu kapsar. Canlı SAP kabulü ayrıca raporlanır; fixture başarısı canlı bağlantı kanıtı değildir. Online/Offline EXE ve SHA256 dosyaları GitHub ön sürümünde yayımlanır.
 
-Ortak `ping_system` katı güven kontrolünü korur: Basic profillerinde `ADT_CONNECTION_UNVERIFIED` döndürebilir. Bu, Basic bağlantısının başarısız olduğu anlamına gelmez. Basic Doğrula sonucu gerekli üç aşamayı kontrol eder; normal salt okunur ADT araçları aynı profille çalışabilir. Güvenli ping sonucu için Advanced sertifika doğrulamasını yapılandırın.

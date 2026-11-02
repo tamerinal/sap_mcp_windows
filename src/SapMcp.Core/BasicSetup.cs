@@ -72,7 +72,7 @@ public static class BasicPolicy
         var secret=ProfileService.ResolveSecret(s.CredentialsFile,p.SecretRef);
         var cipher=File.Exists(secret)?Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(secret))):"missing";
         sid ??= File.Exists(s.LandscapeFile)?LandscapeService.Load(s.LandscapeFile).FirstOrDefault(x=>x.TargetKey==p.TargetKey)?.Sid:null;
-        var data=new {policyVersion=2,sid,profileSid=p.Sid,p.TargetKey,p.User,p.Client,p.Language,p.AdtBaseUrl,p.AdtCertificates,p.AllowInsecureTls,cipher,s.SdkDirectory,s.NodeExecutable,s.PythonExecutable,adt=s.Adt.Version,rfc=s.Rfc.Version};
+        var data=new {policyVersion=2,sid,profileSid=p.Sid,p.Extra,p.TargetKey,p.User,p.Client,p.Language,p.AdtBaseUrl,p.AdtCertificates,p.AllowInsecureTls,cipher,s.SdkDirectory,s.NodeExecutable,s.PythonExecutable,adt=s.Adt.Version,rfc=s.Rfc.Version};
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data,JsonDefaults.Options))));
     }
     public static string[] Eligible(AppSettings s,ConnectionProfile p)=>s.ActiveProfiles.GetValueOrDefault(p.TargetKey)==p.Id&&p.BasicValidation is {PolicyVersion:2} v&&v.Fingerprint==Fingerprint(s,p)
@@ -146,8 +146,8 @@ public static class BasicInstallation
         if (!File.Exists(Path.Combine(root, "dist", "server.js")) || (component == "adt" && !File.Exists(Path.Combine(root, "dist", "basic-connection.js")))) return "Repair";
         return "Current";
     }
-    public static bool SharedReady(IEnumerable<Requirement> checks) => checks.Where(c => c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013")).All(c => c.State is CheckState.Ready or CheckState.Warning);
-    public static bool RfcReady(IEnumerable<Requirement> checks) => SharedReady(checks) && new[]{"sdk","python","pyrfc","vc-runtime","vc2013"}.All(id => checks.Any(c => c.Id == id && c.State == CheckState.Ready));
+    public static bool SharedReady(IEnumerable<Requirement> checks) => checks.Where(c => c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013" or "rfc-native")).All(c => c.State is CheckState.Ready or CheckState.Warning);
+    public static bool RfcReady(IEnumerable<Requirement> checks) => SharedReady(checks) && new[]{"sdk","python","pyrfc","vc-runtime","vc2013","rfc-native"}.All(id => checks.Any(c => c.Id == id && c.State == CheckState.Ready));
 }
 
 public sealed class BasicPreparationService(PackageService packages)
@@ -168,7 +168,7 @@ public sealed class BasicPreparationService(PackageService packages)
         Task<List<Requirement>> Check() => CheckOverride?.Invoke(s,ct) ?? prerequisites.CheckAsync(s,ct);
         Task Install(IEnumerable<string> ids) => InstallOverride?.Invoke(s,ids,progress,ct) ?? prerequisites.InstallAsync(s,ids,progress,ct);
         var checks=await Check();
-        var fatal=checks.FirstOrDefault(c=>c.State is CheckState.Blocked or CheckState.Missing&&!c.Installable&&c.Id!="sdk");
+        var fatal=checks.FirstOrDefault(c=>c.State is CheckState.Blocked or CheckState.Missing&&!c.Installable&&c.Id is not ("sdk" or "rfc-native"));
         if(fatal!=null)throw new InvalidOperationException(UiText.Get("Basic.RequirementBlocked",fatal.Name));
         var maintenance = maintenanceOnly || BasicInstallation.IsMaintenance(current);
         if (!maintenance && checks.Any(c=>c.Id=="node"&&c.Installable&&c.State!=CheckState.Ready))
@@ -181,9 +181,9 @@ public sealed class BasicPreparationService(PackageService packages)
         }
         checks=await Check();
         LastChecks=checks;
-        var sharedFailure=checks.FirstOrDefault(c=>c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013")&&c.State is not (CheckState.Ready or CheckState.Warning));
+        var sharedFailure=checks.FirstOrDefault(c=>c.Id is not ("sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013" or "rfc-native")&&c.State is not (CheckState.Ready or CheckState.Warning));
         if(sharedFailure!=null)throw new InvalidOperationException(UiText.Get(maintenance?"Basic.RepairRequirement":"Basic.RequirementBlocked",sharedFailure.Name));
-        var rfcReady=!adtOnly&&checks.Where(c=>c.Id is "sdk" or "python" or "pyrfc" or "vc-runtime" or "vc2013").All(c=>c.State==CheckState.Ready);
+        var rfcReady=!adtOnly&&BasicInstallation.RfcReady(checks);
         RfcReady=rfcReady;RetainValidatedSdk(s,current,rfcReady);
         var catalog=packages.LoadCatalog();
         foreach(var component in new[]{"adt","rfc"}.Where(c=>c=="adt"||rfcReady))

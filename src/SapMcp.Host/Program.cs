@@ -28,7 +28,7 @@ internal static class Program
             {
                 var service = new PrerequisiteService(new PackageService(Path.Combine(AppContext.BaseDirectory, "payload")));
                 var checks = await service.CheckAsync(settings);
-                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.10", checks }, JsonDefaults.Options));
+                Console.WriteLine(JsonSerializer.Serialize(new { schemaVersion = 1, version = "0.1.0-preview.11", checks }, JsonDefaults.Options));
                 return checks.Any(c => c.State is CheckState.Blocked or CheckState.Missing or CheckState.Waiting) ? 2 : 0;
             }
             var component = Value("--component");
@@ -40,6 +40,7 @@ internal static class Program
                 (settings, testDirectory) = await AdtProfiles.CreateTestSnapshotAsync(settings, profileId);
             }
             var sdk = settings.Rfc.Selected && settings.Rfc.Installed ? await PrerequisiteService.ValidateSdkAsync(settings) : null;
+            if(sdk?.State==CheckState.Ready){var native=await RfcNativeValidation.CheckAsync(settings);if(native.State!=CheckState.Ready)sdk=native;}
             var rfcReady = sdk?.State == CheckState.Ready;
             if (component == "rfc" && sdk is { State: not CheckState.Ready }) throw new SdkUnavailableException(sdk);
             var start = LaunchConfiguration.Create(settings, component, rfcReady);

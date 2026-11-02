@@ -36,7 +36,7 @@ public partial class MainWindow
             {
                 var p=_settings.Profiles.SingleOrDefault(p=>p.Id==_basicDraft.ProfileId);
                 if (p==null || !_basicPrepared || BasicFields()!=_basicLoadedFields) return [];
-                return BasicPolicy.Eligible(_settings,p).Where(c=>c=="adt" || _basicRfcReady).ToArray();
+                return RfcReadinessService.Eligible(_settings,p,_basicReadiness,!BasicInstallation.AdtOnly(_settings));
             }
             return new[]{"adt","rfc"}.Where(c=>_settings.Component(c).Installed && _settings.Component(c).Selected).ToArray();
         }
@@ -54,6 +54,7 @@ public partial class MainWindow
                 if(code.IsChecked==true)next.Add(ClientIntegration.Preview("Claude Code",codePath==null?ClientIntegration.ClaudeCodePath:Read(codePath),_settings,_store.FilePath,components));
                 previews=next;
                 summary.Text=previews.Count==0?UiText.Get("Text209"):string.Join("\n\n",previews.Select(ClientIntegration.Describe));
+                if(basic&&_basicReadiness is{Ready:false} blocked)summary.Text+="\n"+UiText.Get("Rfc.ReadinessResult",blocked.Summary);
                 details.Text=string.Join("\n\n",previews.Select(p=>p.Client+" → "+p.Path+"\n"+ClientIntegration.Details(p)));
                 replace.IsVisible=previews.Any(p=>p.Conflicts.Count>0);UpdateSave();
             }
@@ -62,6 +63,7 @@ public partial class MainWindow
         }
         save=Action(UiText.Get("Basic.ApplyClientSettings"),async()=>
         {
+            if(basic){_basicReadiness=await new RfcReadinessService(_packages).CheckAsync(_settings,!BasicInstallation.AdtOnly(_settings),Token);_basicRfcReady=_basicReadiness.Ready;}
             var valid=Components().Select(ClientIntegration.ServerName).ToHashSet();
             if(previews.Count==0 || previews.Any(p=>p.Names.Any(n=>!valid.Contains(n)))){Preview();throw new InvalidOperationException(UiText.Get("Basic.Retest"));}
             if(!basic && valid.Contains("sap_rfc_call") && (await PrerequisiteService.ValidateSdkAsync(_settings,Token)).State!=CheckState.Ready) throw new InvalidOperationException(UiText.Get("Text207"));

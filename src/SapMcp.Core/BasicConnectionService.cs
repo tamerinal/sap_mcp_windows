@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace SapMcp.Core;
 
 public enum BasicPrompt { ConnectionWarning,RfcDiscovery,AutomaticScan,ExtendedScan }
-public sealed record BasicValidationResult(AppSettings? Settings,BasicCheck Adt,BasicCheck Rfc,BasicDiscovery Discovery,string Url="");
+public sealed record BasicValidationResult(AppSettings? Settings,BasicCheck Adt,BasicCheck Rfc,BasicDiscovery Discovery,string Url="", RfcReadinessResult? Readiness=null);
 internal sealed class BasicValidationHooks
 {
     internal Func<AppSettings,string,string,CancellationToken,Task<BasicCheck>>? Check {get;init;}
@@ -33,14 +33,19 @@ public sealed class BasicConnectionService(ISecretStore secrets)
     }
     public async Task<BasicValidationResult> ValidateAsync(AppSettings source,SettingsStore store,BasicDraft draft,bool rfcAvailable,
         Func<BasicPrompt,CancellationToken,Task<bool>> confirm,IProgress<string>? progress=null,CancellationToken ct=default)
+        => await ValidateAsync(source,store,draft,_=>Task.FromResult(new RfcReadinessResult(rfcAvailable?"OK":"RFC_DEPENDENCY_MISSING","",[],[])),confirm,progress,ct);
+    public async Task<BasicValidationResult> ValidateAsync(AppSettings source,SettingsStore store,BasicDraft draft,
+        Func<CancellationToken,Task<RfcReadinessResult>> readinessCheck,Func<BasicPrompt,CancellationToken,Task<bool>> confirm,IProgress<string>? progress=null,CancellationToken ct=default)
     {
         ValidateDraft(draft);
         var empty=new BasicDiscovery(2,[],false,false,0);
         ct.ThrowIfCancellationRequested();if(!await confirm(BasicPrompt.ConnectionWarning,ct))throw new OperationCanceledException(ct);
         ct.ThrowIfCancellationRequested();
+        var readiness=await readinessCheck(ct);ct.ThrowIfCancellationRequested();
+        progress?.Report(UiText.Get("Rfc.ReadinessResult",readiness.Summary));
         await using var snapshot=await Snapshot.CreateAsync(source,draft,secrets,ct);
-        var rfc=BasicCheck.Blocked("RFC_DEPENDENCY_MISSING");var servers=new BasicRfcServers("RFC_UNAVAILABLE",[]);
-        if(rfcAvailable){
+        var rfc=BasicCheck.Blocked(readiness.Code);var servers=new BasicRfcServers("RFC_UNAVAILABLE",[]);
+        if(readiness.Ready){
             progress?.Report(UiText.Get("Basic.RfcChecking"));rfc=await CheckAsync(snapshot,"rfc",ct);
             MatchSid(draft,rfc);
             if(rfc.Success){
@@ -71,9 +76,9 @@ public sealed class BasicConnectionService(ISecretStore secrets)
         ct.ThrowIfCancellationRequested();
         var (adt,url)=await ValidateCandidatesAsync(snapshot,draft,discovery,mode,servers.Servers,progress,ct);
         MatchSid(draft,adt);
-        if(!adt.Success&&!rfc.Success)return new(null,adt,rfc,discovery);
+        if(!adt.Success&&!rfc.Success)return new(null,adt,rfc,discovery,Readiness:readiness);
         var next=await snapshot.CommitAsync(store,(adt,rfc),ct);
-        return new(next,adt,rfc,discovery,url);
+        return new(next,adt,rfc,discovery,url,readiness);
     }
     // Kept for callers that explicitly supply an already completed anonymous discovery.
     public async Task<(AppSettings? Settings,BasicCheck Adt,BasicCheck Rfc)> SaveAsync(AppSettings source,SettingsStore store,BasicDraft draft,BasicDiscovery discovery,bool rfcAvailable,CancellationToken ct=default,
@@ -129,8 +134,9 @@ public sealed class BasicConnectionService(ISecretStore secrets)
     }
     private static async Task<JsonElement> CallAsync(Snapshot snapshot,string component,string tool,object arguments,CancellationToken ct)
     {
-        using var timeout=CancellationTokenSource.CreateLinkedTokenSource(ct);timeout.CancelAfter(TimeSpan.FromSeconds(component=="rfc"?10:45));
+        using var timeout=CancellationTokenSource.CreateLinkedTokenSource(ct);timeout.CancelAfter(TimeSpan.FromSeconds(component=="rfc"?60:45));
         await using var session=await McpSession.StartAsync(snapshot.Settings,snapshot.Path,component,timeout.Token);
+        timeout.CancelAfter(TimeSpan.FromSeconds(component=="rfc"?Math.Clamp(snapshot.Settings.Rfc.TimeoutSeconds,1,300):45));
         return await session.RequestAsync("tools/call",new{name=tool,arguments},timeout.Token);
     }
     private static async Task<BasicRfcServers> ReadServersAsync(Snapshot snapshot,CancellationToken ct)
