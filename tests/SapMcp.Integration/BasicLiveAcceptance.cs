@@ -37,7 +37,7 @@ internal static class BasicLiveAcceptance
                     var negativeDraft=BasicPolicy.Copy(draft);negativeDraft.ManualUrl=negative.GetString()!;
                     var negativeDiscovery=await new BasicDiscoveryService().DiscoverAsync(settings,negativeDraft);negativeExcluded=!BasicPolicy.Usable(negativeDiscovery).Any()&&negativeDiscovery.Candidates.Any(c=>c.HttpStatus==503);
                 }
-                var passed=result.Adt.Success&&result.Settings?.Profiles.Single().AllowInsecureTls==true&&found&&negativeExcluded!=false;
+                var passed=(!rfcReady||result.Rfc.Success)&&result.Adt.Success&&result.Settings?.Profiles.Single().AllowInsecureTls==true&&found&&negativeExcluded!=false;
                 results.Add(new{name=system.Sid,passed,found,negativeExcluded,selectedUrl=result.Url,adt=result.Adt,rfc=result.Rfc,readinessCode=result.Readiness?.Code,consents,tlsVerification=false,manualUrlUsed=false,preferredUrlUsed=false,liveFullSweep=false,source="packaged Manager/Host/ADT"});
                 Console.WriteLine($"{(passed?"PASS":"FAIL")} Basic live {system.Sid}: ADT={result.Adt.Code}; RFC={result.Rfc.Code}; expected candidate={found}");
                 failed|=!passed;if(result.Settings!=null)settings=result.Settings;
