@@ -22,6 +22,8 @@ jobs:
         run: dotnet test SapMcpManager.slnx -c Release --no-build --logger trx --results-directory artifacts/test-results
       - name: Scan public sources
         run: ./scripts/Test-Publication.ps1 -SourceOnly
+      - name: Verify publication privacy checks
+        run: ./tests/Test-PublicationPrivacy.ps1
       - uses: actions/upload-artifact@v4
         if: always()
         with:

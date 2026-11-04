@@ -69,7 +69,7 @@ Basic/Advanced modes; SDK-first automatic preparation; bounded credential-free H
 - Fix saved SDK lib propagation in child PATH across Host, Node and Python; preserve OS PATH and existing configuration.
 - Require x64 SAP/ICU DLLs and isolated ICU/PyRFC/SDK initialization before Ready; safe stage/decimal/hex exit diagnostics for Manager and Host.
 - Add SDK regression tests, bilingual help and a separate pending RFC worker exitCode/signal request. Issue #3. Private MCP payloads remain unchanged.
-- New Online/Offline preview installers; clean Windows and live TED/TEX acceptance remain pending.
+- New Online/Offline preview installers; clean Windows and live SAP acceptance remain pending.
 
 ## v0.1.0-preview.2 — 2026-10-27
 

@@ -65,7 +65,7 @@ Basic/Advanced modları; SDK’dan başlayan otomatik hazırlık; şifresiz sın
 - Kayıtlı SDK lib yolunu Host, Node ve Python alt süreçlerinin PATH’ine aktar; işletim sistemi PATH’i ve mevcut ayarlar korunur.
 - Ready öncesinde x64 SAP/ICU DLL’leri ve yalıtılmış ICU/PyRFC/SDK başlatması; Manager/Host için güvenli aşama/ondalık/hex çıkış tanılaması.
 - SDK regresyon testleri, iki dilde yardım ve ayrı bekleyen RFC worker exitCode/signal talebi. Kayıt #3. Özel MCP paketleri değişmez.
-- Yeni Online/Offline önizleme kurulumları; temiz Windows ve canlı TED/TEX kabulü bekler.
+- Yeni Online/Offline önizleme kurulumları; temiz Windows ve canlı SAP kabulü bekler.
 
 ## v0.1.0-preview.2 — 2026-10-27
 

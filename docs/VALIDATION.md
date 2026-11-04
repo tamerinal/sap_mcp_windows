@@ -43,7 +43,7 @@ Managed JSON empty/create/edit/delete/reopen, XML projection consumed by both ex
 
 ## Preview.3 SDK regression
 
-Checks cover missing inherited SDK PATH, duplicate/cased/quoted SDK entries, Turkish/spaced paths, five DLL architectures, malformed probe output, native exit hexadecimal values and cancellation/timeout. Local release tests use a private SDK copy under ignored artifacts, never in publication. Host → Node → Python environment inheritance, unchanged worker structured local failure and Manager missing-ICU diagnostics are verified. TED/TEX live RFC_PING remains pending on the affected machine.
+Checks cover missing inherited SDK PATH, duplicate/cased/quoted SDK entries, Turkish/spaced paths, five DLL architectures, malformed probe output, native exit hexadecimal values and cancellation/timeout. Local release tests use a private SDK copy under ignored artifacts, never in publication. Host → Node → Python environment inheritance, unchanged worker structured local failure and Manager missing-ICU diagnostics are verified. SAP live RFC_PING remains pending on the affected machine.
 
 ## Preview.4 ADT/TLS
 
