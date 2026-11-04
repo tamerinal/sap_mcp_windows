@@ -44,7 +44,11 @@ public sealed class BasicDiscoveryService
             if(!metadata.RootElement.TryGetProperty("basicDiscoveryVersion",out var v)||v.GetInt32()!=2)throw new BasicDiscoveryException("BASIC_DISCOVERY_UPGRADE_REQUIRED");
         }catch(Exception ex)when(ex is IOException or JsonException or InvalidOperationException && ex is not BasicDiscoveryException){throw new BasicDiscoveryException("BASIC_DISCOVERY_UPGRADE_REQUIRED");}
         var start=new ProcessStartInfo(s.NodeExecutable){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,StandardInputEncoding=new UTF8Encoding(false),StandardOutputEncoding=Encoding.UTF8};
-        start.ArgumentList.Add(entry);
+        // Wrap the packaged script instead of running it directly: a TCP sweep that starts at stdin EOF misclassifies
+        // every port as closed (issue 7); a settle inside the node event loop fixes it with the current package.
+        start.ArgumentList.Add("--input-type=module");
+        start.ArgumentList.Add("-e");
+        start.ArgumentList.Add(BuildShim(new Uri(entry).AbsoluteUri));
         using var process=Process.Start(start)??throw new BasicDiscoveryException("DISCOVERY_PROCESS_FAILED");
         using var limit=CancellationTokenSource.CreateLinkedTokenSource(ct);limit.CancelAfter(TimeSpan.FromSeconds(100));
         // Drain, never display or retain upstream stderr (it can contain network/account information).
@@ -75,6 +79,33 @@ public sealed class BasicDiscoveryService
         catch(JsonException){throw new BasicDiscoveryException("DISCOVERY_OUTPUT_INVALID");}
         finally {limit.Cancel();if(!process.HasExited)process.Kill(true);await process.WaitForExitAsync(CancellationToken.None);try{await stderr;}catch(OperationCanceledException){}}
     }
+    internal const int SettleMs=500;
+    internal const int WarmUpTimeoutMs=5000;
+    internal static string BuildShim(string entryUrl)=>$$"""
+import net from 'node:net';
+import {discoverBasic} from '{{entryUrl}}';
+let raw='';
+for await (const part of process.stdin) { raw += part; if (raw.length > 1048576) throw new Error(); }
+const emit = e => { process.stdout.write(JSON.stringify({ schemaVersion: 2, ...e }) + '\n'); };
+try {
+    const input = JSON.parse(raw);
+    if (!input || Object.keys(input).some(k => !['host','sysnr','preferredUrl','explicitPort','manualUrl','certificates','options','mode','servers'].includes(k)))
+        throw new Error();
+    emit({ type: 'hello' });
+    // First socket of a process pays a route/first-packet penalty that exceeds the per-port timeout and marks open ports
+    // closed (issue 7). Absorb it here with best-effort warm-up connections, then a short settle, before the sweep.
+    const n = Number(input.sysnr || 0);
+    for (const port of [44300 + n, 8080]) {
+        await new Promise(res => { const s = net.connect(port, input.host); const done = () => { s.destroy(); res(); }; s.setTimeout({{WarmUpTimeoutMs}}, done); s.once('connect', done); s.once('error', done); });
+    }
+    await new Promise(r => setTimeout(r, {{SettleMs}}));
+    emit({ type: 'completed', result: await discoverBasic(input, undefined, undefined, undefined, emit) });
+}
+catch (e) {
+    emit({ type: 'error', code: e && typeof e.code === 'string' ? e.code : 'DISCOVERY_INPUT_INVALID' });
+    process.exitCode = 2;
+}
+""";
     internal static void ValidateTargets(BasicDraft draft,BasicDiscovery result,string mode,IReadOnlyList<BasicRfcServer> servers)
     {
         var host=BasicPolicy.ParseHost(draft.Host).Host;var manual=BasicPolicy.ManualUrl(draft.ManualUrl,draft.Host);
