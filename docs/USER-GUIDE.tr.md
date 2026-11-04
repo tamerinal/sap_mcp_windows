@@ -1,4 +1,8 @@
-# Kullanım kılavuzu — v0.1.0-preview.13
+# Kullanım kılavuzu — v0.1.0-preview.14
+
+## 0.1.0-preview.14 — OpenCode entegrasyonu ve Advanced doğrulama
+
+Basic ve Advanced, global/proje dosyası seçimi, önizleme, yedekleme ve JSONC yorum/talimat korumasıyla OpenCode V1 veya V2’ye SAP MCP kaydı ekleyebilir. Advanced Bağlantılar ekranındaki **Otomatik keşfet ve doğrula**, Basic’in keşif/onay akışını ve ayrı ADT/RFC sonuçlarını kullanır. Sonuç forma gelir; URL/TLS alanlarını inceleyip Kaydet’e basana kadar kayıt yapılmaz. Basic davranışı ve MCP/runtime arşivleri korunur.
 
 ## 0.1.0-preview.13 — Keşif başlangıcı ve public dokümanlar
 
@@ -261,3 +265,5 @@ Doğrulamada Kaydet, İleri, gezinme ve istemci kurulumu pasiftir. İptal alt s�
 ## Sürüm kontrolleri
 
 Yerel fixture'lar HTTP, self-signed HTTPS, yetki dalları, onay reddi, iptal, tüm portların taranması ve istemci uygunluğunu kapsar. Canlı SAP kabulü ayrıca raporlanır; fixture başarısı canlı bağlantı kanıtı değildir. Online/Offline EXE ve SHA256 dosyaları GitHub ön sürümünde yayımlanır.
+
+[OpenCode ve Advanced otomatik doğrulama](OPENCODE-ADVANCED.tr.md).

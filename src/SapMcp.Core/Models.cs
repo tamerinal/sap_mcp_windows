@@ -50,6 +50,7 @@ public sealed class AppSettings
     public bool CodexEnabled { get; set; } = true;
     public bool ClaudeEnabled { get; set; } = true;
     public bool ClaudeCodeEnabled { get; set; }
+    public OpenCodePreferences? OpenCode { get; set; }
     public List<ClientRegistration> Registrations { get; set; } = [];
 
     public static AppSettings CreateDefault(string? root = null)
@@ -77,6 +78,8 @@ public sealed class AppSettings
 
     public void Validate()
     {
+        if (OpenCode is { } openCode && (openCode.Version is not (OpenCodeVersion.V1 or OpenCodeVersion.V2) || openCode.Scope is not ("global" or "project") || openCode.ConfigPath == null || openCode.ConfigPath.Length > 0 && !Path.IsPathFullyQualified(openCode.ConfigPath)))
+            throw new InvalidDataException("INVALID_OPENCODE_SETTINGS");
         if (UiMode is not (null or "basic" or "advanced")) throw new InvalidDataException("INVALID_UI_MODE");
         if (ConnectionSourceMode is not (null or "sapGui" or "managed")) throw new InvalidDataException(UiText.Get("Connections.InvalidMode"));
         foreach (var path in new[] { ExternalLandscapeFile, ManagedConnectionsFile })

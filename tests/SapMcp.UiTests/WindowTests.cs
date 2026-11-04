@@ -21,7 +21,7 @@ public static class TestAppBuilder
         .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
 }
 
-public sealed class WindowTests
+public sealed partial class WindowTests
 {
     [AvaloniaFact]
     public async Task CustomHelpCopiesActualPathsInEveryFormatWithoutWritingClientFiles()
@@ -36,7 +36,7 @@ public sealed class WindowTests
             var before=await File.ReadAllBytesAsync(config);
             var help=Named<Expander>(window,"AdvancedCustomHelp"); help.IsExpanded=true;
             var format=Named<ComboBox>(window,"AdvancedCustomFormat");
-            foreach(var (index,suffix) in new[]{(0,"CustomJson"),(0,"CustomJsonEntries"),(1,"CustomToml"),(2,"CustomFields")})
+            foreach(var (index,suffix) in new[]{(0,"CustomJson"),(0,"CustomJsonEntries"),(1,"CustomToml"),(2,"CustomFields"),(3,"CustomOpenCodeV1"),(4,"CustomOpenCodeV2")})
             {
                 format.SelectedIndex=index;
                 var text=Named<TextBox>(window,"Advanced"+suffix).Text!;
@@ -55,7 +55,7 @@ public sealed class WindowTests
                 window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex=locale=="tr"?1:0;
                 await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
                 Assert.Equal(UiText.Get("Custom.Title"),help.Header);
-                Assert.Equal(UiText.Get("Custom.Fields"),format.Items.Cast<string>().Last());
+                Assert.Equal(UiText.Get("Custom.Fields"),format.Items.Cast<string>().ElementAt(2)); Assert.Equal("OpenCode V2",format.Items.Cast<string>().Last());
             }
             Assert.Empty((await store.LoadAsync()).Registrations); Assert.Null(typeof(MainWindow).GetField("_discoveryCancel",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.GetValue(window));
             // Only the explicit language changes above may persist settings; help itself is read-only.
@@ -191,7 +191,7 @@ public sealed class WindowTests
             await Until(()=>!window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
             Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[4]);
             // Use temporary targets. No test writes to the user's client configuration.
-            var boxes=window.GetLogicalDescendants().OfType<TextBox>().Where(b=>!b.IsReadOnly).ToArray();
+            var boxes=window.GetLogicalDescendants().OfType<TextBox>().Where(b=>!b.IsReadOnly && b.Name!="AdvancedOpenCodePath").ToArray();
             Assert.Equal(3,boxes.Length);for(var i=0;i<boxes.Length;i++)boxes[i].Text=Path.Combine(temp.Root,"client-"+i+(i==0?".toml":".json"));
             Named<CheckBox>(window,"AdvancedCodex").IsChecked=false;Named<CheckBox>(window,"AdvancedClaudeDesktop").IsChecked=false;
             Assert.False(Named<Button>(window,"AdvancedSaveClients").IsEnabled);

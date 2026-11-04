@@ -90,3 +90,9 @@ Core/headless UI tests, public CI and publication scanning live in the source re
 Host integration, installer tests, clean Windows and live SAP acceptance provide separate
 evidence; passing one does not establish that another was performed. Commands and release
 steps are in the [developer guide](DEVELOPMENT.md).
+
+## Preview.14: shared evaluation and OpenCode
+
+Basic and Advanced share the discovery/verification engine. `EvaluateAsync` uses temporary settings, mapping and DPAPI secrets; it returns results without committing a profile or changing an external connection source. Basic retains its commit path. Advanced fills only the current form and requires Save; form changes invalidate evaluation results. Network access still requires explicit consent.
+
+OpenCode is a local stdio client target. Schema-1 settings gain optional preferences; registrations retain client name `OpenCode`. V1 and V2 use separate MCP layouts. JSONC edits change only targeted property spans, preserving unrelated settings and agent instructions. Previews, conflict approval, concurrency checks, backups and ownership-based removal are shared with other clients.

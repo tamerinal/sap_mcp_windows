@@ -1,4 +1,8 @@
-# User guide — v0.1.0-preview.13
+# User guide — v0.1.0-preview.14
+
+## 0.1.0-preview.14 — OpenCode integration and Advanced verification
+
+Basic and Advanced can register SAP MCP servers in OpenCode V1 or V2, with global/project file selection, previews, backups and JSONC comment/instruction preservation. Advanced Connections adds **Automatically discover and verify**, sharing Basic discovery, consent and separate ADT/RFC results. It fills the form without saving; review the URL/TLS fields and press Save. Existing Basic behavior and MCP/runtime archives are retained.
 
 ## 0.1.0-preview.13 — Discovery startup and public documentation
 
@@ -261,3 +265,5 @@ During verification, Save, Next, navigation and client installation are disabled
 ## Release checks
 
 Local fixtures cover HTTP, self-signed HTTPS, authorization branches, consent rejection, cancellation, all-port scanning and client eligibility. Live SAP acceptance is separately reported; a fixture pass does not establish live connectivity. Online/Offline EXEs and SHA256 files are published in the GitHub prerelease.
+
+[OpenCode and Advanced automatic verification](OPENCODE-ADVANCED.md).

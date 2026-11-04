@@ -39,6 +39,7 @@ public sealed class BasicDraft
     public string Language {get;set;}="EN";
     public string ManualUrl {get;set;}="";
     public string PreferredUrl {get;set;}="";
+    public string Router {get;set;}="";
     public List<TrustedCertificate> Certificates {get;set;}=[];
 }
 

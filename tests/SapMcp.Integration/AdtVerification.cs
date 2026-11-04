@@ -113,6 +113,18 @@ process.stdin.resume();process.stdin.on('end',()=>{for(const s of servers){s.clo
             });
             BasicDiscovery? basicDiscovery=null;
             var draft=new BasicDraft{Sid="TST",ProfileId=selected.Id,SystemId=LandscapeService.Load(s.LandscapeFile).Single().Id,Host="127.0.0.1",Sysnr="00",User="TEST",Password="  fixture şifre  ",ManualUrl=endpoints.RootElement.GetProperty("https").GetString()!,Certificates=selected.AdtCertificates.ToList()};
+            foreach(var transport in new[]{"http","https"})
+            await step("Advanced shared evaluation verifies local "+transport+" without committing profile, secrets or mapping",async()=>
+            {
+                var copy=BasicPolicy.Copy(draft);copy.ManualUrl=endpoints.RootElement.GetProperty(transport).GetString()!;
+                var beforeSettings=await File.ReadAllBytesAsync(store.FilePath);var beforeMapping=await File.ReadAllBytesAsync(s.CredentialsFile);var beforeLandscape=await File.ReadAllBytesAsync(s.LandscapeFile);
+                var sourceJson=JsonSerializer.Serialize(s,JsonDefaults.Options);
+                var result=await new BasicConnectionService(new DpapiSecretStore()).EvaluateAsync(s,copy,_=>Task.FromResult(new RfcReadinessResult("RFC_DISABLED_BY_MODE","",[],[])),(_,_)=>Task.FromResult(true));
+                Ensure(result.Settings==null&&result.Adt.Success&&!result.Rfc.Success&&result.Url==copy.ManualUrl,"Advanced evaluation did not verify the expected local candidate");
+                var afterSettings=await File.ReadAllBytesAsync(store.FilePath);var afterMapping=await File.ReadAllBytesAsync(s.CredentialsFile);var afterLandscape=await File.ReadAllBytesAsync(s.LandscapeFile);
+                Ensure(beforeSettings.SequenceEqual(afterSettings)&&beforeMapping.SequenceEqual(afterMapping)&&beforeLandscape.SequenceEqual(afterLandscape),"Advanced evaluation committed persistent files");
+                Ensure(sourceJson==JsonSerializer.Serialize(s,JsonDefaults.Options),"Advanced evaluation mutated the original settings");
+            });
             await step("Basic Manager host-only request discovers actual local HTTPS without a manual URL or explicit port",async()=>
             {
                 var noPort=BasicPolicy.Copy(draft);noPort.ManualUrl="";var before=await File.ReadAllTextAsync(Path.Combine(root,"count.json"));

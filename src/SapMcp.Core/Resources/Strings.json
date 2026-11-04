@@ -2110,5 +2110,69 @@
   "Custom.EmptyAdvanced": {
     "tr": "Örnek üretmek için bileşeni seçin ve kurun. RFC için SDK/bağımlılık hazırlığını ve SAP bağlantı testini tamamlayın; ADT için bağlantıyı doğrulayın.",
     "en": "Select and install a component to generate an example. Complete SDK/prerequisite preparation and SAP connection testing for RFC; verify the connection for ADT."
+  },
+  "OpenCode.Invalid": {
+    "en": "OpenCode configuration must be a JSON/JSONC object with unique keys and a valid MCP section.",
+    "tr": "OpenCode ayarı benzersiz anahtarlar ve geçerli MCP bölümü içeren JSON/JSONC nesnesi olmalıdır."
+  },
+  "OpenCode.Mixed": {
+    "en": "Mixed or invalid OpenCode V1/V2 MCP configuration. Select a compatible file; no automatic migration is performed.",
+    "tr": "OpenCode V1/V2 MCP yapısı karışık veya geçersiz. Uyumlu dosya seçin; otomatik dönüşüm yapılmaz."
+  },
+  "OpenCode.VersionMismatch": {
+    "en": "The selected OpenCode version does not match this file. Choose its version or a different file.",
+    "tr": "Seçilen OpenCode sürümü bu dosyayla uyuşmuyor. Dosyanın sürümünü veya başka dosya seçin."
+  },
+  "OpenCode.Duplicate": {
+    "en": "Multiple server entries start the same SAP component. Resolve duplicates before applying.",
+    "tr": "Birden fazla sunucu kaydı aynı SAP bileşenini başlatıyor. Uygulamadan önce mükerrer kayıtları giderin."
+  },
+  "OpenCode.Global": {
+    "en": "Global — all projects",
+    "tr": "Global — tüm projeler"
+  },
+  "OpenCode.Project": {
+    "en": "Project only",
+    "tr": "Yalnız proje"
+  },
+  "OpenCode.ConfigPath": {
+    "en": "OpenCode configuration file",
+    "tr": "OpenCode yapılandırma dosyası"
+  },
+  "OpenCode.ChooseFolder": {
+    "en": "Choose configuration folder",
+    "tr": "Yapılandırma klasörü seç"
+  },
+  "OpenCode.ChooseFile": {
+    "en": "Choose existing file",
+    "tr": "Mevcut dosya seç"
+  },
+  "OpenCode.ChoosePath": {
+    "en": "Choose one absolute OpenCode configuration file path.",
+    "tr": "Tek bir mutlak OpenCode yapılandırma dosyası yolu seçin."
+  },
+  "OpenCode.ScopeHelp": {
+    "en": "Choose the file OpenCode uses. Project or managed settings can override global configuration. Existing instructions, comments and unrelated settings are preserved. Restart OpenCode after applying.",
+    "tr": "OpenCode’un kullandığı dosyayı seçin. Proje veya yönetilen ayarlar global yapılandırmayı geçersiz kılabilir. Mevcut talimatlar, yorumlar ve ilgisiz ayarlar korunur. Uyguladıktan sonra OpenCode’u yeniden başlatın."
+  },
+  "OpenCode.V1Help": {
+    "en": "OpenCode V1: local servers under mcp. Merge into the existing file; preserve its other settings.",
+    "tr": "OpenCode V1: yerel sunucular mcp altında. Mevcut dosyaya birleştirin; diğer ayarları koruyun."
+  },
+  "OpenCode.V2Help": {
+    "en": "OpenCode V2: local servers under mcp.servers. Merge into the existing file; preserve its other settings.",
+    "tr": "OpenCode V2: yerel sunucular mcp.servers altında. Mevcut dosyaya birleştirin; diğer ayarları koruyun."
+  },
+  "Advanced.AutomaticVerify": {
+    "en": "Automatically discover and verify",
+    "tr": "Otomatik keşfet ve doğrula"
+  },
+  "Advanced.VerifyNotSaved": {
+    "en": "Evaluation only. No profile or active connection was saved. Review the URL/TLS fields and press Save to apply.",
+    "tr": "Yalnız değerlendirme yapıldı. Profil veya aktif bağlantı kaydedilmedi. URL/TLS alanlarını inceleyip uygulamak için Kaydet’e basın."
+  },
+  "Advanced.VerifyStale": {
+    "en": "The form changed. Run automatic verification again for current results.",
+    "tr": "Form değişti. Güncel sonuçlar için otomatik doğrulamayı yeniden çalıştırın."
   }
 }

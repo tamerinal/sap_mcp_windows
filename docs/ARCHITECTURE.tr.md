@@ -89,3 +89,9 @@ Core ve headless UI testleri, public CI ve yayın içeriği taraması kaynak dep
 yürütülür. Host entegrasyonu, kurulum testleri, temiz Windows ve canlı SAP kabulü
 ayrı kanıtlardır; birinin başarısı diğerinin yapıldığı anlamına gelmez. Komutlar ve
 yayın adımları [geliştirici kılavuzundadır](DEVELOPMENT.tr.md).
+
+## Preview.14: ortak değerlendirme ve OpenCode
+
+Basic ve Advanced aynı keşif/doğrulama motorunu kullanır. `EvaluateAsync` geçici ayar, mapping ve DPAPI sırlarıyla çalışır; profil kaydetmeden veya harici bağlantı kaynağını değiştirmeden sonuç döndürür. Basic mevcut kayıt yolunu korur. Advanced yalnız geçerli formu doldurur ve Kaydet bekler; form değişikliği sonucu geçersiz kılar. Ağ erişimi açık onay gerektirir.
+
+OpenCode yerel stdio istemci hedefidir. Şema-1 ayarlara isteğe bağlı tercihler eklenir; registration istemci adı `OpenCode` kalır. V1 ve V2 farklı MCP yerleşimleri kullanır. JSONC düzenlemesi yalnız hedef özellik aralıklarını değiştirir; ilgisiz ayarlar ve agent talimatları korunur. Önizleme, çakışma onayı, eşzamanlı düzenleme kontrolü, yedekleme ve sahipliğe göre kaldırma diğer istemcilerle ortaktır.

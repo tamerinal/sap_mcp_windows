@@ -2,6 +2,9 @@ using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using SapMcp.Core;
+using SapMcp.Integration;
+
+if (args.Length == 7 && args[0] == "--opencode-fixture") { await OpenCodeAcceptance.RunAsync(args[1],args[2],args[3],args[4],args[5],args[6]); return; }
 
 if (args.Length == 5 && args[0] == "--basic-live") { await BasicLiveAcceptance.RunAsync(args[1], args[2], args[3], args[4]); return; }
 if (args.Length is 2 or 3 && args[0] == "--probe") { await Probe.RunAsync(args[1], args.Length == 3 ? args[2] : "adt"); return; }
