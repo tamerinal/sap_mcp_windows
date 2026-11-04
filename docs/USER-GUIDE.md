@@ -236,7 +236,7 @@ RFC ping runs first when its prerequisites are available. A successful ping is r
 
 If RFC discovery is unavailable, declined or finds no usable candidate, the application requests separate automatic-scan consent. RFC candidate failure does not prove the ADT service is inactive.
 
-The smart scan checks instance-derived ports, 80/443, 8080/8443, 8000–8099, 44300–44399 and Java ports. If no ADT candidate is found, another dialog offers ports 1–65535 on the entered host only. Raw TCP connects use 300 ms and adaptive concurrency 512–1024, reduced under resource pressure. Before scanning, the app makes a best-effort single connection attempt to the target host so cold route/first-packet delay cannot mark open ports as closed; the warm-up outcome itself is ignored. The full TCP scan targets 30 seconds and stops at 60 seconds. Slow networks can leave ports untested; incomplete results are explicitly reported.
+The smart scan checks instance-derived ports, 80/443, 8080/8443, 8000–8099, 44300–44399 and Java ports. If no ADT candidate is found, another dialog offers ports 1–65535 on the entered host only. Raw TCP connects use 300 ms and adaptive concurrency 512–1024, reduced under resource pressure. The full TCP scan targets 30 seconds and stops at 60 seconds. Slow networks can leave ports untested; incomplete results are explicitly reported.
 
 Open ports are probed using both HTTP and HTTPS. Each HTTP phase has a separate 30-second budget, up to 32 requests in flight and a 1.5-second request timeout. TCP and HTTP progress are separate; the entire verification is not guaranteed to finish in 30 seconds.
 
