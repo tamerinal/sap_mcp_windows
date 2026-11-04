@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -44,9 +43,6 @@ public sealed class BasicDiscoveryService
             using var metadata=JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(s.PackageDirectory,"adt","build-info.json"),ct));
             if(!metadata.RootElement.TryGetProperty("basicDiscoveryVersion",out var v)||v.GetInt32()!=2)throw new BasicDiscoveryException("BASIC_DISCOVERY_UPGRADE_REQUIRED");
         }catch(Exception ex)when(ex is IOException or JsonException or InvalidOperationException && ex is not BasicDiscoveryException){throw new BasicDiscoveryException("BASIC_DISCOVERY_UPGRADE_REQUIRED");}
-        var (warmHost,warmPort)=BasicPolicy.ParseHost(draft.Host);
-        // Cold route/first-packet delay can exceed the per-port TCP timeout and mark open ports closed; warm the path best-effort before scanning.
-        await WarmUpRouteAsync(warmHost,BasicWarmPorts(draft,warmPort),ct);
         var start=new ProcessStartInfo(s.NodeExecutable){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,StandardInputEncoding=new UTF8Encoding(false),StandardOutputEncoding=Encoding.UTF8};
         start.ArgumentList.Add(entry);
         using var process=Process.Start(start)??throw new BasicDiscoveryException("DISCOVERY_PROCESS_FAILED");
@@ -78,25 +74,6 @@ public sealed class BasicDiscoveryService
         }catch(OperationCanceledException)when(!ct.IsCancellationRequested){throw new BasicDiscoveryException("DISCOVERY_PROCESS_TIMEOUT");}
         catch(JsonException){throw new BasicDiscoveryException("DISCOVERY_OUTPUT_INVALID");}
         finally {limit.Cancel();if(!process.HasExited)process.Kill(true);await process.WaitForExitAsync(CancellationToken.None);try{await stderr;}catch(OperationCanceledException){}}
-    }
-    internal static IReadOnlyList<int> BasicWarmPorts(BasicDraft draft,int? explicitPort)
-    {
-        var n=draft.Sysnr.Length==2&&int.TryParse(draft.Sysnr,out var sysnr)?sysnr:0;
-        var ports=new List<int>{44300+n,8080};
-        if(explicitPort is int p)ports.Insert(0,p);
-        return ports;
-    }
-    internal static async Task WarmUpRouteAsync(string host,IReadOnlyList<int> ports,CancellationToken ct=default)
-    {
-        foreach(var port in ports){
-            try {
-                using var timeout=CancellationTokenSource.CreateLinkedTokenSource(ct);timeout.CancelAfter(TimeSpan.FromSeconds(1));
-                using var client=new TcpClient();
-                await client.ConnectAsync(host,port,timeout.Token);
-            }
-            catch(OperationCanceledException)when(!ct.IsCancellationRequested){} // Attempt itself timed out; the route is likely warmed, outcome is irrelevant.
-            catch(Exception ex)when(ex is SocketException or ObjectDisposedException or InvalidOperationException){} // Best-effort: refusal, DNS failure and disposal are acceptable warm-up outcomes.
-        }
     }
     internal static void ValidateTargets(BasicDraft draft,BasicDiscovery result,string mode,IReadOnlyList<BasicRfcServer> servers)
     {

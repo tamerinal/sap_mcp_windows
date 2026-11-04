@@ -20,15 +20,6 @@ public sealed class BasicTests
         var options=json.RootElement.GetProperty("options");
         Assert.Equal(300,options.GetProperty("tcpTimeoutMs").GetInt32());Assert.Equal(60000,options.GetProperty("tcpBudgetMs").GetInt32());
         Assert.Equal(30000,options.GetProperty("budgetMs").GetInt32());Assert.Equal(32,options.GetProperty("concurrency").GetInt32());
-        Assert.Equal(new[]{44304,8080},BasicDiscoveryService.BasicWarmPorts(new(){Sysnr="04"},null));
-        Assert.Equal(new[]{8443,44304,8080},BasicDiscoveryService.BasicWarmPorts(new(){Sysnr="04"},8443));
-    }
-    [Fact] public async Task RouteWarmUpSwallowsConnectionFailures()
-    {
-        using var cts=new CancellationTokenSource(TimeSpan.FromSeconds(20));
-        await BasicDiscoveryService.WarmUpRouteAsync("127.0.0.1",[1,2],cts.Token); // Closed local ports: refused quickly, swallowed.
-        await BasicDiscoveryService.WarmUpRouteAsync("manager.warmup.invalid",[44300],cts.Token); // DNS failure: swallowed.
-        await BasicDiscoveryService.WarmUpRouteAsync("127.0.0.1",[1],cts.Token); // Repeated call is also safe.
     }
     [Theory][InlineData("DISCOVERY_PORT_INVALID")][InlineData("DISCOVERY_INPUT_INVALID")]
     public void DiscoveryConfigurationFailureIsNotDisguisedAsNetworkOrCertificateError(string code)
