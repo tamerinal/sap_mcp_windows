@@ -29,6 +29,13 @@ certificates/
 *.pfx
 *.p12
 
-# Per-machine agent configuration (machine-specific shared-folder path; never committed)
+# Agent operating instructions and per-machine access configuration are local.
+AGENTS.md
+.agent-local.json
 opencode.json
+opencode.jsonc
+docs/shared/
+examples/agent-local.example.json
+scripts/Check-WorkBranch.ps1
+scripts/Read-SharedInstructions.ps1
 
