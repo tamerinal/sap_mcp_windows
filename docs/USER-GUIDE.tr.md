@@ -1,4 +1,8 @@
-# Kullanım kılavuzu — v0.1.0-preview.12
+# Kullanım kılavuzu — v0.1.0-preview.13
+
+## 0.1.0-preview.13 — Keşif başlangıcı ve public dokümanlar
+
+Issue #7 için Basic keşif başlangıç sarmalayıcısını ve birleştirilmiş public içerik gizlilik temizliğini içerir. Sarmalayıcı, mevcut keşif girişini yüklemeden önce aynı Node sürecinde ön bağlantıları ve beklemeyi çalıştırır. ADT/RFC paket arşivleri ve sabit runtime sürümleri korunur. Belgelerde kurgusal örnekler kullanılır; ortama özel test notları yayımlanmaz. Keşif düzeltmesinin üretim ortamı teyidi, temiz Windows kabulü ve canlı SAP testleri bu sürüm için henüz yapılmadı.
 
 ## 0.1.0-preview.12 — Özel MCP entegrasyon yardımı
 

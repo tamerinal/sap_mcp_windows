@@ -1,4 +1,8 @@
-# User guide — v0.1.0-preview.12
+# User guide — v0.1.0-preview.13
+
+## 0.1.0-preview.13 — Discovery startup and public documentation
+
+Includes the Basic discovery settling wrapper from issue #7 and the merged public-content privacy cleanup. The wrapper warms up and settles inside the same Node process before importing the existing discovery entry point. ADT/RFC package archives and runtime pins are unchanged. Documentation uses fictional examples and omits environment-specific test notes. Production confirmation of the discovery fix, clean Windows acceptance and live SAP testing remain pending for this release.
 
 ## 0.1.0-preview.12 — Custom MCP integration help
 
