@@ -36,6 +36,13 @@ public sealed class BasicConnectionService(ISecretStore secrets)
         => await ValidateAsync(source,store,draft,_=>Task.FromResult(new RfcReadinessResult(rfcAvailable?"OK":"RFC_DEPENDENCY_MISSING","",[],[])),confirm,progress,ct);
     public async Task<BasicValidationResult> ValidateAsync(AppSettings source,SettingsStore store,BasicDraft draft,
         Func<CancellationToken,Task<RfcReadinessResult>> readinessCheck,Func<BasicPrompt,CancellationToken,Task<bool>> confirm,IProgress<string>? progress=null,CancellationToken ct=default)
+        => await EvaluateCoreAsync(source,store,draft,readinessCheck,confirm,progress,ct);
+    /// <summary>Runs the same discovery/verification without saving profiles, source catalogs or active mappings.</summary>
+    public Task<BasicValidationResult> EvaluateAsync(AppSettings source,BasicDraft draft,
+        Func<CancellationToken,Task<RfcReadinessResult>> readinessCheck,Func<BasicPrompt,CancellationToken,Task<bool>> confirm,IProgress<string>? progress=null,CancellationToken ct=default)
+        => EvaluateCoreAsync(source,null,draft,readinessCheck,confirm,progress,ct);
+    private async Task<BasicValidationResult> EvaluateCoreAsync(AppSettings source,SettingsStore? store,BasicDraft draft,
+        Func<CancellationToken,Task<RfcReadinessResult>> readinessCheck,Func<BasicPrompt,CancellationToken,Task<bool>> confirm,IProgress<string>? progress,CancellationToken ct)
     {
         ValidateDraft(draft);
         var empty=new BasicDiscovery(2,[],false,false,0);
@@ -43,7 +50,7 @@ public sealed class BasicConnectionService(ISecretStore secrets)
         ct.ThrowIfCancellationRequested();
         var readiness=await readinessCheck(ct);ct.ThrowIfCancellationRequested();
         progress?.Report(UiText.Get("Rfc.ReadinessResult",readiness.Summary));
-        await using var snapshot=await Snapshot.CreateAsync(source,draft,secrets,ct);
+        await using var snapshot=await Snapshot.CreateAsync(source,draft,secrets,ct,store==null);
         var rfc=BasicCheck.Blocked(readiness.Code);var servers=new BasicRfcServers("RFC_UNAVAILABLE",[]);
         if(readiness.Ready){
             progress?.Report(UiText.Get("Basic.RfcChecking"));rfc=await CheckAsync(snapshot,"rfc",ct);
@@ -57,7 +64,7 @@ public sealed class BasicConnectionService(ISecretStore secrets)
         var discovery=empty;var mode="smart";
         async Task<BasicDiscovery> Discover(string selected){
             ct.ThrowIfCancellationRequested();
-            var result=Hooks.Discover!=null?await Hooks.Discover(source,draft,selected,servers.Servers,progress,ct):await new BasicDiscoveryService().DiscoverAsync(source,draft,selected,servers.Servers,progress,ct);
+            var result=Hooks.Discover!=null?await Hooks.Discover(store==null?snapshot.Settings:source,draft,selected,servers.Servers,progress,ct):await new BasicDiscoveryService().DiscoverAsync(store==null?snapshot.Settings:source,draft,selected,servers.Servers,progress,ct);
             ct.ThrowIfCancellationRequested();BasicDiscoveryService.ValidateTargets(draft,result,selected,servers.Servers);return result;
         }
         if(!string.IsNullOrWhiteSpace(draft.ManualUrl)){mode="manual";discovery=await Discover(mode);}
@@ -76,6 +83,7 @@ public sealed class BasicConnectionService(ISecretStore secrets)
         ct.ThrowIfCancellationRequested();
         var (adt,url)=await ValidateCandidatesAsync(snapshot,draft,discovery,mode,servers.Servers,progress,ct);
         MatchSid(draft,adt);
+        if(store==null)return new(null,adt,rfc,discovery,url,readiness);
         if(!adt.Success&&!rfc.Success)return new(null,adt,rfc,discovery,Readiness:readiness);
         var next=await snapshot.CommitAsync(store,(adt,rfc),ct);
         return new(next,adt,rfc,discovery,url,readiness);
@@ -107,7 +115,7 @@ public sealed class BasicConnectionService(ISecretStore secrets)
             failures.Add(candidate with{Verified=false,HttpStatus=null,Code=result.Code});
         }
         if(!result.Success){snapshot.Profile.AdtBaseUrl=previous;if(failures.Count>0)result=BasicCheck.Failed(BasicPolicy.BestFailure(discovery with{Candidates=failures}));}
-        await new RollingLog(System.IO.Path.Combine(snapshot.Source.DataDirectory,"logs","manager")).WriteAsync(LogLevel.Info,"basic.validation",new{discovery.DiscoveryId,stage="adt",result.State,code=BasicPolicy.SafeCode(result.Code)},ct);
+        await new RollingLog(System.IO.Path.Combine(snapshot.Settings.DataDirectory,"logs","manager")).WriteAsync(LogLevel.Info,"basic.validation",new{discovery.DiscoveryId,stage="adt",result.State,code=BasicPolicy.SafeCode(result.Code)},ct);
         progress?.Report(result.Success?UiText.Get("Basic.ValidationSuccess",snapshot.Profile.AdtBaseUrl):UiText.Get("Basic.ManualFallback"));
         return (result,result.Success?snapshot.Profile.AdtBaseUrl:"");
     }
@@ -179,12 +187,13 @@ public sealed class BasicConnectionService(ISecretStore secrets)
         public required string Root {get;init;}
         public string Path=>System.IO.Path.Combine(Root,"settings.json");
         private string? _newSecret;
-        public static async Task<Snapshot> CreateAsync(AppSettings source,BasicDraft draft,ISecretStore secrets,CancellationToken ct)
+        public static async Task<Snapshot> CreateAsync(AppSettings source,BasicDraft draft,ISecretStore secrets,CancellationToken ct,bool evaluationOnly=false)
         {
             var host=BasicPolicy.ParseHost(draft.Host).Host;var entry=new ManagedConnection{Id=draft.SystemId,Name=host,Host=host,Sysnr=draft.Sysnr.Trim(),Sid=draft.Sid.Trim().ToUpperInvariant()};entry.NormalizeAndValidate();
-            var catalog=await new ManagedJsonConnectionSource().ReadCatalogAsync(source,ct,createIfMissing:true);
+            var catalog=evaluationOnly?new ConnectionCatalog():await new ManagedJsonConnectionSource().ReadCatalogAsync(source,ct,createIfMissing:true);
             var existing=catalog.Systems.SingleOrDefault(s=>s.Id==entry.Id)??catalog.Systems.SingleOrDefault(s=>s.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase));
             if(existing!=null){entry.Id=existing.Id;entry.Name=existing.Name;entry.Router=existing.Router;}
+            if(evaluationOnly)entry.Router=draft.Router;
             var original=source.Profiles.SingleOrDefault(p=>p.Id==draft.ProfileId);var profile=original==null?new ConnectionProfile{Id=draft.ProfileId,Name=draft.User}:BasicPolicy.Copy(original);
             if(original!=null)profile.SecretRef=System.IO.Path.GetFullPath(ProfileService.ResolveSecret(source.CredentialsFile,profile.SecretRef));
             if(original==null||!original.TargetKey.Equals(entry.TargetKey,StringComparison.OrdinalIgnoreCase))profile.AdtBaseUrl="";
@@ -194,6 +203,7 @@ public sealed class BasicConnectionService(ISecretStore secrets)
             var root=System.IO.Path.Combine(source.DataDirectory,"cache","basic-tests",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);
             var settings=BasicPolicy.Copy(source);settings.Profiles=[profile];settings.ActiveProfiles=new(){{entry.TargetKey,profile.Id}};settings.ConnectionSourceMode="managed";
             settings.LandscapeFile=System.IO.Path.Combine(root,"landscape.xml");settings.CredentialsFile=System.IO.Path.Combine(root,"mapping.json");
+            if(evaluationOnly){settings.DataDirectory=root;settings.SecretsDirectory=System.IO.Path.Combine(root,"secrets");settings.ManagedConnectionsFile=System.IO.Path.Combine(root,"connections.json");settings.ExternalLandscapeFile=null;}
             settings.Adt.Selected=true;settings.Rfc.Selected=true;settings.Adt.LogLevel=settings.Rfc.LogLevel=LogLevel.Off;
             settings.Adt.LogDirectory=System.IO.Path.Combine(root,"adt");settings.Rfc.LogDirectory=System.IO.Path.Combine(root,"rfc");
             var snapshot=new Snapshot{Source=source,Settings=settings,Entry=entry,Profile=profile,Root=root};

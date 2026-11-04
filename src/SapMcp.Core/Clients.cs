@@ -11,6 +11,7 @@ public sealed record ClientApplyResult(string Client, string Path, bool Success,
 public sealed record ClientPreview(string Client, string Path, string Before, string After, List<string> Conflicts, List<string> Names)
 {
     public List<ClientEntryChange> Entries { get; init; } = [];
+    public List<string> Components { get; init; } = [];
     public bool Changed => Before != After;
 }
 
@@ -146,6 +147,7 @@ public static partial class ClientIntegration
     public static async Task RemoveOwnedAsync(ClientRegistration registration, string host, CancellationToken ct = default)
     {
         if (!File.Exists(registration.ConfigPath)) return;
+        if (registration.Client == "OpenCode") { await RemoveOpenCodeOwnedAsync(registration,host,ct); return; }
         var before = await File.ReadAllTextAsync(registration.ConfigPath, ct); var after = before;
         if (registration.Client == "Codex")
         {

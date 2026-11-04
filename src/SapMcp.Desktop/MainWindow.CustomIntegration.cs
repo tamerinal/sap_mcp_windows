@@ -49,21 +49,23 @@ public partial class MainWindow
             };
             copyButtons.Add(copy); panel.Children.Add(copy); return box;
         }
-        for (var i = 0; i < 3; i++) { var panel = new StackPanel { Spacing = 8 }; panels.Add(panel); content.Children.Add(panel); }
+        for (var i = 0; i < 5; i++) { var panel = new StackPanel { Spacing = 8 }; panels.Add(panel); content.Children.Add(panel); }
         var json = Code(panels[0], "CustomJson", "Custom.FullJson", () => ClientIntegration.CustomConfiguration(_settings.HostExecutable, _store.FilePath, ClientComponents(basic)).Json);
         var entries = Code(panels[0], "CustomJsonEntries", "Custom.JsonEntries", () => ClientIntegration.CustomConfiguration(_settings.HostExecutable, _store.FilePath, ClientComponents(basic)).JsonEntries);
         var toml = Code(panels[1], "CustomToml", "Custom.TomlHelp", () => ClientIntegration.CustomConfiguration(_settings.HostExecutable, _store.FilePath, ClientComponents(basic)).Toml);
         var manual = Code(panels[2], "CustomFields", "Custom.FieldsHelp", () => ManualFields(ClientIntegration.CustomConfiguration(_settings.HostExecutable, _store.FilePath, ClientComponents(basic))));
+        var openCode1=Code(panels[3],"CustomOpenCodeV1","OpenCode.V1Help",()=>ClientIntegration.OpenCodeConfiguration(_settings.HostExecutable,_store.FilePath,ClientComponents(basic),OpenCodeVersion.V1));
+        var openCode2=Code(panels[4],"CustomOpenCodeV2","OpenCode.V2Help",()=>ClientIntegration.OpenCodeConfiguration(_settings.HostExecutable,_store.FilePath,ClientComponents(basic),OpenCodeVersion.V2));
         content.Children.Add(output);
         update = () =>
         {
             var example = ClientIntegration.CustomConfiguration(_settings.HostExecutable, _store.FilePath, ClientComponents(basic));
             help.Text = UiText.Get("Custom.Steps"); scope.Text = UiText.Get("Custom.Scope");
             var selected = format.SelectedIndex;
-            format.ItemsSource = new[] { "JSON", "TOML", UiText.Get("Custom.Fields") }; format.SelectedIndex = Math.Clamp(selected, 0, 2);
+            format.ItemsSource = new[] { "JSON", "TOML", UiText.Get("Custom.Fields"),"OpenCode V1","OpenCode V2" }; format.SelectedIndex = Math.Clamp(selected, 0, 4);
             empty.Text = example.Entries.Count == 0 ? UiText.Get(basic ? "Custom.EmptyBasic" : "Custom.EmptyAdvanced") : "";
             empty.IsVisible = example.Entries.Count == 0;
-            json.Text = example.Json; entries.Text = example.JsonEntries; toml.Text = example.Toml; manual.Text = ManualFields(example);
+            json.Text = example.Json; entries.Text = example.JsonEntries; toml.Text = example.Toml; manual.Text = ManualFields(example); openCode1.Text=ClientIntegration.OpenCodeConfiguration(_settings.HostExecutable,_store.FilePath,ClientComponents(basic),OpenCodeVersion.V1);openCode2.Text=ClientIntegration.OpenCodeConfiguration(_settings.HostExecutable,_store.FilePath,ClientComponents(basic),OpenCodeVersion.V2);
             foreach (var button in copyButtons) button.IsEnabled = example.Entries.Count > 0;
             for (var i = 0; i < panels.Count; i++) panels[i].IsVisible = i == format.SelectedIndex && example.Entries.Count > 0;
             output.Text = "";

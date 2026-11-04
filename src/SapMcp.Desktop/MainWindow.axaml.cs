@@ -312,10 +312,49 @@ public partial class MainWindow : Window
         adt.PropertyChanged += (_, e) => { if (e.Property == TextBox.TextProperty) Warn(); };
         insecure.IsCheckedChanged += (_, _) => Warn();
         ConnectionProfile? current = null;
+        var automaticResult = Text(""); automaticResult.Name = "AdvancedAutomaticResult";
+        BasicValidationResult? evaluated = null;
+        string EvaluationKey() => JsonSerializer.Serialize(new { system=(systemPicker.SelectedItem as SapSystem)?.Id, profile=current?.Id, name=name.Text, user=user.Text, client=client.Text, language=language.Text, password=password.Text, adt=adt.Text, bw=bw.Text, insecure=insecure.IsChecked, timeout=adtTimeout.Text, discovery=autoDiscovery.IsChecked });
+        string evaluatedKey = "";
+        void InvalidateEvaluation()
+        {
+            if(evaluated!=null)automaticResult.Text=UiText.Get("Advanced.VerifyStale");
+            evaluated=null;evaluatedKey="";
+        }
+        var automaticVerify=Action(UiText.Get("Advanced.AutomaticVerify"),async()=>
+        {
+            if(systemPicker.SelectedItem is not SapSystem system)throw new InvalidOperationException(UiText.Get("Text196"));
+            var initialKey=EvaluationKey();InvalidateEvaluation();
+            var draft=new BasicDraft { ProfileId=current?.Id??Guid.NewGuid().ToString("N"), SystemId=system.Id, Sid=system.Sid.Length>0?system.Sid:current?.Sid??"", Host=system.Host, Sysnr=system.Sysnr??"", Router=system.Router, User=Read(user), Password=password.Text??"", Client=Read(client), Language=Read(language).ToUpperInvariant(), PreferredUrl=Read(adt), Certificates=current?.AdtCertificates.ToList()??[] };
+            async Task<bool> Confirm(BasicPrompt prompt,CancellationToken ct)
+            {
+                var key=prompt switch { BasicPrompt.ConnectionWarning=>"Basic.ConnectionWarning",BasicPrompt.RfcDiscovery=>"Basic.RfcDiscoveryConsent",BasicPrompt.AutomaticScan=>"Basic.AutomaticConsent",_=>"Basic.ExtendedConsent" };
+                return await ConfirmBasicNetworkAsync(UiText.Get(key),prompt==BasicPrompt.ConnectionWarning,ct);
+            }
+            BasicValidationResult result;var evaluating=true;
+            try
+            {
+                result=await new BasicConnectionService(_secrets).EvaluateAsync(_settings,draft,
+                    CheckAdvancedReadinessAsync,Confirm,
+                    new Progress<string>(message=>{if(evaluating && !Token.IsCancellationRequested && EvaluationKey()==initialKey)automaticResult.Text=message;}),Token);
+                Token.ThrowIfCancellationRequested();
+            }
+            catch(OperationCanceledException){automaticResult.Text=UiText.Get("Text112");throw;}
+            catch(Exception ex){automaticResult.Text=UiText.Get("OperationFailed",Redaction.Text(ex.Message));throw;}
+            finally { evaluating=false;draft.Password=""; }
+            if(EvaluationKey()!=initialKey){automaticResult.Text=UiText.Get("Advanced.VerifyStale");return;}
+            if(result.Adt.Success && result.Url.Length>0){adt.Text=result.Url;insecure.IsChecked=true;}
+            evaluated=result;evaluatedKey=EvaluationKey();
+            automaticResult.Text=UiText.Get("Basic.AdtResult")+" "+Outcome(result.Adt)+"\n"+UiText.Get("Basic.RfcResult")+" "+Outcome(result.Rfc)+"\n"+UiText.Get("Advanced.VerifyNotSaved");
+            if(result.Discovery.BudgetExpired)automaticResult.Text+="\n"+UiText.Get("Basic.ScanIncomplete");
+            if(result.Readiness is {Ready:false} blocked)automaticResult.Text+="\n"+UiText.Get("Rfc.ReadinessResult",blocked.Summary);
+        },true);automaticVerify.Name="AdvancedAutomaticVerify";
+        edit.Children.Add(Row(automaticVerify));edit.Children.Add(automaticResult);
+
         edit.Children.Add(Row(DialogAction(UiText.Get("Adt.UrlHelp"), ShowAdtUrlHelpAsync, "AdtUrlHelp"),
             DialogAction(UiText.Get("Adt.Certificates"), async () => { var saved = await EditAdtTrustAsync(current); if (saved != null) Fill(saved); }, "AdtCertificates"),
             Action(UiText.Get("Adt.Discover"), () => DiscoverAdtAsync(current, adt))));
-        void Fill(ConnectionProfile? p) { _fillingProfiles = true; current = p; name.Text = p?.Name ?? ""; user.Text = p?.User ?? ""; client.Text = p?.Client ?? "100"; language.Text = p?.Language ?? "TR"; password.Text = ""; adt.Text = p?.AdtBaseUrl ?? ""; bw.Text = p?.BwModelingBaseUrl ?? ""; insecure.IsChecked = p?.AllowInsecureTls ?? false; adtTimeout.Text = (p?.AdtTimeoutSeconds ?? 15).ToString(); autoDiscovery.IsChecked = p?.AdtAutoDiscovery ?? false; _fillingProfiles = false; _connectionsDirty = false; }
+        void Fill(ConnectionProfile? p) { InvalidateEvaluation(); _fillingProfiles = true; current = p; name.Text = p?.Name ?? ""; user.Text = p?.User ?? ""; client.Text = p?.Client ?? "100"; language.Text = p?.Language ?? "TR"; password.Text = ""; adt.Text = p?.AdtBaseUrl ?? ""; bw.Text = p?.BwModelingBaseUrl ?? ""; insecure.IsChecked = p?.AllowInsecureTls ?? false; adtTimeout.Text = (p?.AdtTimeoutSeconds ?? 15).ToString(); autoDiscovery.IsChecked = p?.AdtAutoDiscovery ?? false; _fillingProfiles = false; _connectionsDirty = false; }
         void RefreshProfiles()
         {
             if (systemPicker.SelectedItem is not SapSystem system) return;
@@ -330,6 +369,7 @@ public partial class MainWindow : Window
                 if (systemPicker.SelectedItem is not SapSystem system) return;
                 var p = current == null ? new ConnectionProfile() : JsonSerializer.Deserialize<ConnectionProfile>(JsonSerializer.Serialize(current, JsonDefaults.Options), JsonDefaults.Options)!;
                 p.TargetKey = system.TargetKey; p.Name = Read(name); p.User = Read(user); p.Client = Read(client); p.Language = Read(language).ToUpperInvariant(); p.AdtBaseUrl = Read(adt); p.BwModelingBaseUrl = Read(bw); p.AllowInsecureTls = insecure.IsChecked == true; p.AdtTimeoutSeconds = int.Parse(Read(adtTimeout)); p.AdtAutoDiscovery = autoDiscovery.IsChecked == true;
+                if(evaluated!=null && evaluatedKey==EvaluationKey())p.BasicValidation=null;
                 var secret = password.Text; password.Text = "";
                 await new ProfileService(_secrets).SaveAsync(_settings, p, secret, activate.IsChecked == true, Token); await PersistAsync(); await AuditAsync("profile.saved", new { target = p.TargetKey, profile = p.Name }); RefreshProfiles(); SetStatus(UiText.Get("Text186"));
             }, true),
@@ -337,10 +377,10 @@ public partial class MainWindow : Window
         edit.Children.Add(Row(Action(UiText.Get("Text190"), () => PingAsync(systemPicker.SelectedItem as SapSystem, "rfc")), Action(UiText.Get("Text191"), () => TestAdtProfileAsync(current)),
             Action(UiText.Get("Text192"), async () => { if (current == null) return; if (!await ConfirmAsync(UiText.Get("Text193"), UiText.Get("RemoveProfile", current.Name))) return; var p = current; _settings.Profiles.RemoveAll(x => x.Id == p.Id); if (_settings.ActiveProfiles.GetValueOrDefault(p.TargetKey) == p.Id) _settings.ActiveProfiles.Remove(p.TargetKey); await ProfileService.MaterializeAsync(_settings, Token); await PersistAsync(); RefreshProfiles(); SetStatus(UiText.Get("Text195")); })));
         foreach (var field in new[] { name, user, client, language, password, adt, bw, adtTimeout })
-            field.PropertyChanged += (_, change) => { if (change.Property == TextBox.TextProperty && !_fillingProfiles) _connectionsDirty = true; };
-        insecure.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
+            field.PropertyChanged += (_, change) => { if (change.Property == TextBox.TextProperty && !_fillingProfiles) { _connectionsDirty = true; InvalidateEvaluation(); } };
+        insecure.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) { _connectionsDirty = true; InvalidateEvaluation(); } };
         activate.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
-        autoDiscovery.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) _connectionsDirty = true; };
+        autoDiscovery.IsCheckedChanged += (_, _) => { if (!_fillingProfiles) { _connectionsDirty = true; InvalidateEvaluation(); } };
         Body.Children.Add(Card(edit));
     }
 

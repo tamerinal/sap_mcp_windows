@@ -11,6 +11,13 @@ namespace SapMcp.Desktop;
 
 public partial class MainWindow
 {
+    private async Task<RfcReadinessResult> CheckAdvancedReadinessAsync(CancellationToken ct)
+    {
+        var temporary=Path.Combine(_settings.DataDirectory,"cache","advanced-readiness",Guid.NewGuid().ToString("N"));
+        var settings=BasicPolicy.Copy(_settings);settings.DataDirectory=temporary;
+        try { return await new RfcReadinessService(_packages).CheckAsync(settings,_settings.Rfc.Selected,ct); }
+        finally { if(Directory.Exists(temporary))Directory.Delete(temporary,true); }
+    }
     private Button DialogAction(string caption, Func<Task> action, string? name = null)
     {
         var button = new Button { Content = caption, Name = name };

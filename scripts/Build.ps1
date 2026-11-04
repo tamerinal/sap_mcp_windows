@@ -12,7 +12,7 @@ try {
         if (!$RfcSource -or !$AdtSource -or !$PyRfcSitePackages) { throw 'Pass explicit MCP source and PyRFC paths, or use -SkipPayload with a prepared catalog.' }
         & (Join-Path $PSScriptRoot 'Prepare-Payload.ps1') -RfcSource $RfcSource -AdtSource $AdtSource -PyRfcSitePackages $PyRfcSitePackages
     }
-    if (!$SkipTests) { & $taskDotnet test SapMcpManager.slnx -c Release -v minimal; if ($LASTEXITCODE -ne 0) { throw 'Tests failed' } }
+    if (!$SkipTests) { & (Join-Path $PSScriptRoot 'Test.ps1') }
     $taskPublish = Join-Path $taskRoot 'artifacts\publish'
     $taskPublish = [IO.Path]::GetFullPath($taskPublish)
     $taskArtifactsRoot = [IO.Path]::GetFullPath((Join-Path $taskRoot 'artifacts'))

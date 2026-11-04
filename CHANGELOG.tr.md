@@ -1,5 +1,9 @@
 # Sürüm geçmişi
 
+## 0.1.0-preview.14 — OpenCode entegrasyonu ve Advanced doğrulama
+
+Basic ve Advanced, global/proje dosyası seçimi, önizleme, yedekleme ve JSONC yorum/talimat korumasıyla OpenCode V1 veya V2’ye SAP MCP kaydı ekleyebilir. Advanced Bağlantılar ekranındaki **Otomatik keşfet ve doğrula**, Basic’in keşif/onay akışını ve ayrı ADT/RFC sonuçlarını kullanır. Sonuç forma gelir; URL/TLS alanlarını inceleyip Kaydet’e basana kadar kayıt yapılmaz. Basic davranışı ve MCP/runtime arşivleri korunur.
+
 ## 0.1.0-preview.13 — Keşif başlangıcı ve public dokümanlar
 
 Issue #7 için Basic keşif başlangıç sarmalayıcısını ve birleştirilmiş public içerik gizlilik temizliğini içerir. Sarmalayıcı, mevcut keşif işlevini çağırmadan önce aynı Node sürecinde ön bağlantıları ve beklemeyi çalıştırır. ADT/RFC paket arşivleri ve sabit runtime sürümleri korunur. Belgelerde kurgusal örnekler kullanılır; ortama özel test notları yayımlanmaz. Keşif düzeltmesinin üretim ortamı teyidi, temiz Windows kabulü ve canlı SAP testleri bu sürüm için henüz yapılmadı.
