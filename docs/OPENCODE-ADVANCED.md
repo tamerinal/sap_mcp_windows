@@ -25,3 +25,7 @@ The action uses Basic's readiness, RFC-assisted discovery, consented smart/full 
 A successful ADT result fills the discovered URL and shows the TLS checkbox required by the evaluated connection. Read the separate results and review those fields. **Nothing is committed until Save is pressed.** The existing activation checkbox controls profile activation. Changing fields/profile invalidates the displayed evaluation; verify again. Missing RFC readiness can still yield an ADT-only result.
 
 External SAP GUI XML is read-only and is not converted to a managed source by evaluation. Failure retains the existing profile, secrets and active mapping. The original Basic workflow and Advanced diagnostic/certificate tools remain available.
+
+## Stable 0.1.0
+
+Advanced exposes one automatic discovery/verification action. Legacy AdtAutoDiscovery and AdtTimeoutSeconds remain schema-1 fields for compatibility, with existing values preserved and defaults false/15 for new profiles; their controls are no longer shown. The MCP contract is unchanged.

@@ -1336,8 +1336,8 @@
     "tr": "Önce seçili profili ve form değişikliklerini kaydedin. Test, ortak aktif profili değiştirmez."
   },
   "Adt.UrlAdvice": {
-    "en": "Check the profile ADT base URL. Use “How do I find this address?”; do not infer the web port from the RFC system number.",
-    "tr": "Profilin ADT kök adresini kontrol edin. “Bu adresi nasıl bulurum?” yardımını kullanın; RFC sistem numarasından web portu çıkarmayın."
+    "en": "Check the profile ADT base URL. Use the ADT address help; do not infer the web port from the RFC system number.",
+    "tr": "Profilin ADT kök adresini kontrol edin. ADT adres yardımını kullanın; RFC sistem numarasından web portu çıkarmayın."
   },
   "Adt.NameAdvice": {
     "en": "Use the DNS/IP covered by the server SAN, or ask Basis to correct the certificate. Adding a CA does not fix a name mismatch.",
@@ -1368,28 +1368,28 @@
     "tr": "Basis ile URL ve ADT servis/yönlendirmesini kontrol edin. Açık port, 401, kök 404 veya herhangi bir XML ADT erişimini kanıtlamaz."
   },
   "Adt.UrlHelp": {
-    "en": "How do I find this address?",
-    "tr": "Bu adresi nasıl bulurum?"
+    "en": "How do I find the ADT (ABAP Development Tools) address?",
+    "tr": "ADT (Abap Development Tools) Adresini Nasıl bulurum?"
+  },
+  "Adt.SapDocumentation": {
+    "en": "SAP documentation: ABAP Development Tools",
+    "tr": "SAP dokümantasyonu: ABAP Development Tools"
+  },
+  "Adt.SapConfigurationGuide": {
+    "en": "SAP guide: Configuring the ABAP back end (2022)",
+    "tr": "SAP kılavuzu: ABAP arka uç yapılandırması (2022)"
   },
   "Adt.CopyBasisRequest": {
     "en": "Copy request for Basis",
     "tr": "Basis talebini kopyala"
   },
   "Adt.BasisRequest": {
-    "en": "Please provide the ADT HTTP/HTTPS base URL reachable from my workstation, the web port, any reverse-proxy path prefix, VPN/proxy requirements and the verified root/intermediate CA chain. Please confirm that ADT discovery and read-only compatibility services are available to my SAP user/client. Do not send passwords.",
-    "tr": "Lütfen bilgisayarımdan erişilebilen ADT HTTP/HTTPS kök adresini, web portunu, varsa ters proxy yol önekini, VPN/proxy gereksinimlerini ve doğrulanmış kök/ara CA zincirini paylaşın. SAP kullanıcı/client hesabımın ADT discovery ve salt okunur compatibility servislerine erişebildiğini doğrulayın. Şifre göndermeyin."
+    "en": "Request to SAP Basis\n\nTo configure SAP MCP Manager, please provide the workstation-accessible ADT base URL for the intended SAP system, including protocol, DNS name, port and any reverse-proxy path prefix. Please specify VPN/proxy and firewall requirements, and provide the approved public root/intermediate CA certificates when needed. Please confirm that the required ADT ICF services are active and that my user/client has permission to access discovery and the intended read-only ADT resources. Please indicate whether the external Web Dispatcher address differs from the application server address. Do not include passwords, private keys or other credentials in your response.",
+    "tr": "SAP Basis ekibine erişim bilgisi talebi\n\nSAP MCP Manager bağlantısını yapılandırabilmem için hedef SAP sisteminin bilgisayarımdan erişilebilen ADT kök adresini; protokol, DNS adı, port ve varsa ters proxy yol önekiyle birlikte paylaşmanızı rica ederim. VPN/proxy ve güvenlik duvarı gereksinimlerini belirtmenizi; gerekliyse onaylı, herkese açık kök/ara CA sertifikalarını iletmenizi rica ederim. Gerekli ADT ICF servislerinin etkin olduğunu ve kullanıcı/client hesabımın discovery ile kullanılacak salt okunur ADT kaynaklarına erişim yetkisini doğrulayınız. Dış Web Dispatcher adresi uygulama sunucusundan farklıysa lütfen belirtiniz. Yanıtınıza parola, özel anahtar veya başka kimlik bilgisi eklemeyiniz."
   },
   "Adt.UrlHelpBody": {
-    "en": "Ask your SAP Basis team for the workstation-accessible ADT web address. A working Eclipse ADT project can identify the intended system, but its RFC system number does not determine the HTTP port. An authorized administrator can read active HTTP/HTTPS services in SMICM → Goto → Services. The external Web Dispatcher/load-balancer address may differ from that internal address. Prefer the DNS name present in the certificate SAN. Enter a base URL such as https://sap.example.invalid:8443 (fictional); the application appends /sap/bc/adt/discovery itself. Automatic discovery proposes candidates without passwords and does not prove availability. If you cannot access SAP GUI or Eclipse, use the Basis request below. See SAP Help: https://help.sap.com/docs/SUPPORT_CONTENT/abapconn/3354079914.html",
-    "tr": "Bilgisayarınızdan erişilebilen ADT web adresini SAP Basis ekibinden isteyin. Çalışan Eclipse ADT projesini sistem referansı olarak gösterebilirsiniz; RFC sistem numarası HTTP portunu belirlemez. Yetkili yönetici SMICM → Goto → Services üzerinden etkin HTTP/HTTPS servislerini okuyabilir. Dış Web Dispatcher/yük dengeleyici adresi bu iç adresten farklı olabilir. Sertifikanın SAN alanındaki DNS adını tercih edin. https://sap.example.invalid:8443 gibi kök URL girin (kurgusal); uygulama /sap/bc/adt/discovery yolunu ekler. Otomatik keşif şifresiz aday önerir, erişimi kanıtlamaz. SAP GUI/Eclipse erişiminiz yoksa aşağıdaki Basis talebini kullanın. SAP Yardım: https://help.sap.com/docs/SUPPORT_CONTENT/abapconn/3354079914.html"
-  },
-  "Adt.Timeout": {
-    "en": "ADT timeout (seconds, 1–120)",
-    "tr": "ADT zaman aşımı (saniye, 1–120)"
-  },
-  "Adt.AllowDiscovery": {
-    "en": "Enable unauthenticated address suggestions for this profile",
-    "tr": "Bu profil için kimlik bilgisiz adres önerilerini etkinleştir"
+    "en": "1. What address is required?\nABAP Development Tools (ADT) accesses the SAP development services through HTTP/HTTPS. Enter the base URL, for example https://sap.example.invalid:8443. This is a fictional documentation example, not a real system address. Include a reverse-proxy path prefix only when supplied by Basis. Manager appends /sap/bc/adt/discovery; do not append discovery or another service resource yourself.\n\n2. Use automatic discovery and verification\nEnter the system and profile details, then select Automatically discover and verify. Review the network and transport warnings before approving a scan or verification. Discovery identifies candidates without a password; subsequent verification can use your account. Review the separate ADT/RFC results and the URL/TLS fields, then select Save to apply the profile. An open port or a browser login prompt alone does not confirm a usable ADT connection.\n\n3. Obtain the authoritative address from SAP Basis\nAsk for the externally reachable DNS name, protocol, port and any path prefix. A working Eclipse ADT project can help identify the intended system. The RFC instance number does not determine the HTTP/HTTPS port. If SAP GUI or Eclipse is unavailable, copy the request below and send it to your Basis team through your usual support channel.\n\n4. Administrative checks\nAn authorized administrator can inspect active HTTP/HTTPS services in SMICM → Goto → Services, and check the relevant ADT service under default_host → sap → bc → adt in transaction SICF. These are administrative checks; service activation or configuration changes must follow your organization’s procedures. An external Web Dispatcher or load balancer may expose a different host, port or path from the application server.\n\n5. HTTPS, certificates and official documentation\nPrefer HTTPS and a DNS name covered by the server certificate. Request the approved public CA chain if certificate trust is incomplete. HTTP does not encrypt credentials, and disabling TLS verification does not establish server identity. Read the displayed warnings before proceeding. Use the SAP documentation links below and choose the guide applicable to your SAP release; the linked back-end configuration PDF describes the 2022 release.",
+    "tr": "1. Hangi adres gereklidir?\nABAP Development Tools (ADT), SAP geliştirme servislerine HTTP/HTTPS üzerinden erişir. Kök URL’yi, örneğin https://sap.example.invalid:8443 biçiminde giriniz. Bu adres gerçek bir sistemi temsil etmeyen kurgusal dokümantasyon örneğidir. Ters proxy yol önekini yalnız Basis ekibiniz bildirmişse ekleyiniz. Manager /sap/bc/adt/discovery yolunu kendisi ekler; discovery veya başka bir servis kaynağını adresin sonuna yazmayınız.\n\n2. Otomatik keşif ve doğrulamayı kullanınız\nSistem ve profil bilgilerini girdikten sonra Otomatik keşfet ve doğrula düğmesine basınız. Tarama veya doğrulamaya izin vermeden önce ağ ve iletişim uyarılarını inceleyiniz. Keşif aşaması parola kullanmadan aday adresleri belirler; sonraki doğrulama hesabınızı kullanabilir. Ayrı ADT/RFC sonuçlarını ve URL/TLS alanlarını inceleyip profili uygulamak için Kaydet’e basınız. Açık bir port veya tarayıcıdaki giriş istemi tek başına kullanılabilir ADT bağlantısını doğrulamaz.\n\n3. Yetkili adres bilgisini SAP Basis ekibinden alınız\nBilgisayarınızdan erişilebilen DNS adı, protokol, port ve varsa yol önekini isteyiniz. Çalışan bir Eclipse ADT projesi hedef sistemin belirlenmesine yardımcı olabilir. RFC sistem numarası HTTP/HTTPS portunu belirlemez. SAP GUI veya Eclipse erişiminiz yoksa aşağıdaki talebi kopyalayıp olağan destek kanalınız üzerinden Basis ekibinize iletiniz.\n\n4. Yönetici kontrolleri\nYetkili yönetici SMICM → Goto → Services menüsünden etkin HTTP/HTTPS servislerini inceleyebilir; SICF işleminde default_host → sap → bc → adt altındaki ilgili ADT servisini kontrol edebilir. Bu işlemler yönetim yetkisi gerektirir; servis etkinleştirme veya yapılandırma değişiklikleri kurum prosedürlerine göre yapılmalıdır. Dış Web Dispatcher ya da yük dengeleyici; uygulama sunucusundan farklı bir sunucu adı, port veya yol yayımlayabilir.\n\n5. HTTPS, sertifikalar ve resmî dokümantasyon\nHTTPS’i ve sunucu sertifikasının kapsadığı DNS adını tercih ediniz. Sertifika güven zinciri eksikse onaylı, herkese açık CA zincirini isteyiniz. HTTP kimlik bilgilerini şifrelemez; TLS doğrulamasını kapatmak sunucu kimliğini doğrulamaz. Devam etmeden önce gösterilen uyarıları okuyunuz. Aşağıdaki SAP dokümantasyon bağlantılarından sistem sürümünüze uygun kılavuzu seçiniz; doğrudan bağlantısı verilen arka uç yapılandırma PDF’i 2022 sürümünü açıklar."
   },
   "Adt.TrustScope": {
     "en": "Trust scope: Node defaults + Windows trust + certificates explicitly added to this profile. Other profiles do not inherit these files.",
@@ -1490,22 +1490,6 @@
   "Adt.TrustSaved": {
     "en": "Profile trust saved. New calls read the new policy; restart MCP after package/runtime or Windows trust changes.",
     "tr": "Profil güveni kaydedildi. Yeni çağrılar güncel ayarı okur; paket/runtime veya Windows güven değişiminden sonra MCP’yi yeniden başlatın."
-  },
-  "Adt.Discover": {
-    "en": "Suggest ADT addresses (no login)",
-    "tr": "ADT adresi öner (giriş yapmadan)"
-  },
-  "Adt.EnableDiscovery": {
-    "en": "Enable address suggestions in this profile and save it first.",
-    "tr": "Önce profilde adres önerisini etkinleştirip kaydedin."
-  },
-  "Adt.UseCandidate": {
-    "en": "Use selected URL in form",
-    "tr": "Seçili URL’yi forma al"
-  },
-  "Adt.CandidateWarning": {
-    "en": "Candidates only: not proof of ADT access. Select a URL, verify it with Basis, then save the profile before authentication.",
-    "tr": "Yalnız adaylar: ADT erişimini kanıtlamaz. URL seçin, Basis ile doğrulayın ve kimlik doğrulamadan önce profili kaydedin."
   },
   "Adt.IdentityAdvice": {
     "en": "The server did not require authentication on the checked resources. ADT read access was observed, but the supplied account was not proven. Ask Basis to verify the authentication policy.",

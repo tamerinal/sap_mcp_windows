@@ -238,23 +238,35 @@ public sealed partial class WindowTests
         await store.SaveAsync(settings); var manager = new ConnectionManager(store);
         settings = await manager.SelectSourceAsync(settings, "managed");
         settings = await manager.SaveSystemAsync(settings, new() { Name = "Fictional", Sid="TST", Host = "fictional.example.invalid", Sysnr = "00" });
-        var profile = new ConnectionProfile { Name = "Account", TargetKey = "fictional.example.invalid:00", User = "DEMO" };
+        var profile = new ConnectionProfile { Name = "Account", TargetKey = "fictional.example.invalid:00", User = "DEMO", AdtTimeoutSeconds = 27, AdtAutoDiscovery = true,
+            AdtCertificates = [new(Path.Combine(root, "fixture-ca.pem"), new string('a', 64))] };
         await new ProfileService(new DpapiSecretStore()).SaveAsync(settings, profile, "fictional-test-password", true); await store.SaveAsync(settings);
+        var secretFile = ProfileService.ResolveSecret(settings.CredentialsFile, profile.SecretRef);
+        var originalSecret = await File.ReadAllBytesAsync(secretFile);
         var window = new MainWindow(store.FilePath); window.Show();
         try
         {
             await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
             Click((Button)window.FindControl<StackPanel>("Navigation")!.Children[3]);
-            var timeout = Named<TextBox>(window, "AdtTimeout"); timeout.Text = "27";
-            var checkbox = Named<CheckBox>(window, "AdtAutoDiscovery"); checkbox.IsChecked = true;
+            var profileName = Named<TextBox>(window, "AdvancedProfileName"); profileName.Text = "Account edited";
+            window.Width = 940;
             foreach (var locale in new[] { "en", "tr" })
             {
                 window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = locale == "tr" ? 1 : 0;
                 await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
-                Assert.Equal("27", timeout.Text); Assert.True(checkbox.IsChecked);
+                Assert.Equal("Account edited", profileName.Text);
+                Dispatcher.UIThread.RunJobs();
+                var helpButton = Named<Button>(window, "AdtUrlHelp");
+                Assert.Equal(UiText.Get("Adt.UrlHelp"), helpButton.Content);
+                Assert.True(helpButton.Bounds.Width > 0 && helpButton.Bounds.Width < window.Width - 300);
+                Assert.DoesNotContain(window.GetLogicalDescendants().OfType<Control>(), c => c.Name is "AdtTimeout" or "AdtAutoDiscovery");
+                Assert.DoesNotContain(window.GetLogicalDescendants().OfType<Button>(), b => Equals(b.Content, "ADT adresi öner (giriş yapmadan)") || Equals(b.Content, "Suggest ADT addresses (no login)"));
+                Assert.NotNull(Named<Button>(window, "AdvancedAutomaticVerify"));
                 Click(Named<Button>(window, "AdtUrlHelp")); await Until(() => window.OwnedWindows.Any());
                 var dialog = window.OwnedWindows.Single(); var text = Named<TextBox>(dialog, "AdtUrlHelpText").Text!;
-                Assert.Contains("SMICM", text); Assert.Contains("Basis", text); Assert.Contains("example.invalid", text);
+                Assert.Contains("SMICM", text); Assert.Contains("SICF", text); Assert.Contains("Basis", text); Assert.Contains("example.invalid", text);
+                Assert.Equal(UiText.Get("Adt.UrlHelp"), dialog.Title);
+                Assert.NotNull(Named<Button>(dialog, "AdtSapDocumentation")); Assert.NotNull(Named<Button>(dialog, "AdtSapConfigurationGuide"));
                 Assert.Equal(UiText.Get("Adt.UrlHelpBody") + "\n\n" + UiText.Get("Adt.BasisRequest"), text);
                 if (Environment.GetEnvironmentVariable("SAP_MCP_UI_SNAPSHOTS") is { Length: > 0 } output)
                 {
@@ -263,14 +275,18 @@ public sealed partial class WindowTests
                 }
                 dialog.Close(); await Until(() => !window.OwnedWindows.Any());
             }
-            Assert.Equal(15, (await store.LoadAsync()).Profiles.Single().AdtTimeoutSeconds); // No implicit form save.
+            Assert.Equal("Account", (await store.LoadAsync()).Profiles.Single().Name); // No implicit form save.
             Click(Named<Button>(window, "AdtCertificates"));
             await Task.Delay(20); Dispatcher.UIThread.RunJobs(); Assert.Empty(window.OwnedWindows); // Dirty form requires save first.
             Click(Caption(window, UiText.Get("Text185"))); await Until(() => !window.FindControl<ProgressBar>("BusyIndicator")!.IsVisible);
             Click(Named<Button>(window, "AdtCertificates")); await Until(() => window.OwnedWindows.Any());
-            var trust = window.OwnedWindows.Single(); Assert.Empty(Named<ListBox>(trust, "AdtTrustedCertificates").ItemsSource!);
+            var trust = window.OwnedWindows.Single(); Assert.Single(Named<ListBox>(trust, "AdtTrustedCertificates").ItemsSource!.Cast<string>());
             trust.Close();
             Assert.Equal(profile.Id, (await store.LoadAsync()).ActiveProfiles[profile.TargetKey]);
+            var saved = Assert.Single((await store.LoadAsync()).Profiles);
+            Assert.Equal("Account edited", saved.Name); Assert.Equal(27, saved.AdtTimeoutSeconds); Assert.True(saved.AdtAutoDiscovery);
+            Assert.Equal(profile.AdtCertificates, saved.AdtCertificates); Assert.Equal(profile.SecretRef, saved.SecretRef);
+            Assert.Equal(originalSecret, await File.ReadAllBytesAsync(secretFile));
             window.Close();
         }
         finally { window.Close(); if (Directory.Exists(root)) Directory.Delete(root, true); }

@@ -12,7 +12,7 @@ body:
     id: version
     attributes:
       label: App version and installer / Sürüm ve kurulum
-      placeholder: v0.1.0-preview.1, Online or Offline
+      placeholder: v0.1.0, Online or Offline
     validations:
       required: true
   - type: input

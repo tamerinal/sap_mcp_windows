@@ -4,15 +4,37 @@
 
 ## Find and save the ADT URL
 
-Ask your SAP Basis team for the workstation-accessible ADT web address. A working Eclipse ADT project can identify the intended system, but its RFC system number does not determine the HTTP port. An authorized administrator can read active HTTP/HTTPS services in SMICM → Goto → Services. The external Web Dispatcher/load-balancer address may differ from that internal address. Prefer the DNS name present in the certificate SAN. Enter a base URL such as https://sap.example.invalid:8443 (fictional); the application appends /sap/bc/adt/discovery itself. Automatic discovery proposes candidates without passwords and does not prove availability. If you cannot access SAP GUI or Eclipse, use the Basis request below. See SAP Help: https://help.sap.com/docs/SUPPORT_CONTENT/abapconn/3354079914.html
+### 1. What address is required?
+
+ABAP Development Tools (ADT) accesses the SAP development services through HTTP/HTTPS. Enter the base URL, for example https://sap.example.invalid:8443. This is a fictional documentation example, not a real system address. Include a reverse-proxy path prefix only when supplied by Basis. Manager appends /sap/bc/adt/discovery; do not append discovery or another service resource yourself.
+
+### 2. Use automatic discovery and verification
+
+Enter the system and profile details, then select Automatically discover and verify. Review the network and transport warnings before approving a scan or verification. Discovery identifies candidates without a password; subsequent verification can use your account. Review the separate ADT/RFC results and the URL/TLS fields, then select Save to apply the profile. An open port or a browser login prompt alone does not confirm a usable ADT connection.
+
+### 3. Obtain the authoritative address from SAP Basis
+
+Ask for the externally reachable DNS name, protocol, port and any path prefix. A working Eclipse ADT project can help identify the intended system. The RFC instance number does not determine the HTTP/HTTPS port. If SAP GUI or Eclipse is unavailable, copy the request below and send it to your Basis team through your usual support channel.
+
+### 4. Administrative checks
+
+An authorized administrator can inspect active HTTP/HTTPS services in SMICM → Goto → Services, and check the relevant ADT service under default_host → sap → bc → adt in transaction SICF. These are administrative checks; service activation or configuration changes must follow your organization’s procedures. An external Web Dispatcher or load balancer may expose a different host, port or path from the application server.
+
+### 5. HTTPS, certificates and official documentation
+
+Prefer HTTPS and a DNS name covered by the server certificate. Request the approved public CA chain if certificate trust is incomplete. HTTP does not encrypt credentials, and disabling TLS verification does not establish server identity. Read the displayed warnings before proceeding. Use the SAP documentation links below and choose the guide applicable to your SAP release; the linked back-end configuration PDF describes the 2022 release.
+
+[SAP ADT documentation](https://help.sap.com/docs/ABAP_DEVELOPMENT_TOOLS_FOR_ECLIPSE) · [SAP back-end configuration guide (2022)](https://help.sap.com/doc/2e65ad9a26c84878b1413009f8ac07c3/202210.000/en-US/config_guide_system_backend_abap_development_tools.pdf)
 
 ### Request to send to Basis
 
-Please provide the ADT HTTP/HTTPS base URL reachable from my workstation, the web port, any reverse-proxy path prefix, VPN/proxy requirements and the verified root/intermediate CA chain. Please confirm that ADT discovery and read-only compatibility services are available to my SAP user/client. Do not send passwords.
+Request to SAP Basis
+
+To configure SAP MCP Manager, please provide the workstation-accessible ADT base URL for the intended SAP system, including protocol, DNS name, port and any reverse-proxy path prefix. Please specify VPN/proxy and firewall requirements, and provide the approved public root/intermediate CA certificates when needed. Please confirm that the required ADT ICF services are active and that my user/client has permission to access discovery and the intended read-only ADT resources. Please indicate whether the external Web Dispatcher address differs from the application server address. Do not include passwords, private keys or other credentials in your response.
 
 The base URL is independent of the RFC system number and SAP client. Keep client/language/account in their own fields. Explicit adtBaseUrl wins. A trailing /sap/bc/adt is removed once; discovery is appended by the client. Queries, fragments, embedded credentials and deeper service URLs are rejected. Reverse-proxy prefixes, IPv4/IPv6 and custom ports are supported. HTTP sends credentials without TLS protection and is always marked with a warning.
 
-Old profiles and DPAPI files are preserved. A legacy blank URL no longer triggers credential-bearing port guesses: select and save a confirmed URL first. Imported legacy URL lists remain in profile data; the first configured address is used only if the explicit field is blank. Address suggestions are opt-in, target-host-only and unauthenticated. Candidate responses including 401/404 do not prove ADT availability. Selecting a suggestion fills the form; save it before testing.
+Old profiles and DPAPI files are preserved. Advanced automatic discovery and verification evaluates the unsaved form; only Save commits the profile. The former address-suggestion controls and timeout field are removed from the UI. Existing timeout/discovery values remain compatible and are preserved when editing profiles.
 
 ## Profile certificate trust
 

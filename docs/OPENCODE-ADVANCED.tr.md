@@ -25,3 +25,7 @@ Bağlantılar ekranında sistem ve mevcut/yeni profil seçin. Kullanıcı/client
 Başarılı ADT sonucu bulunan URL’yi doldurur ve değerlendirilen bağlantının gerektirdiği TLS kutusunu gösterir. Ayrı sonuçları ve bu alanları inceleyin. **Kaydet’e basılana kadar hiçbir profil kaydı uygulanmaz.** Mevcut etkinleştirme kutusu profil aktivasyonunu belirler. Alan/profil değişikliği değerlendirmeyi geçersiz kılar; yeniden doğrulayın. RFC hazırlığı eksikken yalnız ADT başarılı olabilir.
 
 Harici SAP GUI XML salt okunur kalır; değerlendirme yönetilen kaynağa dönüşüm yapmaz. Başarısızlık mevcut profil, sırlar ve aktif mapping’i korur. Basic akışı ile mevcut Advanced tanılama/sertifika araçları kullanılmaya devam eder.
+
+## Kararlı 0.1.0
+
+Advanced tek otomatik keşif/doğrulama işlemi sunar. Eski AdtAutoDiscovery ve AdtTimeoutSeconds alanları şema-1 uyumluluğu için korunur; mevcut değerler değişmez, yeni profiller false/15 varsayılanlarını kullanır. Bu alanlar artık arayüzde gösterilmez. MCP sözleşmesi değişmez.

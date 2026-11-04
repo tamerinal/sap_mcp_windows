@@ -4,15 +4,37 @@
 
 ## ADT adresini bulup kaydetme
 
-Bilgisayarınızdan erişilebilen ADT web adresini SAP Basis ekibinden isteyin. Çalışan Eclipse ADT projesini sistem referansı olarak gösterebilirsiniz; RFC sistem numarası HTTP portunu belirlemez. Yetkili yönetici SMICM → Goto → Services üzerinden etkin HTTP/HTTPS servislerini okuyabilir. Dış Web Dispatcher/yük dengeleyici adresi bu iç adresten farklı olabilir. Sertifikanın SAN alanındaki DNS adını tercih edin. https://sap.example.invalid:8443 gibi kök URL girin (kurgusal); uygulama /sap/bc/adt/discovery yolunu ekler. Otomatik keşif şifresiz aday önerir, erişimi kanıtlamaz. SAP GUI/Eclipse erişiminiz yoksa aşağıdaki Basis talebini kullanın. SAP Yardım: https://help.sap.com/docs/SUPPORT_CONTENT/abapconn/3354079914.html
+### 1. Hangi adres gereklidir?
+
+ABAP Development Tools (ADT), SAP geliştirme servislerine HTTP/HTTPS üzerinden erişir. Kök URL’yi, örneğin https://sap.example.invalid:8443 biçiminde giriniz. Bu adres gerçek bir sistemi temsil etmeyen kurgusal dokümantasyon örneğidir. Ters proxy yol önekini yalnız Basis ekibiniz bildirmişse ekleyiniz. Manager /sap/bc/adt/discovery yolunu kendisi ekler; discovery veya başka bir servis kaynağını adresin sonuna yazmayınız.
+
+### 2. Otomatik keşif ve doğrulamayı kullanınız
+
+Sistem ve profil bilgilerini girdikten sonra Otomatik keşfet ve doğrula düğmesine basınız. Tarama veya doğrulamaya izin vermeden önce ağ ve iletişim uyarılarını inceleyiniz. Keşif aşaması parola kullanmadan aday adresleri belirler; sonraki doğrulama hesabınızı kullanabilir. Ayrı ADT/RFC sonuçlarını ve URL/TLS alanlarını inceleyip profili uygulamak için Kaydet’e basınız. Açık bir port veya tarayıcıdaki giriş istemi tek başına kullanılabilir ADT bağlantısını doğrulamaz.
+
+### 3. Yetkili adres bilgisini SAP Basis ekibinden alınız
+
+Bilgisayarınızdan erişilebilen DNS adı, protokol, port ve varsa yol önekini isteyiniz. Çalışan bir Eclipse ADT projesi hedef sistemin belirlenmesine yardımcı olabilir. RFC sistem numarası HTTP/HTTPS portunu belirlemez. SAP GUI veya Eclipse erişiminiz yoksa aşağıdaki talebi kopyalayıp olağan destek kanalınız üzerinden Basis ekibinize iletiniz.
+
+### 4. Yönetici kontrolleri
+
+Yetkili yönetici SMICM → Goto → Services menüsünden etkin HTTP/HTTPS servislerini inceleyebilir; SICF işleminde default_host → sap → bc → adt altındaki ilgili ADT servisini kontrol edebilir. Bu işlemler yönetim yetkisi gerektirir; servis etkinleştirme veya yapılandırma değişiklikleri kurum prosedürlerine göre yapılmalıdır. Dış Web Dispatcher ya da yük dengeleyici; uygulama sunucusundan farklı bir sunucu adı, port veya yol yayımlayabilir.
+
+### 5. HTTPS, sertifikalar ve resmî dokümantasyon
+
+HTTPS’i ve sunucu sertifikasının kapsadığı DNS adını tercih ediniz. Sertifika güven zinciri eksikse onaylı, herkese açık CA zincirini isteyiniz. HTTP kimlik bilgilerini şifrelemez; TLS doğrulamasını kapatmak sunucu kimliğini doğrulamaz. Devam etmeden önce gösterilen uyarıları okuyunuz. Aşağıdaki SAP dokümantasyon bağlantılarından sistem sürümünüze uygun kılavuzu seçiniz; doğrudan bağlantısı verilen arka uç yapılandırma PDF’i 2022 sürümünü açıklar.
+
+[SAP ADT dokümantasyonu](https://help.sap.com/docs/ABAP_DEVELOPMENT_TOOLS_FOR_ECLIPSE) · [SAP arka uç yapılandırma kılavuzu (2022)](https://help.sap.com/doc/2e65ad9a26c84878b1413009f8ac07c3/202210.000/en-US/config_guide_system_backend_abap_development_tools.pdf)
 
 ### Basis’e gönderilecek talep
 
-Lütfen bilgisayarımdan erişilebilen ADT HTTP/HTTPS kök adresini, web portunu, varsa ters proxy yol önekini, VPN/proxy gereksinimlerini ve doğrulanmış kök/ara CA zincirini paylaşın. SAP kullanıcı/client hesabımın ADT discovery ve salt okunur compatibility servislerine erişebildiğini doğrulayın. Şifre göndermeyin.
+SAP Basis ekibine erişim bilgisi talebi
+
+SAP MCP Manager bağlantısını yapılandırabilmem için hedef SAP sisteminin bilgisayarımdan erişilebilen ADT kök adresini; protokol, DNS adı, port ve varsa ters proxy yol önekiyle birlikte paylaşmanızı rica ederim. VPN/proxy ve güvenlik duvarı gereksinimlerini belirtmenizi; gerekliyse onaylı, herkese açık kök/ara CA sertifikalarını iletmenizi rica ederim. Gerekli ADT ICF servislerinin etkin olduğunu ve kullanıcı/client hesabımın discovery ile kullanılacak salt okunur ADT kaynaklarına erişim yetkisini doğrulayınız. Dış Web Dispatcher adresi uygulama sunucusundan farklıysa lütfen belirtiniz. Yanıtınıza parola, özel anahtar veya başka kimlik bilgisi eklemeyiniz.
 
 Kök URL, RFC sistem numarası ve SAP client’tan bağımsızdır. Client/dil/hesabı kendi alanlarında tutun. Açık adtBaseUrl önceliklidir. Sondaki /sap/bc/adt bir kez kaldırılır; discovery yolunu istemci ekler. Query, fragment, gömülü kimlik bilgisi ve alt servis adresleri reddedilir. Ters proxy yol öneki, IPv4/IPv6 ve özel port desteklenir. HTTP’de kimlik bilgileri TLS ile korunmaz; sürekli uyarı gösterilir.
 
-Eski profiller ve DPAPI dosyaları korunur. Eski boş URL artık şifreyle port tahmini başlatmaz: önce doğrulanmış URL seçip kaydedin. İçe aktarılmış eski adres listeleri profil verisinde kalır; açık alan boşsa ilk tanımlı adres kullanılır. Adres önerisi isteğe bağlı, yalnız hedef sunucuya yönelik ve kimlik bilgisizdir. 401/404 dahil aday yanıtları ADT varlığını kanıtlamaz. Seçim URL’yi forma alır; testten önce kaydedin.
+Eski profiller ve DPAPI dosyaları korunur. Advanced otomatik keşif ve doğrulaması kaydedilmemiş formu değerlendirir; profili yalnız Kaydet uygular. Eski adres önerisi kontrolleri ve zaman aşımı alanı arayüzden kaldırılmıştır. Mevcut zaman aşımı/keşif değerleri uyumlu kalır ve profil düzenlenirken korunur.
 
 ## Profile sertifika güveni ekleme
 

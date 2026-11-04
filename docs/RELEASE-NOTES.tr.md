@@ -1,5 +1,9 @@
 # Sürüm notları
 
+## 0.1.0 — İlk kararlı sürüm
+
+Advanced Bağlantılar ekranındaki ayrı ADT adres öneri düğmesi, profile özel öneri seçeneği ve zaman aşımı alanı kaldırıldı. Otomatik keşfet ve doğrula işlemini kullanıp sonuçları inceleyin ve Kaydet’e basın. Mevcut profillerin zaman aşımı/keşif değerleri, parolaları, sertifikaları ve aktif eşlemeleri korunur; yeni profiller 15 saniyelik varsayılanı kullanır. ADT adres yardımı; bölümlenmiş açıklamalar, profesyonel Basis talebi ve resmî SAP belge bağlantılarıyla yenilendi. Kullanıcı iki makinede Basic bağlantısını ve Advanced çoklu profil bağlantısını doğruladı. Bu, kullanıcı tarafından bildirilen kabuldür; temiz Windows VM testi değildir. OpenCode’a özel kullanıcı kabulü beklemektedir.
+
 ## 0.1.0-preview.14 — OpenCode entegrasyonu ve Advanced doğrulama
 
 Basic ve Advanced, global/proje dosyası seçimi, önizleme, yedekleme ve JSONC yorum/talimat korumasıyla OpenCode V1 veya V2’ye SAP MCP kaydı ekleyebilir. Advanced Bağlantılar ekranındaki **Otomatik keşfet ve doğrula**, Basic’in keşif/onay akışını ve ayrı ADT/RFC sonuçlarını kullanır. Sonuç forma gelir; URL/TLS alanlarını inceleyip Kaydet’e basana kadar kayıt yapılmaz. Basic davranışı ve MCP/runtime arşivleri korunur.
