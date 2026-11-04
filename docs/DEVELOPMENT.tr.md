@@ -4,6 +4,10 @@
 
 ## Mimari
 
+Bileşenler, veri akışları ve uyumluluk sınırları [uygulama mimarisinde](ARCHITECTURE.tr.md)
+tanımlıdır. Mimari ve teknik kararlar kaynak kodla aynı Git dalında sürümlenir;
+ortak agent klasörü uygulama belgelerinin kaynağı değildir.
+
 `SapMcp.Desktop` Avalonia/.NET 10 tabanlı kullanıcı başına yöneticidir. `SapMcp.Core` şema-1 ayarlarını, atomik kaydı, DPAPI, landscape/profil mapping, paket doğrulama, ön koşul, istemci birleştirme ve maskeli dönen logları yönetir. `SapMcp.Host` arayüzden bağımsız güncel ayarları okuyup açık ortam değişkenleri üretir ve MCP stdio aktarır. Her başlangıçta RFC durumu doğrulanır. RFC yoksa ona bağımlı ADT işlemleri iletilmeden ihtiyatlı biçimde engellenir. MCP araç adları ve parametreleri korunur.
 
 Core içindeki `Resources/Strings.json` ortak İngilizce/Türkçe kaynaktır; sabit kaynak anahtarları MCP teşhis kimliklerinden ayrıdır. İsteğe bağlı `uiLanguage` şema-1 uyumunu korur. Arayüz yeniden gösterimi açık formu yeniden oluşturmadan ve alan değerlerini yazmadan etiketleri günceller. Kullanıcının TextBox girdisini yerelleştirmeden geçirmeyin. Mac şifre/kurulum adaptörleri sonraki aşamadır.

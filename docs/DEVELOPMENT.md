@@ -4,6 +4,10 @@
 
 ## Architecture
 
+See [application architecture](ARCHITECTURE.md) for components, data flow and compatibility
+boundaries. Architecture and technical decisions are versioned with source on the same
+Git branch; the shared agent directory is not the source of application documentation.
+
 `SapMcp.Desktop` is an Avalonia/.NET 10 per-user manager. `SapMcp.Core` owns schema-1 settings, atomic saves, DPAPI, landscape/profile mapping, package verification, prerequisites, client merges and redacted rolling logs. `SapMcp.Host` reads current settings independently of the UI, constructs explicit process environment and proxies MCP stdio. RFC readiness is checked at each launch. ADT operations requiring RFC are conservatively blocked before forwarding when RFC is unavailable. Existing MCP tool names and parameters remain unchanged.
 
 `Resources/Strings.json` in Core is the shared English/Turkish catalog; stable resource keys are independent of MCP diagnostic IDs. Optional `uiLanguage` preserves schema-1 compatibility. UI redisplay updates labels without rebuilding open forms or writing their values. Never send user-entered TextBox content through localization. Platform adapters for macOS secret storage/install are future work.
