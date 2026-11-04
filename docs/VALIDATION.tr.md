@@ -23,7 +23,7 @@ Test sonuçlarının makinece okunur çıktısı `artifacts/verification/report.
 
 ## Yayın öncesi temiz VM kontrolleri
 
-Bu matrisin tamamlanması mevcut geliştirici bilgisayardaki testin yerine geçmez:
+Geliştirme ortamı kontrolleri aşağıdaki kabul matrisinin tamamlandığını göstermez:
 
 | Ortam / senaryo | Kabul |
 |---|---|
@@ -50,7 +50,7 @@ Boş JSON/oluşturma/düzenleme/silme/yeniden açma, iki mevcut MCP’nin üreti
 
 ## Preview.3 SDK regression
 
-SDK içermeyen başlangıç PATH’i, mükerrer/büyük harf/tırnaklı SDK girdisi, Türkçe/boşluklu yollar, beş DLL mimarisi, bozuk kontrol çıktısı, native çıkış kodunun hex gösterimi ve iptal/zaman aşımı sınanır. Yerel yayın testleri yalnız Git dışında kalan artifacts altında özel SDK kopyası kullanır; yayınlara SDK alınmaz. Host → Node → Python ortam aktarımı, değişmeyen worker’ın yapılandırılmış yerel hatası ve Manager eksik-ICU tanılaması doğrulanır. TED/TEX canlı RFC_PING sorunlu makinede beklemektedir.
+SDK içermeyen başlangıç PATH’i, mükerrer/büyük harf/tırnaklı SDK girdisi, Türkçe/boşluklu yollar, beş DLL mimarisi, bozuk kontrol çıktısı, native çıkış kodunun hex gösterimi ve iptal/zaman aşımı sınanır. Yerel yayın testleri yalnız Git dışında kalan artifacts altında özel SDK kopyası kullanır; yayınlara SDK alınmaz. Host → Node → Python ortam aktarımı, değişmeyen worker’ın yapılandırılmış yerel hatası ve Manager eksik-ICU tanılaması doğrulanır. Canlı RFC_PING kabulü beklemektedir.
 
 ## Preview.4 ADT/TLS
 

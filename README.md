@@ -66,25 +66,9 @@ Use the [bug report](https://github.com/tamerinal/sap_mcp_windows/issues/new?tem
 
 RFC/ADT source repositories remain private. **Compiled MCP JavaScript and dependencies can be extracted from the public EXEs**; installers do not provide source confidentiality. Distribution-only path adaptations are recorded in each package's `build-info.json`. SDK files, credentials, real landscapes and logs are excluded from this repository and installers.
 
-Preview.3 fixes SDK/ICU startup when SDK lib is absent from PATH. After upgrading, verify the saved SDK folder and restart client MCP servers. [SDK startup troubleshooting](docs/TROUBLESHOOTING.md#rfc-sdk--icu-startup-and-emptystdout) · [Issue #3](https://github.com/tamerinal/sap_mcp_windows/issues/3). Live TED/TEX acceptance is pending.
+Preview.3 fixes SDK/ICU startup when SDK lib is absent from PATH. After upgrading, verify the saved SDK folder and restart client MCP servers. [SDK startup troubleshooting](docs/TROUBLESHOOTING.md#rfc-sdk--icu-startup-and-emptystdout) · [Issue #3](https://github.com/tamerinal/sap_mcp_windows/issues/3). Live SAP acceptance is pending.
 
 Preview.4 adds explicit ADT endpoints, profile certificate trust, staged diagnosis and address help. **Upgrade the Manager, install/repair the ADT component, then restart client MCP servers.** Legacy blank URLs need a confirmed address before authentication. [ADT/TLS guide](docs/ADT-CONNECTIONS.md) · [Issue #4](https://github.com/tamerinal/sap_mcp_windows/issues/4).
 
 
 [Basic setup and automatic ADT discovery](docs/BASIC-SETUP.md).
-
-## Earlier local release notes
-
-## 0.1.0-preview.9 — SID and MCP output fixes
-
-RFC 0.1.1 and ADT 0.4.1 return complete JSON in text as well as structured content. Legacy ADT list/ping responses follow their schemas. Syntax diagnostics, DDIC details, class/interface components, search descriptions and BW endpoint failures are visible to text-only clients. Both tool name sets remain available.
-
-SID is required when saving connections/profiles. Basic can obtain it from a successful RFC connection, or the user can enter it. A backend SID mismatch prevents saving. Existing blank records remain readable. HTTP profiles retain the plaintext warning; TLS inspection explains that certificates do not apply to HTTP. Configured custom URLs are included first in endpoint discovery.
-
-Native MCP operation/session logs are separate from Host process logs, honor level/rotation/retention, exclude SAP payloads, and expose operation IDs. Backend release information remains unavailable when SAP does not explicitly expose it. UTF-8 and declared Turkish response encodings are decoded at the HTTP boundary.
-
-Local Online/Offline installers only; no GitHub publication. Live writes and activations are excluded from acceptance.
-
-New local release: **0.1.0-preview.9**. Basic status summary, reusable setup screens, and separate Codex / Claude Desktop / Claude Code integrations. [Release notes](docs/RELEASE-NOTES.md). Not published to GitHub.
-
-New local release: **0.1.0-preview.7** (ADT 0.4.0). Local Online/Offline installers are in `artifacts/installers`; GitHub links below refer to the previously published preview.6 release.

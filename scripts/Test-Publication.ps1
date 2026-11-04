@@ -7,6 +7,8 @@ $taskFindings = [Collections.Generic.List[string]]::new()
 $taskPersonal = '(?i)([A-Z]:[\\/]+Users[\\/]+(?!\.{3})[^\\/\s"'']+|[A-Z]:[\\/]+Codex[\\/]|[A-Z]:[\\/]+OneDrive[\\/]|\.openclaw[\\/])'
 $taskForbiddenFile = '(?i)(^|/)(sapnwrfc|libsapucum|icudt\d*|icuin\d*|icuuc\d*)\.(dll|so|dylib)$|\.password\.dpapi$|(^|/)(SAPUILandscape\.xml|SAPMcpLandscape\.xml|connections\.json|sap_credentials\.json|settings\.json)$|\.pdb$'
 $taskCredential = '(?i)-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----\s+[A-Za-z0-9+/]{32,}|gh[pousr]_[A-Za-z0-9]{30,}'
+# Public examples use reserved documentation addresses; internal addresses remain private even when partly masked.
+$taskPrivateNetwork = '(?i)(?<![\w.])(?:10(?:\.(?:\d{1,3}|[xy]{1,3})){3}|192\.168(?:\.(?:\d{1,3}|[xy]{1,3})){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.(?:\d{1,3}|[xy]{1,3})){2})(?![\w.])'
 Push-Location $taskRoot
 try {
     $taskFiles = @(& git ls-files --cached --others --exclude-standard) | Sort-Object -Unique
@@ -14,10 +16,11 @@ try {
     foreach ($taskRelative in $taskFiles) {
         if (!(Test-Path -LiteralPath $taskRelative -PathType Leaf)) { continue }
         if ($taskRelative -match $taskForbiddenFile) { $taskFindings.Add('Forbidden source file: ' + $taskRelative) }
-        if ([IO.Path]::GetExtension($taskRelative) -in @('.cs','.axaml','.json','.md','.txt','.ps1','.iss','.yml','.props','.csproj','.xml','.example')) {
+        if ([IO.Path]::GetExtension($taskRelative) -in @('.cs','.axaml','.json','.jsonc','.toml','.md','.txt','.ps1','.iss','.yml','.yaml','.props','.csproj','.xml','.example')) {
             $taskText = [IO.File]::ReadAllText((Join-Path $taskRoot $taskRelative))
             if ($taskText -match $taskPersonal) { $taskFindings.Add('Machine-specific path in source: ' + $taskRelative) }
             if ($taskText -match $taskCredential) { $taskFindings.Add('Potential credential in source: ' + $taskRelative) }
+            if ($taskText -match $taskPrivateNetwork) { $taskFindings.Add('Private network address in public source: ' + $taskRelative) }
         }
     }
     if (!$SourceOnly) {

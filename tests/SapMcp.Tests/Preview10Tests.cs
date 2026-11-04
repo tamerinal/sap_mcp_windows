@@ -86,8 +86,8 @@ public sealed class Preview10Tests
     }
     [Fact] public void ParsesAllRfcServersAndSeparatesLocalPolicyFromSapAuthority()
     {
-        using var json=JsonDocument.Parse("""{"structuredContent":{"result":{"LIST":[{"NAME":"app_TST_02","HOSTADDR_V4_STR":"10.0.0.2"},{"NAME":"other_TST_04","HOST":"other.invalid"}]}}}""");
-        Assert.Equal(new[]{new BasicRfcServer("10.0.0.2","02"),new BasicRfcServer("other.invalid","04")},BasicConnectionService.ParseServers(json.RootElement).Servers);
+        using var json=JsonDocument.Parse("""{"structuredContent":{"result":{"LIST":[{"NAME":"app_TST_02","HOSTADDR_V4_STR":"192.0.2.2"},{"NAME":"other_TST_04","HOST":"other.invalid"}]}}}""");
+        Assert.Equal(new[]{new BasicRfcServer("192.0.2.2","02"),new BasicRfcServer("other.invalid","04")},BasicConnectionService.ParseServers(json.RootElement).Servers);
         foreach(var(code,message) in new[]{("AUTHORIZATION_DENIED","RFC_NO_AUTHORITY S_RFC"),("RFC_ALLOWLIST_DENIED","Function allowlist disi")}){using var denied=JsonDocument.Parse(JsonSerializer.Serialize(new{isError=true,content=new[]{new{text=message}}}));Assert.Equal(code,BasicConnectionService.ParseServers(denied.RootElement).Code);}
     }
     [Fact] public void CrossHostPreferredAddressCannotEnterAutomaticDiscovery()
