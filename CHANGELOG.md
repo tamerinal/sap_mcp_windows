@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-preview.13 — Discovery startup and public documentation
+
+Includes the Basic discovery settling wrapper from issue #7 and the merged public-content privacy cleanup. The wrapper warms up and settles inside the same Node process before invoking the existing discovery function. ADT/RFC package archives and runtime pins are unchanged. Documentation uses fictional examples and omits environment-specific test notes. Production confirmation of the discovery fix, clean Windows acceptance and live SAP testing remain pending for this release.
+
 ## 0.1.0-preview.12 — Custom MCP integration help
 
 Basic and Advanced client integration screens, and the final Basic summary, now provide local stdio MCP setup help for other agents and applications. Copy complete JSON, server entries for an existing `mcpServers` object, TOML tables or individual command/argument fields with actual installation paths. Basic examples follow current verification and RFC readiness; no eligible component produces no runnable example. Opening help and copying code do not start network checks or write client configurations. ADT/RFC packages are unchanged. See [custom integration help](docs/CUSTOM-INTEGRATION.md).
