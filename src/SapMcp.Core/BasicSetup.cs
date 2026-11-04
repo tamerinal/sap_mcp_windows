@@ -12,7 +12,7 @@ public sealed record BasicCheck(string State, string Code, string? Sid = null, s
     public static BasicCheck Blocked(string code) => new("blocked",code);
 }
 public sealed record BasicValidation(BasicCheck Adt, BasicCheck Rfc, DateTimeOffset TestedAt, string Fingerprint, int PolicyVersion = 0);
-public sealed record BasicDiscoveryOptions(int Concurrency=32,int ProbeTimeoutMs=1500,int BudgetMs=30000,int DebounceMs=500,int MaxAgeSeconds=60,int TcpTimeoutMs=250,int TcpBudgetMs=60000);
+public sealed record BasicDiscoveryOptions(int Concurrency=32,int ProbeTimeoutMs=1500,int BudgetMs=30000,int DebounceMs=500,int MaxAgeSeconds=60,int TcpTimeoutMs=300,int TcpBudgetMs=60000);
 public sealed record BasicCandidate(string Url,int Priority,string Code,int? HttpStatus,bool Verified,int DurationMs=0);
 public sealed record BasicDiscovery(int SchemaVersion,List<BasicCandidate> Candidates,bool BudgetExpired,bool Found,int DurationMs,string DiscoveryId="",string StartedAt="");
 public sealed class BasicDiscoveryException(string code):IOException(UiText.Get("Basic.DiscoveryError",UiText.Get(code switch
