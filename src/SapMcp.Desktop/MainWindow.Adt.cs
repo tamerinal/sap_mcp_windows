@@ -40,9 +40,11 @@ public partial class MainWindow
         var text = UiText.Get("Adt.UrlHelpBody");
         var copy = DialogAction(UiText.Get("Adt.CopyBasisRequest"), async () => { if (Clipboard != null) await Clipboard.SetTextAsync(UiText.Get("Adt.BasisRequest")); });
         var box = new TextBox { Name = "AdtUrlHelpText", Text = text + "\n\n" + UiText.Get("Adt.BasisRequest"), IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 350 };
-        var dialog = new Window { Name = "AdtUrlHelpDialog", Title = UiText.Get("Adt.UrlHelp"), Width = 760, Height = 650, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+        var dialog = new Window { Name = "AdtUrlHelpDialog", Title = UiText.Get("Adt.UrlHelp"), Width = 800, Height = 720, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+        var documentation = DialogAction(UiText.Get("Adt.SapDocumentation"), () => { OpenUrl("https://help.sap.com/docs/ABAP_DEVELOPMENT_TOOLS_FOR_ECLIPSE"); return Task.CompletedTask; }, "AdtSapDocumentation");
+        var configuration = DialogAction(UiText.Get("Adt.SapConfigurationGuide"), () => { OpenUrl("https://help.sap.com/doc/2e65ad9a26c84878b1413009f8ac07c3/202210.000/en-US/config_guide_system_backend_abap_development_tools.pdf"); return Task.CompletedTask; }, "AdtSapConfigurationGuide");
         var close = new Button { Content = UiText.Get("Text243") }; close.Click += (_, _) => dialog.Close();
-        dialog.Content = new ScrollViewer { Content = new StackPanel { Margin = new(22), Spacing = 12, Children = { box, Row(copy, close) } } };
+        dialog.Content = new ScrollViewer { Content = new StackPanel { Margin = new(22), Spacing = 12, Children = { box, documentation, configuration, Row(copy, close) } } };
         await dialog.ShowDialog(this);
     }
 
@@ -137,17 +139,4 @@ public partial class MainWindow
         await dialog.ShowDialog(this); return saved;
     }
 
-    private async Task DiscoverAdtAsync(ConnectionProfile? selected, TextBox url)
-    {
-        var profile = SavedAdtProfile(selected);
-        if (!profile.AdtAutoDiscovery) throw new InvalidOperationException(UiText.Get("Adt.EnableDiscovery"));
-        var report = await AdtOperationAsync(profile, "discover_adt_endpoints");
-        var candidates = report.GetProperty("candidates").EnumerateArray().Select(c => c.Clone()).ToArray();
-        var list = new ListBox { ItemsSource = candidates.Select(c => c.GetProperty("url").GetString() + " · " + c.GetProperty("code").GetString()).ToArray(), MinHeight = 180 };
-        var dialog = new Window { Title = UiText.Get("Adt.Discover"), Width = 760, Height = 500, WindowStartupLocation = WindowStartupLocation.CenterOwner };
-        var select = new Button { Content = UiText.Get("Adt.UseCandidate") };
-        select.Click += (_, _) => { if (list.SelectedIndex >= 0) { url.Text = candidates[list.SelectedIndex].GetProperty("url").GetString(); _connectionsDirty = true; dialog.Close(); } };
-        dialog.Content = new ScrollViewer { Content = new StackPanel { Margin = new(22), Spacing = 12, Children = { Notice(UiText.Get("Adt.CandidateWarning")), list, select } } };
-        await dialog.ShowDialog(this);
-    }
 }

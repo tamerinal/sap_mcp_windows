@@ -1,5 +1,9 @@
 # Release notes
 
+## 0.1.0 — First stable release
+
+Advanced Connections removes the separate ADT address-suggestion button, its profile opt-in and the timeout field. Use Automatically discover and verify, review the results and select Save. Existing profile timeout/discovery values, passwords, certificates and active mappings are preserved; new profiles retain the 15-second default. ADT address help now provides structured instructions, a professional Basis request and official SAP documentation links. The user confirmed Basic connections and Advanced multiple-profile connections on two machines. This is user-reported acceptance, not a clean Windows VM test. OpenCode-specific user acceptance remains pending.
+
 ## 0.1.0-preview.14 — OpenCode integration and Advanced verification
 
 Basic and Advanced can register SAP MCP servers in OpenCode V1 or V2, with global/project file selection, previews, backups and JSONC comment/instruction preservation. Advanced Connections adds **Automatically discover and verify**, sharing Basic discovery, consent and separate ADT/RFC results. It fills the form without saving; review the URL/TLS fields and press Save. Existing Basic behavior and MCP/runtime archives are retained.

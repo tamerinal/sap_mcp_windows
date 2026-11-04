@@ -1,5 +1,9 @@
 # SAP MCP Manager for Windows
 
+## 0.1.0 — First stable release
+
+Advanced Connections removes the separate ADT address-suggestion button, its profile opt-in and the timeout field. Use Automatically discover and verify, review the results and select Save. Existing profile timeout/discovery values, passwords, certificates and active mappings are preserved; new profiles retain the 15-second default. ADT address help now provides structured instructions, a professional Basis request and official SAP documentation links. The user confirmed Basic connections and Advanced multiple-profile connections on two machines. This is user-reported acceptance, not a clean Windows VM test. OpenCode-specific user acceptance remains pending.
+
 ## 0.1.0-preview.14 — OpenCode integration and Advanced verification
 
 Basic and Advanced can register SAP MCP servers in OpenCode V1 or V2, with global/project file selection, previews, backups and JSONC comment/instruction preservation. Advanced Connections adds **Automatically discover and verify**, sharing Basic discovery, consent and separate ADT/RFC results. It fills the form without saving; review the URL/TLS fields and press Save. Existing Basic behavior and MCP/runtime archives are retained.
@@ -32,16 +36,16 @@ Install SAP RFC and SAP ADT MCP servers, manage SAP connection profiles and Wind
 
 ![SAP MCP Manager overview](docs/images/overview-en.png)
 
-**Last published preview: v0.1.0-preview.14.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned; clean Windows 10/11 and live SAP acceptance tests remain pending. Read the [release notes](docs/RELEASE-NOTES.md).
+**Stable release: v0.1.0.** Windows 10 22H2 and Windows 11 **x64**. English/Turkish and light/dark themes. macOS is planned. Installers are unsigned. Basic and Advanced multiple-profile connections were confirmed by the user on two machines; clean Windows 10/11 VM acceptance was not performed. Read the [release notes](docs/RELEASE-NOTES.md).
 
 ## Download
 
 | Installer | Choose this when |
 |---|---|
-| [Online EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.14/SAP-MCP-Manager-0.1.0-preview.14-Windows-x64-Online.exe) | Internet is available to download missing runtimes. MCP packages and the self-contained manager are included. |
-| [Offline EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.14/SAP-MCP-Manager-0.1.0-preview.14-Windows-x64-Offline.exe) | The target cannot download runtimes. Includes the same MCP packages plus runtime installers. |
+| [Online EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0/SAP-MCP-Manager-0.1.0-Windows-x64-Online.exe) | Internet is available to download missing runtimes. MCP packages and the self-contained manager are included. |
+| [Offline EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0/SAP-MCP-Manager-0.1.0-Windows-x64-Offline.exe) | The target cannot download runtimes. Includes the same MCP packages plus runtime installers. |
 
-[Preview assets and checksums](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.14). Compare `Get-FileHash -Algorithm SHA256` with `SHA256SUMS.txt`. SAP access still requires your corporate network. **SAP NetWeaver RFC SDK is not included in either EXE.**
+[Release assets and checksums](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0). Compare `Get-FileHash -Algorithm SHA256` with `SHA256SUMS.txt`. SAP access still requires your corporate network. **SAP NetWeaver RFC SDK is not included in either EXE.**
 
 ## First setup
 

@@ -1,5 +1,9 @@
 # Windows için SAP MCP Yöneticisi
 
+## 0.1.0 — İlk kararlı sürüm
+
+Advanced Bağlantılar ekranındaki ayrı ADT adres öneri düğmesi, profile özel öneri seçeneği ve zaman aşımı alanı kaldırıldı. Otomatik keşfet ve doğrula işlemini kullanıp sonuçları inceleyin ve Kaydet’e basın. Mevcut profillerin zaman aşımı/keşif değerleri, parolaları, sertifikaları ve aktif eşlemeleri korunur; yeni profiller 15 saniyelik varsayılanı kullanır. ADT adres yardımı; bölümlenmiş açıklamalar, profesyonel Basis talebi ve resmî SAP belge bağlantılarıyla yenilendi. Kullanıcı iki makinede Basic bağlantısını ve Advanced çoklu profil bağlantısını doğruladı. Bu, kullanıcı tarafından bildirilen kabuldür; temiz Windows VM testi değildir. OpenCode’a özel kullanıcı kabulü beklemektedir.
+
 ## 0.1.0-preview.14 — OpenCode entegrasyonu ve Advanced doğrulama
 
 Basic ve Advanced, global/proje dosyası seçimi, önizleme, yedekleme ve JSONC yorum/talimat korumasıyla OpenCode V1 veya V2’ye SAP MCP kaydı ekleyebilir. Advanced Bağlantılar ekranındaki **Otomatik keşfet ve doğrula**, Basic’in keşif/onay akışını ve ayrı ADT/RFC sonuçlarını kullanır. Sonuç forma gelir; URL/TLS alanlarını inceleyip Kaydet’e basana kadar kayıt yapılmaz. Basic davranışı ve MCP/runtime arşivleri korunur.
@@ -32,16 +36,16 @@ SAP RFC ve SAP ADT MCP sunucularını kurun, SAP bağlantı profillerini ve Wind
 
 ![SAP MCP Yöneticisi genel durum](docs/images/overview-tr.png)
 
-**Son yayımlanmış önizleme: v0.1.0-preview.14.** Windows 10 22H2 ve Windows 11 **x64**. İngilizce/Türkçe ve açık/koyu tema. macOS planlanmaktadır. Kurulumlar imzasızdır; temiz Windows 10/11 ve canlı SAP kabul testleri henüz tamamlanmamıştır. [Sürüm notlarını](docs/RELEASE-NOTES.tr.md) okuyun.
+**Kararlı sürüm: v0.1.0.** Windows 10 22H2 ve Windows 11 **x64**. İngilizce/Türkçe ve açık/koyu tema. macOS planlanmaktadır. Kurulumlar imzasızdır. Kullanıcı iki makinede Basic ve Advanced çoklu profil bağlantısını doğruladı; temiz Windows 10/11 VM kabulü yapılmadı. [Sürüm notlarını](docs/RELEASE-NOTES.tr.md) okuyun.
 
 ## İndirme
 
 | Kurulum | Ne zaman seçilmeli? |
 |---|---|
-| [İnternetli EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.14/SAP-MCP-Manager-0.1.0-preview.14-Windows-x64-Online.exe) | Eksik çalışma zamanlarını indirmek için internet varsa. MCP paketleri ve kendi çalışma zamanını içeren yönetici dahildir. |
-| [Çevrimdışı EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0-preview.14/SAP-MCP-Manager-0.1.0-preview.14-Windows-x64-Offline.exe) | Hedef bilgisayar çalışma zamanlarını indiremiyorsa. Aynı MCP paketlerine çalışma zamanı kurulumları eklenir. |
+| [İnternetli EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0/SAP-MCP-Manager-0.1.0-Windows-x64-Online.exe) | Eksik çalışma zamanlarını indirmek için internet varsa. MCP paketleri ve kendi çalışma zamanını içeren yönetici dahildir. |
+| [Çevrimdışı EXE](https://github.com/tamerinal/sap_mcp_windows/releases/download/v0.1.0/SAP-MCP-Manager-0.1.0-Windows-x64-Offline.exe) | Hedef bilgisayar çalışma zamanlarını indiremiyorsa. Aynı MCP paketlerine çalışma zamanı kurulumları eklenir. |
 
-[Önizleme dosyaları ve hashler](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0-preview.14). `Get-FileHash -Algorithm SHA256` sonucunu `SHA256SUMS.txt` ile karşılaştırın. SAP erişimi için kurum ağı gerekir. **SAP NetWeaver RFC SDK iki EXE’ye de dahil değildir.**
+[Sürüm dosyaları ve hashler](https://github.com/tamerinal/sap_mcp_windows/releases/tag/v0.1.0). `Get-FileHash -Algorithm SHA256` sonucunu `SHA256SUMS.txt` ile karşılaştırın. SAP erişimi için kurum ağı gerekir. **SAP NetWeaver RFC SDK iki EXE’ye de dahil değildir.**
 
 ## İlk kurulum
 

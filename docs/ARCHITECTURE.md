@@ -96,3 +96,7 @@ steps are in the [developer guide](DEVELOPMENT.md).
 Basic and Advanced share the discovery/verification engine. `EvaluateAsync` uses temporary settings, mapping and DPAPI secrets; it returns results without committing a profile or changing an external connection source. Basic retains its commit path. Advanced fills only the current form and requires Save; form changes invalidate evaluation results. Network access still requires explicit consent.
 
 OpenCode is a local stdio client target. Schema-1 settings gain optional preferences; registrations retain client name `OpenCode`. V1 and V2 use separate MCP layouts. JSONC edits change only targeted property spans, preserving unrelated settings and agent instructions. Previews, conflict approval, concurrency checks, backups and ownership-based removal are shared with other clients.
+
+## Stable 0.1.0
+
+Advanced exposes one automatic discovery/verification action. Legacy AdtAutoDiscovery and AdtTimeoutSeconds remain schema-1 fields for compatibility, with existing values preserved and defaults false/15 for new profiles; their controls are no longer shown. The MCP contract is unchanged.
