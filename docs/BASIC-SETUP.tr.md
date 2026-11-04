@@ -30,7 +30,7 @@ Bağımlılıkları uygunsa önce RFC ping çalışır. `TH_SERVER_LIST` yetkisi
 
 RFC keşfi kullanılamazsa, reddedilirse veya kullanılabilir aday bulamazsa otomatik tarama için ayrı onay istenir. RFC adaylarının başarısız olması ADT servisinin kapalı olduğunu kanıtlamaz.
 
-Akıllı tarama instance portlarını, 80/443, 8080/8443, 8000–8099, 44300–44399 ve Java portlarını kontrol eder. ADT adayı bulunamazsa yalnız girilen host üzerindeki 1–65535 portlarını taramak için ayrıca onay istenir. Ham TCP bağlantıları 250 ms ve 512–1024 uyarlanan eşzamanlılık kullanır; kaynak yetersizliğinde eşzamanlılık azaltılır. Tam TCP taramasının hedefi 30, üst sınırı 60 saniyedir. Yavaş ağlarda taranmamış portlar kalabilir; kısmi sonuç açıkça bildirilir.
+Akıllı tarama instance portlarını, 80/443, 8080/8443, 8000–8099, 44300–44399 ve Java portlarını kontrol eder. ADT adayı bulunamazsa yalnız girilen host üzerindeki 1–65535 portlarını taramak için ayrıca onay istenir. Ham TCP bağlantıları 300 ms ve 512–1024 uyarlanan eşzamanlılık kullanır; kaynak yetersizliğinde eşzamanlılık azaltılır. Taramadan önce uygulama hedef host'a en iyi çaba (best-effort) tek bağlantı denemesi yapar; soğuk ilk paket gecikmesi açık portları kapalı saymaz. Isınma denemesinin sonucu yok sayılır. Tam TCP taramasının hedefi 30, üst sınırı 60 saniyedir. Yavaş ağlarda taranmamış portlar kalabilir; kısmi sonuç açıkça bildirilir.
 
 Açık portlarda HTTP ve HTTPS denenir. Her HTTP aşamasının ayrı 30 saniye bütçesi, en fazla 32 paralel isteği ve istek başına 1,5 saniye timeout'u vardır. TCP ve HTTP ilerlemesi ayrıdır; tüm doğrulamanın 30 saniyede tamamlanması garanti edilmez.
 

@@ -28,3 +28,7 @@ certificates/
 *.key
 *.pfx
 *.p12
+
+# Per-machine agent configuration (machine-specific shared-folder path; never committed)
+opencode.json
+
