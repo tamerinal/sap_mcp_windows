@@ -21,6 +21,16 @@ public sealed class BasicTests
         Assert.Equal(300,options.GetProperty("tcpTimeoutMs").GetInt32());Assert.Equal(60000,options.GetProperty("tcpBudgetMs").GetInt32());
         Assert.Equal(30000,options.GetProperty("budgetMs").GetInt32());Assert.Equal(32,options.GetProperty("concurrency").GetInt32());
     }
+    [Fact] public void DiscoveryShimWrapsPackagedScriptWithWarmUpAndSettle()
+    {
+        var shim=BasicDiscoveryService.BuildShim("file:///C:/packages/adt/dist/basic-connection.js");
+        Assert.Contains("file:///C:/packages/adt/dist/basic-connection.js",shim);
+        Assert.Contains("import net from 'node:net'",shim);Assert.Contains("discoverBasic",shim);
+        Assert.Contains("44300 + n",shim);Assert.Contains("8080",shim);
+        Assert.Contains($"s.setTimeout({BasicDiscoveryService.WarmUpTimeoutMs}",shim);
+        Assert.Contains($"setTimeout(r, {BasicDiscoveryService.SettleMs})",shim);
+        Assert.Contains("'DISCOVERY_INPUT_INVALID'",shim);
+    }
     [Theory][InlineData("DISCOVERY_PORT_INVALID")][InlineData("DISCOVERY_INPUT_INVALID")]
     public void DiscoveryConfigurationFailureIsNotDisguisedAsNetworkOrCertificateError(string code)
     {
